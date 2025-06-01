@@ -1,0 +1,61 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+.next/
+out/
+.expo/
+web-build/
+build/
+
+# Expo
+*.expo
+*.expo-shared
+.expo-shared/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+turbo.log
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Firebase (if using service account locally)
+firebase-service-account.json
+
+# macOS metadata
+*.DS_Store
+
+# Optional: tamagui debug output
+.tamagui/
+
+# Optional: Expo EAS credentials
+*.p8
+*.pem
+*.jks
+
+# Optional lockfiles if only using one package manager
+package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
