@@ -1,11 +1,8 @@
 declare global {
   interface Window {
-    gapi: typeof import('gapi-script');
-    google: any;
+    gapiLoaded: (() => void) | undefined;
+    gisLoaded: (() => void) | undefined;
   }
-
-  var gapi: any;
-  var google: any;
 }
 
 export {};
