@@ -9,10 +9,13 @@
     "start": "next start"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "@tanstack/react-query": "^5.0.0",
+    "dotenv": "^17.2.1",
+    "firebase": "^10.0.0",
+    "googleapis": "^105.0.0",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest",
-    "firebase": "^10.0.0",
-    "@tanstack/react-query": "^5.0.0"
+    "react-dom": "latest"
   }
 }
