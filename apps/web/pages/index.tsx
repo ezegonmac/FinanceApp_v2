@@ -40,9 +40,20 @@ export default function HomePage() {
     return (
         <div>
             <h1>Google Sheets Demo</h1>
-            <button onClick={handleLoginAndLoad}>Authorize & Load Data</button>
-            {token && <button onClick={() => loadData()}>Reload Data</button>}
+            <ol>
+                <li>
+                    Create an empty sheet with your account
+                </li>
+                <li>
+                    Authorize the app to access your sheets and load the data &nbsp;
+                    <button onClick={handleLoginAndLoad}>Authorize & Load Data</button>
+                </li>
+                <li>
+                    Create an empty sheet with your account
+                </li>
+            </ol>
             {token && <button onClick={() => logout()}>Logout</button>}
+            {token && !loading && <button onClick={() => loadData()}>Reload Data</button>}
             {loading && <p>loading ...</p>}
             {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
             <GoogleScripts />
