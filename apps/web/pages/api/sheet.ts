@@ -5,7 +5,8 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const sheetId = process.env.GOOGLE_SHEET_ID;
+    const sheetId = (req.query.id as string);
+    if (!sheetId) return res.status(400).json({ error: 'Missing sheet ID' });
 
     const accessToken = req.headers.authorization?.split('Bearer ')[1];
     if (!accessToken) return res.status(401).json({ error: 'Unauthorized' });
@@ -25,12 +26,11 @@ export default async function handler(
             spreadsheetId: sheetId,
             range,
         });
-
-        const values = sheetData.data.values;
-
-        res.status(200).json({ values })
+        
+        const data = sheetData.data.values;
+        
+        res.status(200).json({ data });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: 'Failed to fetch sheet data' });
     }
 }

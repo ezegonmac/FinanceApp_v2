@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { useGoogleAuth } from "../hooks/useGoogleAuth";
-import { fetchSheetData } from "../lib/fetchSheetData";
+import { useSheetId } from "../hooks/useSheetId";
 import GoogleScripts from "../components/GoogleScripts";
+import SheetSelector from "../components/sheetSelector";
 
 export default function HomePage() {
+    const [error, setError] = useState<any>(null);
+    const clearError = () => setError(null);
+
+    const [sheetId] = useSheetId();
+
     const [data, setData] = useState<any>(null);
     const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID!;
     const SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
@@ -21,41 +27,58 @@ export default function HomePage() {
             await loadData(accessToken);
         } catch (err) {
             stopLoading();
-            console.error("Login failed", err);
+            setError(`Login failed ${err}`);
         }
     };
 
     const loadData = async (accessToken?: string) => {
         startLoading();
+
         const tokenToUse = accessToken || token;
+
         if (!tokenToUse) {
             stopLoading();
             return console.warn("No access token");
         }
-        const sheetData = await fetchSheetData(tokenToUse);
+        if (!sheetId) {
+            stopLoading();
+            return console.warn("No sheet ID");
+        }
+        const sheetData = await fetch(`/api/sheet?id=${encodeURIComponent(sheetId)}`, {
+            headers: { Authorization: `Bearer ${tokenToUse}` },
+        });
+        
+        if(sheetData.status == 200) {
+            const json = await sheetData.json();
+            setData(JSON.stringify(json.data, null, 2));
+            clearError();
+        } else {
+            setError(sheetData.statusText);
+        }
         stopLoading();
-        setData(sheetData);
     };
 
     return (
         <div>
             <h1>Google Sheets Demo</h1>
+            {error && <p style={{backgroundColor: 'lightcoral', padding: '0.5em'}}>{error}</p>}
             <ol>
                 <li>
                     Create an empty sheet with your account
                 </li>
                 <li>
+                    Add the sheet ID &nbsp;
+                    <SheetSelector/>
+                </li>
+                <li>
                     Authorize the app to access your sheets and load the data &nbsp;
                     <button onClick={handleLoginAndLoad}>Authorize & Load Data</button>
                 </li>
-                <li>
-                    Create an empty sheet with your account
-                </li>
             </ol>
-            {token && <button onClick={() => logout()}>Logout</button>}
+            {token && <button onClick={logout}>Logout</button>}
             {token && !loading && <button onClick={() => loadData()}>Reload Data</button>}
             {loading && <p>loading ...</p>}
-            {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+            {data && <pre>{data}</pre>}
             <GoogleScripts />
         </div>
     );
