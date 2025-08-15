@@ -4,6 +4,8 @@ import { CreateSheetStep } from "../components/steps/createSheetStep";
 import { SelectSheetStep } from "../components/steps/SelectSheetStep";
 import { AllowServiceAccountStep } from "../components/steps/AllowServiceAccountStep";
 import { LoadDataStep } from "../components/steps/LoadDataStep";
+import { AddAccountsStep } from "../components/steps/AddAccountsStep";
+import { PopulateSpreadsheetStep } from "../components/steps/PopulateSpreadsheetStep";
 
 export default function HomePage() {
 
@@ -13,8 +15,9 @@ export default function HomePage() {
 
     return (
         <div style={{fontFamily: 'sans-serif'}}>
-            <h1>Google Sheets Demo</h1>
+            <h1>Finance App</h1>
             
+            {/* Instructions Steps */}
             <ol>
                 <CreateSheetStep />
                 <SelectSheetStep 
@@ -28,6 +31,11 @@ export default function HomePage() {
                 <LoadDataStep 
                     sheetId={sheetId} 
                     setData={setData} 
+                />
+                <PopulateSpreadsheetStep
+                    sheetId={sheetId}
+                />
+                <AddAccountsStep
                 />
             </ol>
 

@@ -34,25 +34,20 @@ export async function loadSheetData(sheetId: string | null): Promise<{ data: Str
     }
 }
 
-export async function loadOAuthSheetData(sheetId: string | null, token: string | null): Promise<{ data?: any; error?: string }> {
-    if (!sheetId) return { error: "No sheet ID provided" };
-    if (!token) return { error: "No access token" };
+export async function populateSpreadsheet(sheetId: string | null): Promise<{ success: boolean | null; error?: string }> {
+    if (!sheetId) return { success: false, error: "No sheet ID provided" };
 
     try {
-        const res = await fetch(`/api/getSheetOAuth?id=${encodeURIComponent(sheetId)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const res = await fetch(`/api/populateSpreadsheet?id=${encodeURIComponent(sheetId)}`);
         if (!res.ok) {
             const text = await res.text();
-            console.error("Failed to load sheet: ", text);
-            return { error: `Failed to load sheet` };
+            console.error("Populate failed: ", text);
+            return { success: false, error: `Populate failed` };
         }
-
         const json = await res.json();
-        return { data: json.data };
+        return { success: json.success };
     } catch (err) {
-        console.error("Error loading sheet data:", err);
-        return { error: "Error trying to load sheet" };
+        console.error("Error populating spreadsheet data:", err);
+        return { success: false, error: "Error populating spreadsheet data" };
     }
 }
