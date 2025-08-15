@@ -1,6 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { google } from 'googleapis';
 
+/**
+ * API route to fetch a range of values from a Google Sheet.
+ * 
+ * Header:
+ *   - Authorization: Bearer token (Google OAuth access token).
+ * 
+ * Query parameters:
+ *   - id: Spreadsheet ID.
+ * 
+ * Returns:
+ *   - 200: { data: string[][] } containing the sheet values
+ *   - 400: { error: 'Missing sheet ID' } if no sheet ID is provided
+ *   - 401: { error: 'Unauthorized' } if no access token is provided
+ *   - 500: { error: 'Failed to fetch sheet data' } for any other errors
+ */
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
