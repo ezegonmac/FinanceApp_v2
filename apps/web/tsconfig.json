@@ -27,7 +27,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts"
-  ],
+, "components/steps/AllowServiceAccountStep.tsx"  ],
   "exclude": [
     "node_modules"
   ]
