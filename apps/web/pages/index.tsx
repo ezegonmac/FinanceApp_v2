@@ -12,8 +12,6 @@ export default function HomePage() {
     const [sheetId, setSheetId, clearSheetId] = useSheetId();
 
     const [data, setData] = useState<any>(null);
-    const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID!;
-    const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
     const [loading, setLoading] = useState<boolean>(false);
     const startLoading = () => setLoading(true);
@@ -25,19 +23,6 @@ export default function HomePage() {
     const stopChecking = () => setChecking(false);
 
     const serviceAccount = process.env.NEXT_PUBLIC_SERVICE_ACCOUNT ?? "No service account";
-
-    const { login, logout, token, isReady } = useGoogleAuth(CLIENT_ID, SCOPES);
-
-    const handleLoginAndLoad = async () => {
-        try {
-            startLoading();
-            const accessToken = await login();
-            await loadData(accessToken);
-        } catch (err) {
-            stopLoading();
-            setError(`Login failed ${err}`);
-        }
-    };
 
     const handleCheckAccess = async () => {
         startChecking();
@@ -53,12 +38,10 @@ export default function HomePage() {
         stopChecking();
     };
 
-    const loadData = async (accessToken?: string) => {
+    const handleLoadData = async () => {
         startLoading();
 
-        const tokenToUse = accessToken || token;
-
-        const { data, error } = await loadSheetData(sheetId, tokenToUse);
+        const { data, error } = await loadSheetData(sheetId);
         if (error) {
             setError(error);
         } else {
@@ -77,10 +60,12 @@ export default function HomePage() {
                 <li>
                     <p>Create an empty sheet with your account</p>
                 </li>
+
                 <li>
                     <p>Add the sheet ID</p>
                     <SheetSelector sheetId={sheetId} setSheetId={setSheetId} clearSheetId={clearSheetId}/>
                 </li>
+                
                 <li>
                     <p>To allow this app to access your sheet, share it with the service account email:</p>
                     <p>
@@ -96,17 +81,15 @@ export default function HomePage() {
                     {accessGranted === true && <p style={{ color: "green" }}>Access confirmed ✅</p>}
                     {accessGranted === false && <p style={{ color: "red" }}>Cannot access sheet ❌</p>}
                 </li>
+
                 <li>
-                    <p>Authorize the app to access your sheets and load the data</p> &nbsp;
-                    <button onClick={handleLoginAndLoad}>Authorize & Load Data</button>
+                    <p>Authorize the app to OAuth access your sheets and load the data</p> &nbsp;
+                    <button onClick={handleLoadData}>Load Data</button>
                 </li>
             </ol>
-            {token && <button onClick={logout}>Logout</button>}
-            {token && data && <button onClick={() => loadData()} disabled={loading}>Reload Data</button>}
+
             {loading && <p>loading ...</p>}
             {data && <pre>{data}</pre>}
-
-            <GoogleScripts />
         </div>
     );
 }
