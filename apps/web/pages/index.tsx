@@ -8,7 +8,7 @@ export default function HomePage() {
     const [error, setError] = useState<any>(null);
     const clearError = () => setError(null);
 
-    const [sheetId] = useSheetId();
+    const [sheetId, setSheetId, clearSheetId] = useSheetId();
 
     const [data, setData] = useState<any>(null);
     const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID!;
@@ -38,11 +38,13 @@ export default function HomePage() {
 
         if (!tokenToUse) {
             stopLoading();
-            return console.warn("No access token");
+            setError("No access token");
+            return;
         }
         if (!sheetId) {
             stopLoading();
-            return console.warn("No sheet ID");
+            setError("No sheet ID");
+            return;
         }
         const sheetData = await fetch(`/api/sheet?id=${encodeURIComponent(sheetId)}`, {
             headers: { Authorization: `Bearer ${tokenToUse}` },
@@ -68,7 +70,7 @@ export default function HomePage() {
                 </li>
                 <li>
                     Add the sheet ID &nbsp;
-                    <SheetSelector/>
+                    <SheetSelector sheetId={sheetId} setSheetId={setSheetId} clearSheetId={clearSheetId}/>
                 </li>
                 <li>
                     Authorize the app to access your sheets and load the data &nbsp;
@@ -76,9 +78,10 @@ export default function HomePage() {
                 </li>
             </ol>
             {token && <button onClick={logout}>Logout</button>}
-            {token && !loading && <button onClick={() => loadData()}>Reload Data</button>}
+            {token && data && !loading && <button onClick={() => loadData()}>Reload Data</button>}
             {loading && <p>loading ...</p>}
             {data && <pre>{data}</pre>}
+
             <GoogleScripts />
         </div>
     );
