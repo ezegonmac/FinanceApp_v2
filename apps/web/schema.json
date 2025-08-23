@@ -6,6 +6,7 @@
     "Data": {
         "Default": [],
         "Accounts": ["id", "name", "addDate", "active"],
+        "AccountValues": ["id", "accountId", "value", "date", "month"],
         "Sales": ["id", "name"]
     }
 }
