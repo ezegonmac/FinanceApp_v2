@@ -20,16 +20,18 @@ import SheetsApi from 'utils/apiClient/server/sheetsApi';
  *   - 400: { error: 'Missing sheet ID' }
  *   - 500: { error: 'Failed to fetch sheet data' }
  */
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const sheetId = req.query.id as string;
   if (!sheetId) return res.status(400).json({ error: 'Missing sheet ID' });
 
   try {
     const sheets = new SheetsApi(sheetId);
-    const data = await sheets.getSpreadsheet();
-    res.status(200).json({ data });
+    const allData = await sheets.getAllData();
+    res.status(200).json({ data: allData });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch spreadsheet data' });
   }
 }
+
