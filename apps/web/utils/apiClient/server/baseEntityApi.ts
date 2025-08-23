@@ -11,8 +11,14 @@ export default abstract class BaseEntityApi {
         this.sheetName = sheetName;
     }
 
+    async getHeaders(): Promise<string[]> {
+        const headers = (await this.sheetApi.readValues(this.sheetName, '1:1'))[0];
+        return headers;
+    }
+
     async getAll(): Promise<string[][]> {
         const data = await this.sheetApi.getSheet(this.sheetName);
+        data.shift(); // Remove headers
         return data;
     }
 
@@ -28,7 +34,7 @@ export default abstract class BaseEntityApi {
     }
 
     async create(data: Record<string, any>): Promise<void> {
-        const headers = (await this.sheetApi.readValues(this.sheetName, '1:1'))[0];
+        const headers = await this.getHeaders();
         const values = headers.map(header => data[header] || '');
         await this.sheetApi.appendRow(this.sheetName, [values]);
     }

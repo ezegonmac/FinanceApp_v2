@@ -4,6 +4,7 @@ import ErrorMessage from "./ErrorMessage";
 
 export default function AccountsTable({ sheetId }) {
     const [inputValue, setInputValue] = useState<string>("");
+    const [headers, setHeaders] = useState<string[]>([]);
     const [accounts, setAccounts] = useState<String[][]>();
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
@@ -14,6 +15,22 @@ export default function AccountsTable({ sheetId }) {
     
     const [error, setError] = useState<any>(null);
     const clearError = () => setError(null);
+
+    useEffect(() => {
+        const fetchHeaders = async () => {
+            try {
+                const res = await accountsApi.getHeaders();
+                setHeaders(res);
+            } catch (err) {
+                console.log(`Failed to get headers: ${err}`);
+                setError("Failed to get headers");
+            }
+        };
+
+        if (sheetId) {
+            fetchHeaders();
+        }
+    }, [accountsApi]);
 
     useEffect(() => {
         const fetchAccounts = async () => {
@@ -47,7 +64,7 @@ export default function AccountsTable({ sheetId }) {
         try {
             await accountsApi.create(inputValue);
             setRefreshKey(oldKey => oldKey + 1);
-            setInputValue(""); // Clear the input field
+            setInputValue("");
         } catch (err) {
             console.log(`Failed to add account: ${err}`);
             setError("Failed to add account");
@@ -62,12 +79,21 @@ export default function AccountsTable({ sheetId }) {
                 <p>Loading...</p>
             ) : error ? (
                 <ErrorMessage message={error} />
-            ) : accounts && accounts.length > 0 ? (
-                <ul>
-                    {accounts.map((acc, i) => (
-                        <TableItem key={i} account={acc} />
-                    ))}
-                </ul>
+            ) : accounts && accounts.length > 0 && headers && headers.length ? (
+                <table>
+                    <thead>
+                        <tr>
+                            {headers.map(header => <th key={header}>{header}</th>)}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {accounts.map((acc, i) => (
+                            <tr key={i}>
+                                {acc.map((cell, j) => <td key={j}>{cell}</td>)}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             ) : (
                 <p>No accounts available</p>
             )}
@@ -85,15 +111,5 @@ export default function AccountsTable({ sheetId }) {
             </button> &nbsp;
             <button onClick={() => setRefreshKey(oldKey => oldKey + 1)} disabled={isAdding || loading}>Refresh</button>
         </>
-    );
-}
-
-function TableItem({ account }) {
-    return (
-        <li>
-            {account.map((attr, i) => (
-                <span key={i} style={{ marginRight: '10px' }}>{attr}</span>
-            ))}
-        </li>
     );
 }
