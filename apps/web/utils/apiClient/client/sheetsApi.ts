@@ -1,32 +1,31 @@
 
 class SheetsApi {
   private sheetId: string;
-  private baseUrl = "http://localhost:3000/api/sheets"; // use full URL for server-side safety
+  private baseUrl = "/api/sheets";
 
   constructor(sheetId: string) {
     if (!sheetId) throw new Error("No sheet ID provided");
     this.sheetId = sheetId;
   }
 
-private async request<T>(endpoint: string): Promise<T> {
-  const url = endpoint.includes('?') 
-    ? `${this.baseUrl}/${endpoint}&id=${encodeURIComponent(this.sheetId)}`
-    : `${this.baseUrl}/${endpoint}?id=${encodeURIComponent(this.sheetId)}`;
+  private async request<T>(endpoint: string): Promise<T> {
+    const url = endpoint.includes('?') 
+      ? `${this.baseUrl}/${endpoint}&id=${encodeURIComponent(this.sheetId)}`
+      : `${this.baseUrl}/${endpoint}?id=${encodeURIComponent(this.sheetId)}`;
 
-  const res = await fetch(url);
+    const res = await fetch(url);
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Request to ${endpoint} failed: ${text}`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Request to ${endpoint} failed: ${text}`);
+    }
+
+    try {
+      return await res.json();
+    } catch (err) {
+      throw new Error(`Failed to parse JSON from ${endpoint}`);
+    }
   }
-
-  try {
-    return await res.json();
-  } catch (err) {
-    throw new Error(`Failed to parse JSON from ${endpoint}`);
-  }
-}
-
 
   async checkAccess(): Promise<boolean> {
     const json = await this.request<{ access: boolean }>("checkAccess");
@@ -62,11 +61,6 @@ private async request<T>(endpoint: string): Promise<T> {
     const json = await this.request<{ success: boolean }>("populate");
     return Boolean(json.success);
   }
-
-  // async getSheetData(sheetName: string): Promise<string[][]> {
-  //   const json = await this.request<{ data: string[][] }>(`getSheetData?range=${encodeURIComponent(sheetName)}`);
-  //   return json.data;
-  // }
 }
 
 export default SheetsApi;

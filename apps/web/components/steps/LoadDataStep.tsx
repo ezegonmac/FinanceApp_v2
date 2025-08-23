@@ -1,6 +1,6 @@
 import Step from "./stepWrapper";
 import { useState } from "react";
-import SheetsApi from "../../utils/apiClient/sheets";
+import SheetsApi from "../../utils/apiClient/client/sheetsApi";
 import ErrorMessage from "../ErrorMessage";
 
 export function LoadDataStep({ sheetId, setData }) {
@@ -22,9 +22,9 @@ export function LoadDataStep({ sheetId, setData }) {
             const data = await sheetsApi.getAllData();
             const configuration = await sheetsApi.getAllConfigurations();
 
-            const alldata = {'spreadsheet': spreadsheet,'data': data,'config': configuration};
+            const allData = {'spreadsheet': spreadsheet,'data': data,'config': configuration};
 
-            setData(JSON.stringify(alldata, null, 2));
+            setData(JSON.stringify(allData, null, 2));
             clearError();
         } catch (err) {
             setError("Failed to load sheet data");

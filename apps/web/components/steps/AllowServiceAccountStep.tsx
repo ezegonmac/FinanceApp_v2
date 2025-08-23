@@ -1,5 +1,5 @@
 import Step from "./stepWrapper";
-import SheetsApi from "../../utils/apiClient/sheets";
+import SheetsApi from "../../utils/apiClient/client/sheetsApi";
 import { useState } from "react";
 import ErrorMessage from "../ErrorMessage";
 

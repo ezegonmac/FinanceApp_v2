@@ -1,7 +1,7 @@
 import Step from "./stepWrapper";
 import { useState } from "react";
 import ErrorMessage from "../ErrorMessage";
-import SheetsApi from "../../utils/apiClient/sheets";
+import SheetsApi from "../../utils/apiClient/client/sheetsApi";
 
 export function PopulateSpreadsheetStep({ sheetId }) {
 

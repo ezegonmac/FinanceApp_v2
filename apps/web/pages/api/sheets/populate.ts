@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { google } from 'googleapis';
+import SheetsApi from 'utils/apiClient/server/sheetsApi';
 
 /**
  * API route to prepopulate a Google Spreadsheet with predefined sheets and values.
@@ -20,57 +20,14 @@ const sheetsDictionary: Record<string, string[]> = {
   'Sales': ['id', 'name'],
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const sheetId = req.query.id as string;
   if (!sheetId) return res.status(400).json({ error: 'Missing sheet ID' });
 
   try {
-    const auth = new google.auth.GoogleAuth({
-      credentials: {
-        type: process.env.GOOGLE_SERVICE_ACCOUNT_TYPE,
-        private_key: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL,
-        client_id: process.env.GOOGLE_SERVICE_ACCOUNT_CLIENT_ID,
-      },
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    });
-
-    const gSheetsApi = google.sheets({ version: 'v4', auth });
-
-    // Loop through the dictionary
-    for (const [sheetTitle, values] of Object.entries(sheetsDictionary)) {
-      // Add new sheet (skip if it already exists)
-      try {
-        await gSheetsApi.spreadsheets.batchUpdate({
-          spreadsheetId: sheetId,
-          requestBody: {
-            requests: [
-              {
-                addSheet: {
-                  properties: { title: sheetTitle },
-                },
-              },
-            ],
-          },
-        });
-      } catch (err) {
-        // If sheet exists, ignore error
-        if (!err.message.includes('already exists')) throw err;
-      }
-
-      // Write values into the sheet (starting at A1)
-      await gSheetsApi.spreadsheets.values.update({
-        spreadsheetId: sheetId,
-        range: `'${sheetTitle}'!A1:${String.fromCharCode(64 + values.length)}1`, // e.g., A1:D1
-        valueInputOption: 'RAW',
-        requestBody: { values: [values] }, // wrap the array in another array to make a single row
-      });
-    }
-
-    res.status(200).json({ success: true });
+    const sheets = new SheetsApi(sheetId);
+    const result = await sheets.populate(sheetsDictionary);
+    res.status(200).json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to populate sheet' });
