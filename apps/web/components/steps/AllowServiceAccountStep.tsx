@@ -1,5 +1,5 @@
 import Step from "./stepWrapper";
-import { checkSheetAccess } from "../../utils/sheetApi";
+import SheetsApi from "../../utils/apiClient/sheets";
 import { useState } from "react";
 import ErrorMessage from "../ErrorMessage";
 
@@ -17,13 +17,19 @@ export function AllowServiceAccountStep({ sheetId }) {
 
     const handleCheckAccess = async () => {
         startChecking();
-        
-        const { access, error } = await checkSheetAccess(sheetId);
-        setAccessGranted(access);
-        if (error) {
-            setError(error);
-        } else {
+
+        const sheetsApi = new SheetsApi(sheetId);
+
+        let access: boolean = false;
+        try {
+            access = await sheetsApi.checkAccess();
+            
+            setAccessGranted(access);
             clearError();
+        } catch (err) {
+            setAccessGranted(access);
+            setError("Failed to connect to service account");
+            console.error("Failed to connect to service account:", err);
         }
 
         stopChecking();
@@ -44,7 +50,6 @@ export function AllowServiceAccountStep({ sheetId }) {
                 {checking ? "Checking..." : "Check Access"}
             </button>
             {accessGranted === true && <p style={{ color: "green" }}>Access confirmed ✅</p>}
-            {accessGranted === false && <p style={{ color: "red" }}>Cannot access sheet ❌</p>}
             
             <ErrorMessage message={error}/>
             </>

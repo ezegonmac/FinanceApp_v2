@@ -1,8 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { google } from 'googleapis';
+import SheetsApi from 'utils/apiClient/sheets';
 
 /**
- * API route to fetch all sheets from a Google Spreadsheet using a Service Account,
+ * API route to fetch all sheets containing data (not configuration) 
+ * from a Google Spreadsheet,
  * and structure them so that the first row contains keys,
  * and each key maps to the list of values in that column.
  *
@@ -38,49 +40,25 @@ export default async function handler(
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     });
 
-    const sheetsApi = google.sheets({ version: 'v4', auth });
+    const sheetsApi = new SheetsApi(sheetId);
 
-    // Get metadata (all sheet names)
-    const spreadsheet = await sheetsApi.spreadsheets.get({
-      spreadsheetId: sheetId,
-    });
-
-    const sheetNames = spreadsheet.data.sheets?.map(
-      (s) => s.properties?.title
-    ) || [];
-
-    const allData: Record<string, Record<string, string[]>> = {};
-
-    for (const name of sheetNames) {
-      const sheetData = await sheetsApi.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range: name,
-      });
-
-      const rows = sheetData.data.values || [];
-      if (rows.length === 0) {
-        allData[name] = {};
-        continue;
-      }
-
-      const headers = rows[0];
-      const sheetObj: Record<string, string[]> = {};
-
-      headers.forEach((header, colIndex) => {
-        const columnValues = rows
-          .slice(1) // skip header row
-          .map(row => row[colIndex] || '') // empty if missing
-          .filter(v => v !== ''); // optional: skip empty strings
-
-        sheetObj[header] = columnValues;
-      });
-
-      allData[name] = sheetObj;
+    let titles: string[] = [];
+    try {
+      titles = await sheetsApi.getAllTitles();
+    } catch (err) {
+      console.error("Could not load sheet titles:", err);
     }
+
+    const configurationTitle = process.env.CONFIGURATION_SHEET_TITLE as string;
+    const filteredTitles = titles.filter(title => title !== configurationTitle);
+
+    const allData = await Promise.all(
+      filteredTitles.map(title => sheetsApi.getSheet(title))
+    );
 
     res.status(200).json({ data: allData });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch sheet data' });
+    res.status(500).json({ error: 'Failed to fetch spreadsheet data' });
   }
 }

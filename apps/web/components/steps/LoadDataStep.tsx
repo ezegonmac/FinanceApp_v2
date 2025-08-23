@@ -1,6 +1,6 @@
 import Step from "./stepWrapper";
 import { useState } from "react";
-import { loadSheetData } from "../../utils/sheetApi";
+import SheetsApi from "../../utils/apiClient/sheets";
 import ErrorMessage from "../ErrorMessage";
 
 export function LoadDataStep({ sheetId, setData }) {
@@ -15,12 +15,20 @@ export function LoadDataStep({ sheetId, setData }) {
     const handleLoadData = async () => {
         startLoading();
 
-        const { data, error } = await loadSheetData(sheetId);
-        if (error) {
-            setError(error);
-        } else {
-            setData(JSON.stringify(data, null, 2));
+        const sheetsApi = new SheetsApi(sheetId);
+
+        try {
+            const spreadsheet = await sheetsApi.getSpreadsheet();
+            const data = await sheetsApi.getAllData();
+            const configuration = await sheetsApi.getAllConfigurations();
+
+            const alldata = {'spreadsheet': spreadsheet,'data': data,'config': configuration};
+
+            setData(JSON.stringify(alldata, null, 2));
             clearError();
+        } catch (err) {
+            setError("Failed to load sheet data");
+            console.error("Failed to load sheet data:", err);
         }
         
         stopLoading();

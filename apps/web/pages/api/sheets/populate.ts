@@ -13,9 +13,11 @@ import { google } from 'googleapis';
  *   - 500: { error: 'Failed to populate sheet' } for other failures
  */
 
+const configSheetTitle = process.env.CONFIGURATION_SHEET_TITLE as string;
 const sheetsDictionary: Record<string, string[]> = {
-  'General': ['Accounts', 'Misc'],
-  'Sales': ['Leads', 'Opportunities'],
+  configSheetTitle: ['email', 'theme'],
+  'Accounts': ['id', 'name'],
+  'Sales': ['id', 'name'],
 };
 
 export default async function handler(
@@ -36,13 +38,13 @@ export default async function handler(
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
 
-    const sheetsApi = google.sheets({ version: 'v4', auth });
+    const gSheetsApi = google.sheets({ version: 'v4', auth });
 
     // Loop through the dictionary
     for (const [sheetTitle, values] of Object.entries(sheetsDictionary)) {
       // Add new sheet (skip if it already exists)
       try {
-        await sheetsApi.spreadsheets.batchUpdate({
+        await gSheetsApi.spreadsheets.batchUpdate({
           spreadsheetId: sheetId,
           requestBody: {
             requests: [
@@ -60,7 +62,7 @@ export default async function handler(
       }
 
       // Write values into the sheet (starting at A1)
-      await sheetsApi.spreadsheets.values.update({
+      await gSheetsApi.spreadsheets.values.update({
         spreadsheetId: sheetId,
         range: `'${sheetTitle}'!A1:${String.fromCharCode(64 + values.length)}1`, // e.g., A1:D1
         valueInputOption: 'RAW',
