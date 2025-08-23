@@ -19,12 +19,8 @@ export function LoadDataStep({ sheetId, setData }) {
 
         try {
             const spreadsheet = await sheetsApi.getSpreadsheet();
-            const data = await sheetsApi.getAllData();
-            const configuration = await sheetsApi.getAllConfigurations();
 
-            const allData = {'spreadsheet': spreadsheet,'data': data,'config': configuration};
-
-            setData(JSON.stringify(allData, null, 2));
+            setData(JSON.stringify(spreadsheet, null, 2));
             clearError();
         } catch (err) {
             setError("Failed to load sheet data");

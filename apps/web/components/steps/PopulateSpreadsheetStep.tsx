@@ -20,7 +20,7 @@ export function PopulateSpreadsheetStep({ sheetId }) {
 
         let populated: boolean = false;
         try {
-            populated = await sheetsApi.populate();
+            populated = await sheetsApi.buildSchema();
 
             setSuccessful(populated);
             clearError();

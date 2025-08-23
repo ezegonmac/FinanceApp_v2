@@ -57,8 +57,8 @@ class SheetsApi {
     return json.data;
   }
 
-  async populate(): Promise<boolean> {
-    const json = await this.request<{ success: boolean }>("populate");
+  async buildSchema(): Promise<boolean> {
+    const json = await this.request<{ success: boolean }>("buildSchema");
     return Boolean(json.success);
   }
 }

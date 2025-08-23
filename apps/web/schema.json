@@ -1,0 +1,10 @@
+{
+    "Configuration": {
+        "email": "",
+        "theme": "default"
+    },
+    "Data": {
+        "Accounts": ["id", "name"],
+        "Sales": ["id", "name"]
+    }
+}

@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import schemaDict from 'schema.json';
 
 class SheetsApi {
   private sheetId: string;
@@ -83,41 +84,109 @@ class SheetsApi {
     );
   }
 
-  /**
-   * Prepopulates the spreadsheet with predefined sheets and headers.
-   */
-  async populate(
-    sheetsDictionary: Record<string, string[]>
-  ): Promise<{ success: boolean; sheets: string[] }> {
+  async createSheet(sheetTitle: string): Promise<boolean>{
     const sheetsApi = await this.getSheetsApi();
-    const createdSheets: string[] = [];
-
-    for (const [sheetTitle, values] of Object.entries(sheetsDictionary)) {
-      // Try to create sheet
-      try {
-        await sheetsApi.spreadsheets.batchUpdate({
-          spreadsheetId: this.sheetId,
-          requestBody: {
-            requests: [
-              {
-                addSheet: { properties: { title: sheetTitle } },
-              },
-            ],
-          },
-        });
-        createdSheets.push(sheetTitle);
-      } catch (err: any) {
-        // Ignore if it already exists
-        if (!err.message?.includes('already exists')) throw err;
-      }
-
-      // Write headers into first row
-      await sheetsApi.spreadsheets.values.update({
+    let created = false;
+    try {
+      await sheetsApi.spreadsheets.batchUpdate({
         spreadsheetId: this.sheetId,
-        range: `'${sheetTitle}'!A1:${String.fromCharCode(64 + values.length)}1`,
-        valueInputOption: 'RAW',
-        requestBody: { values: [values] },
+        requestBody: {
+          requests: [
+            {
+              addSheet: { properties: { title: sheetTitle } },
+            },
+          ],
+        },
       });
+      created = true
+    } catch (err: any) {
+      created = false;
+      if (!err.message?.includes('already exists')) throw err;
+    }
+    return created;
+  }
+
+  async writeValues(
+    sheetTitle: string,
+    range: string,
+    values: any[][]
+  ): Promise<void> {
+    const sheetsApi = await this.getSheetsApi();
+
+    await sheetsApi.spreadsheets.values.update({
+      spreadsheetId: this.sheetId,
+      range: `'${sheetTitle}'!${range}`,
+      valueInputOption: "RAW",
+      requestBody: { values },
+    });
+  }
+
+  async readValues(
+    sheetTitle: string,
+    range: string
+  ): Promise<any[][]> {
+    const sheetsApi = await this.getSheetsApi();
+
+    const response = await sheetsApi.spreadsheets.values.get({
+      spreadsheetId: this.sheetId,
+      range: `'${sheetTitle}'!${range}`,
+    });
+
+    return response.data.values ?? [];
+  }
+
+  async buildSchema(): Promise<{ success: boolean; sheets: string[] }> {
+    let createdSheets: string[] = [];
+
+    const configTitle = Object.keys(schemaDict)[0];
+    const configDict = schemaDict.Configuration;
+    const dataDict = schemaDict.Data;
+
+    // Create sheets if they don't exist
+    const sheetTitles = [configTitle, ...Object.keys(dataDict)]
+    console.log("Creating sheets: ", sheetTitles);
+    for (const sheetTitle of sheetTitles) {
+      console.log("Creating sheet: ", sheetTitle);
+      try {
+        const created = await this.createSheet(sheetTitle);
+        if (created) {
+          createdSheets.push(sheetTitle);
+          console.log("Sheet created: ", sheetTitle);
+        } else {
+          console.log("The sheet was already created: ", sheetTitle);
+        }
+      } catch(err) {
+        throw new Error(`Could not create the sheet: ${sheetTitle}. ${err}`);
+      }
+    }
+
+    // Write data headers and default values into first two columns
+    console.log("Populating data sheets");
+    for (const [sheetTitle, headers] of Object.entries(dataDict)) {
+      console.log("Populating sheet: ", sheetTitle);
+      // dont populate already existing sheets
+      if (sheetTitle in createdSheets) {
+        console.log("Sheet already present");
+        continue;
+      }
+      // headers in first row
+      await this.writeValues(sheetTitle, `A1:${String.fromCharCode(64 + headers.length)}1`, [headers]);
+      console.log("Sheet populated: ", sheetTitle);
+    }
+
+    // Write config entries into first column
+    let rowIndex = 1;
+    // dont populate if config sheet already exists
+    console.log("Populating configs");
+    if (createdSheets.includes(configTitle)) {
+      for (const [attribute, defValue] of Object.entries(configDict)) {
+        const row = [attribute, defValue ?? '']; // attribute in col A, default in col B
+        await this.writeValues(configTitle, `A${rowIndex}:B${rowIndex}`, [row]);
+        rowIndex++;
+      }
+      console.log("Config sheet populated");
+    } else {
+      console.log("Config sheet already present");
     }
 
     return { success: true, sheets: createdSheets };

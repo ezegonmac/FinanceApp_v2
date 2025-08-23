@@ -24,10 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const sheetsApi = new SheetsApi(sheetId);
 
-    const configurationTitle = process.env.CONFIGURATION_SHEET_TITLE as string;
-    if (!configurationTitle) throw new Error("CONFIGURATION_SHEET_TITLE env variable not set");
-
-    const rawSheetData = await sheetsApi.getSheet(configurationTitle);
+    const rawSheetData = await sheetsApi.getSheet("Configuration");
     
     // optional: parse first row as keys and remaining rows as values
     const configurationsSheetData = parseRawSheetToObject(rawSheetData);
