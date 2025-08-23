@@ -3,10 +3,14 @@ import { useState, useEffect } from "react";
 const STORAGE_KEY = "sheetId";
 
 export function useSheetId() {
-    const [sheetId, setSheetId] = useState<string | null>(() => {
-        if (typeof window === "undefined") return null;
-        return localStorage.getItem(STORAGE_KEY);
-    });
+    const [sheetId, setSheetId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedSheetId = localStorage.getItem(STORAGE_KEY);
+        if (storedSheetId) {
+            setSheetId(storedSheetId);
+        }
+    }, []);
 
     const clearSheetId = () => {
         setSheetId(null);

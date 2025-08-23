@@ -2,8 +2,10 @@ import Step from "./stepWrapper";
 import { useState } from "react";
 import ErrorMessage from "../ErrorMessage";
 import AccountsApi from "../../utils/apiClient/client/accountsApi";
+import { useRouter } from "next/navigation";
 
 export function AddAccountsStep({ sheetId, setData }) {
+    const router = useRouter();
 
     const [error, setError] = useState<any>(null);
     const clearError = () => setError(null);
@@ -35,7 +37,7 @@ export function AddAccountsStep({ sheetId, setData }) {
             <>
             <p>Add your finance accounts you want to track</p>
             <button onClick={handleLoadData}>Load Accounts</button>
-            
+            <button onClick={() => router.push("/accounts")}>Accounts</button>
             {loading && <p>loading ...</p>}
 
             <ErrorMessage message={error}/>

@@ -27,4 +27,10 @@ export default abstract class BaseEntityApi {
         return result;
     }
 
+    async create(data: Record<string, any>): Promise<void> {
+        const headers = (await this.sheetApi.readValues(this.sheetName, '1:1'))[0];
+        const values = headers.map(header => data[header] || '');
+        await this.sheetApi.appendRow(this.sheetName, [values]);
+    }
+
 }

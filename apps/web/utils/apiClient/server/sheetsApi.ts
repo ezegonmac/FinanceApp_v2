@@ -126,6 +126,17 @@ class SheetsApi {
     });
   }
 
+  async appendRow(sheetTitle: string, values: any[][]): Promise<void> {
+    const sheetsApi = await this.getSheetsApi();
+
+    await sheetsApi.spreadsheets.values.append({
+      spreadsheetId: this.sheetId,
+      range: sheetTitle,
+      valueInputOption: 'RAW',
+      requestBody: { values },
+    });
+  }
+
   async readValues(
     sheetTitle: string,
     range: string

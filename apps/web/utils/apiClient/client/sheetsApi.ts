@@ -1,6 +1,6 @@
 
 class SheetsApi {
-  private sheetId: string;
+  private sheetId: string | null;
   private baseUrl = "/api";
 
   constructor(sheetId: string) {
