@@ -36,6 +36,8 @@ export default function HomePage() {
                     sheetId={sheetId}
                 />
                 <AddAccountsStep
+                    sheetId={sheetId}
+                    setData={setData} 
                 />
             </ol>
 

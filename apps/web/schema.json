@@ -5,7 +5,7 @@
     },
     "Data": {
         "Default": [],
-        "Accounts": ["id", "name"],
+        "Accounts": ["id", "name", "addDate", "active"],
         "Sales": ["id", "name"]
     }
 }
