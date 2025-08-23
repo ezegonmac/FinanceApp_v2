@@ -12,6 +12,9 @@ export function PopulateSpreadsheetStep({ sheetId }) {
     const [loading, setLoading] = useState<boolean>(false);
     const startLoading = () => setLoading(true);
     const stopLoading = () => setLoading(false);
+    const [clearing, setClearing] = useState<boolean>(false);
+    const startClearing= () => setClearing(true);
+    const stopClearing = () => setClearing(false);
 
     const handlePopulate = async () => {
         startLoading();
@@ -33,11 +36,42 @@ export function PopulateSpreadsheetStep({ sheetId }) {
         stopLoading();
     };
 
+    const handleClearData = async () => {
+        startLoading();
+
+        const confirmation = confirm("Are you sure you want to clear all the data?");
+        if(!confirmation) {
+            stopLoading();
+            return null;
+        }
+
+        const sheetsApi = new SheetsApi(sheetId);
+
+        let cleared: boolean = false;
+        try {
+            cleared = await sheetsApi.clearData();
+
+            setSuccessful(cleared);
+            clearError();
+        } catch (err) {
+            setSuccessful(cleared);
+            setError("Failed to populate spreadsheet");
+            console.error("Failed to populate spreadsheet:", err);
+        }
+        
+        stopLoading();
+    };
+
     return (
         <Step title="Populate Spreadsheet for the first time">
             <button onClick={handlePopulate} disabled={loading}>
                 {loading ? "Populating..." : "Populate"}
             </button>
+            <button onClick={handleClearData} disabled={loading}>
+                {loading ? "Clearing..." : "Clear Data"}
+            </button>
+            {successful === true && <p style={{ color: "green" }}>Successful ✅</p>}
+            
             
             <ErrorMessage message={error}/>
         </Step>

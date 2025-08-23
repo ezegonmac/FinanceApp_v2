@@ -4,6 +4,7 @@
         "theme": "default"
     },
     "Data": {
+        "Default": [],
         "Accounts": ["id", "name"],
         "Sales": ["id", "name"]
     }

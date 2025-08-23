@@ -1,7 +1,7 @@
 
 class SheetsApi {
   private sheetId: string;
-  private baseUrl = "/api/sheets";
+  private baseUrl = "/api";
 
   constructor(sheetId: string) {
     if (!sheetId) throw new Error("No sheet ID provided");
@@ -28,37 +28,42 @@ class SheetsApi {
   }
 
   async checkAccess(): Promise<boolean> {
-    const json = await this.request<{ access: boolean }>("checkAccess");
+    const json = await this.request<{ access: boolean }>("spreadsheets/checkAccess");
     return Boolean(json.access);
   }
 
   async getSpreadsheet(): Promise<string[][]> {
-    const json = await this.request<{ data: string[][] }>("getSpreadsheet");
+    const json = await this.request<{ data: string[][] }>("spreadsheets/get");
     return json.data;
   }
 
   async getSheet(sheetTitle: string): Promise<string[][]> {
-    const json = await this.request<{ data: string[][] }>(`getSheet?title=${encodeURIComponent(sheetTitle)}`);
+    const json = await this.request<{ data: string[][] }>(`/sheet/get?title=${encodeURIComponent(sheetTitle)}`);
     return json.data;
   }
 
   async getAllData(): Promise<string[][]> {
-    const json = await this.request<{ data: string[][] }>("getAllData");
+    const json = await this.request<{ data: string[][] }>("/spreadsheets/getAllData");
     return json.data;
   }
 
   async getAllConfigurations(): Promise<string[][]> {
-    const json = await this.request<{ data: string[][] }>("getAllConfigurations");
+    const json = await this.request<{ data: string[][] }>("/spreadsheets/getAllConfigurations");
     return json.data;
   }
 
   async getAllTitles(): Promise<string[]> {
-    const json = await this.request<{ data: string[] }>("getAllTitles");
+    const json = await this.request<{ data: string[] }>("/spreadsheets/getAllTitles");
     return json.data;
   }
 
   async buildSchema(): Promise<boolean> {
-    const json = await this.request<{ success: boolean }>("buildSchema");
+    const json = await this.request<{ success: boolean }>("/spreadsheets/buildSchema");
+    return Boolean(json.success);
+  }
+
+  async clearData(): Promise<boolean> {
+    const json = await this.request<{ success: boolean }>("/spreadsheets/clear");
     return Boolean(json.success);
   }
 }

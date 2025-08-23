@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import schemaDict from 'schema.json';
+import { colNumberToLetter } from 'utils/sheets';
 
 class SheetsApi {
   private sheetId: string;
@@ -37,9 +38,13 @@ class SheetsApi {
     Record<string, Record<string, string[]>>
   > {
     const titles = await this.getAllTitles();
+
     const all = await Promise.all(titles.map((title) => this.getSheet(title)));
 
-    return Object.assign({}, ...all);
+    return titles.reduce((acc, title, i) => {
+      acc[title] = all[i];
+      return acc;
+    }, {} as Record<string, any>);
   }
 
   async getSheet(sheetTitle: string): Promise<string[][]> {
@@ -170,8 +175,11 @@ class SheetsApi {
         continue;
       }
       // headers in first row
-      await this.writeValues(sheetTitle, `A1:${String.fromCharCode(64 + headers.length)}1`, [headers]);
-      console.log("Sheet populated: ", sheetTitle);
+      if(headers.length>0) {
+        const endColumn = colNumberToLetter(headers.length);
+        await this.writeValues(sheetTitle, `A1:${endColumn}1`, [headers]);
+        console.log("Sheet populated: ", sheetTitle);
+      }
     }
 
     // Write config entries into first column
@@ -191,6 +199,33 @@ class SheetsApi {
 
     return { success: true, sheets: createdSheets };
   }
+
+  async clearSpreadsheet(): Promise<void> {
+    const sheetsApi = await this.getSheetsApi();
+
+    // Get all sheet IDs
+    const spreadsheet = await sheetsApi.spreadsheets.get({
+      spreadsheetId: this.sheetId,
+    });
+
+    const sheetIds =
+      spreadsheet.data.sheets?.filter(s => s.properties?.title !== "Default")
+        .map(s => s.properties?.sheetId).filter(Boolean) || [];
+
+    if (sheetIds.length === 0) return;
+
+    // Batch delete all existing sheets except default one
+    const deleteRequests = sheetIds.map(sheetId => ({
+      deleteSheet: { sheetId },
+    }));
+
+    await sheetsApi.spreadsheets.batchUpdate({
+      spreadsheetId: this.sheetId,
+      requestBody: { requests: deleteRequests },
+    });
+
+  }
+
 }
 
 export default SheetsApi;
