@@ -1,8 +1,4 @@
-declare global {
-  interface Window {
-    gapiLoaded: (() => void) | undefined;
-    gisLoaded: (() => void) | undefined;
-  }
+declare module '*.yaml' {
+  const data: any;
+  export default data;
 }
-
-export {};

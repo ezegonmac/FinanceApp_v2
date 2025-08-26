@@ -1,0 +1,51 @@
+Data:
+  Default: []           # placeholder sheet, empty
+
+  Accounts: 
+    - id
+    - name
+    - addDate           # date the account was added
+    - active            # TRUE/FALSE
+
+  Month: 
+    - id
+    - month             # numeric month (1–12)
+    - year              # 4-digit year
+
+  IncomeType: 
+    - id
+    - name              # e.g. Salary, Investment Sale
+
+  Income: 
+    - id
+    - accountId         # reference to Accounts.id
+    - monthId           # reference to Month.id
+    - monthlyIncomeId   # optional, link to Monthly_Income.id
+    - amount
+    - date              # transaction date (dd/mm/yyyy)
+    - incomeTypeId      # reference to IncomeType.id
+
+  Monthly_Income: 
+    - id
+    - accountId         # reference to Accounts.id
+    - monthId           # reference to Month.id
+    - amount
+
+  Monthly_Income_Split: 
+    - id
+    - fromAccountId     # reference to Accounts.id
+    - toAccountId       # reference to Accounts.id
+    - monthId           # reference to Month.id
+    - amount
+
+  Monthly_Account_Invested_Real: 
+    - id
+    - monthId           # reference to Month.id
+    - accountId         # reference to Accounts.id
+    - amount
+
+  Monthly_Account_Spent_Real: 
+    - id
+    - monthId           # reference to Month.id
+    - accountId         # reference to Accounts.id
+    - amount

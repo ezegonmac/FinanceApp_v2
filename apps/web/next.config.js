@@ -11,6 +11,10 @@ module.exports = {
         "@ui":  path.resolve(__dirname, "../packages/ui"),
         "@utils": path.resolve(__dirname, "../packages/utils"),
     };
+    config.module.rules.push({
+        test: /\ya?ml$/,
+        use: 'yaml-loader',
+    });
     return config;
     },
 };

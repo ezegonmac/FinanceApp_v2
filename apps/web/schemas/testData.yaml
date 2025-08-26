@@ -1,0 +1,46 @@
+Data:
+  Default: []     # placeholder sheet
+
+  Accounts:
+    # ["id", "name", "addDate", "active"]
+    - [1, "Santander", "25/08/2025", "TRUE"]
+    - [2, "Trade Republic", "25/08/2025", "TRUE"]
+    - [3, "Revolut", "25/08/2025", "TRUE"]
+    - [4, "Sabadell", "25/08/2025", "TRUE"]
+    - [5, "Santander Inactive", "25/08/2025", "FALSE"]
+
+  Month:
+    # ["id", "month", "year"]
+    - [1, 1, 2025]
+    - [2, 2, 2025]
+    - [3, 3, 2025]
+    - [4, 4, 2025]
+    - [5, 5, 2025]
+    - [6, 6, 2025]
+    - [7, 7, 2025]
+    - [8, 8, 2025]
+    - [9, 9, 2025]
+    - [10, 12, 2024]
+    - [11, 11, 2024]
+    - [12, 10, 2024]
+
+  IncomeType:
+    # ["id", "name"]
+    - [1, "Salary"]
+    - [2, "Investment Sale"]
+
+  Income:
+    # ["id", "accountId", "monthId", "monthlyIncomeId", "amount", "date", "incomeTypeId"]
+    - [1, 1, 8, 1, 1900, "28/07/2025", 1]
+    - [2, 1, 8, 1, 20, "20/08/2025", 2]
+    - [3, 1, 9, null, 1900, "29/08/2025", 1]
+
+  Monthly_Income:
+    # ["id", "accountId", "monthId", "amount"]
+    - [1, 1, 8, 1920]
+
+  Monthly_Income_Split: ["id", "fromAccountId", "toAccountId", "monthId", "amount"]
+
+  Monthly_Account_Invested_Real: ["id", "monthId", "accountId", "amount"]
+
+  Monthly_Account_Spent_Real: ["id", "monthId", "accountId", "amount"]

@@ -1,0 +1,3 @@
+Configuration:
+  schema_version: v0    # schema versioning for migrations
+  theme: default        # default UI theme

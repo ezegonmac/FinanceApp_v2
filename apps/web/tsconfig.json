@@ -21,13 +21,17 @@
     "paths": {
       "@api/*": ["../packages/api/*"],
       "@ui/*":  ["../packages/ui/*"],
-      "@utils/*": ["../packages/utils/*"]
+      "@utils/*": ["./utils/*"],
+      "@schemas/*": ["./schemas/*"],
+      "@components/*": ["./components/*"],
+      "@hooks/*": ["./hooks/*"],
     }
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts"
-, "components/steps/AllowServiceAccountStep.tsx"  ],
+    "**/*.ts",
+    "**/*.d.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

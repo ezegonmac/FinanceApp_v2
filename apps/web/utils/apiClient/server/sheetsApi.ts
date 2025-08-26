@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
-import schemaDict from 'schema.json';
 import { colNumberToLetter } from 'utils/sheets';
+import dataSchemaDict from "@schemas/baseSchemaData.yaml";
+import configSchemaDict from "@schemas/baseSchemaConfig.yaml";
 
 class SheetsApi {
   private sheetId: string;
@@ -145,7 +146,7 @@ class SheetsApi {
 
     const response = await sheetsApi.spreadsheets.values.get({
       spreadsheetId: this.sheetId,
-      range: `'${sheetTitle}'!${range}`,
+      range: `'${'${sheetTitle}'}'!${range}`,
     });
 
     return response.data.values ?? [];
@@ -154,9 +155,10 @@ class SheetsApi {
   async buildSchema(): Promise<{ success: boolean; sheets: string[] }> {
     let createdSheets: string[] = [];
 
-    const configTitle = Object.keys(schemaDict)[0];
-    const configDict = schemaDict.Configuration;
-    const dataDict = schemaDict.Data;
+    const configTitle = Object.keys(configSchemaDict)[0];
+    const configDict = (configSchemaDict as Record<string, Record<string, string>>)[configTitle];
+    const dataRootKey = Object.keys(dataSchemaDict)[0];
+    const dataDict = (dataSchemaDict as Record<string, Record<string, string[]>>)[dataRootKey];
 
     // Create sheets if they don't exist
     const sheetTitles = [configTitle, ...Object.keys(dataDict)]
@@ -181,7 +183,7 @@ class SheetsApi {
     for (const [sheetTitle, headers] of Object.entries(dataDict)) {
       console.log("Populating sheet: ", sheetTitle);
       // dont populate already existing sheets
-      if (sheetTitle in createdSheets) {
+      if (createdSheets.includes(sheetTitle)) {
         console.log("Sheet already present");
         continue;
       }

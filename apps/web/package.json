@@ -17,5 +17,8 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
+  },
+  "devDependencies": {
+    "yaml-loader": "^0.8.1"
   }
 }

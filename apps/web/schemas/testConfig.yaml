@@ -1,0 +1,4 @@
+Configuration:
+  schema_version: v0    
+  email: ""             
+  theme: default        
