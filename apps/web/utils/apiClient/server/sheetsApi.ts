@@ -183,7 +183,7 @@ class SheetsApi {
     for (const [sheetTitle, headers] of Object.entries(dataDict)) {
       console.log("Populating sheet: ", sheetTitle);
       // dont populate already existing sheets
-      if (createdSheets.includes(sheetTitle)) {
+      if (!createdSheets.includes(sheetTitle)) {
         console.log("Sheet already present");
         continue;
       }

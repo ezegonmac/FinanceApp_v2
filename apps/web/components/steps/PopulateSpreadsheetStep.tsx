@@ -37,11 +37,11 @@ export function PopulateSpreadsheetStep({ sheetId }) {
     };
 
     const handleClearData = async () => {
-        startLoading();
+        startClearing();
 
         const confirmation = confirm("Are you sure you want to clear all the data?");
         if(!confirmation) {
-            stopLoading();
+            stopClearing();
             return null;
         }
 
@@ -59,16 +59,16 @@ export function PopulateSpreadsheetStep({ sheetId }) {
             console.error("Failed to populate spreadsheet:", err);
         }
         
-        stopLoading();
+        stopClearing();
     };
 
     return (
         <Step title="Populate Spreadsheet for the first time">
-            <button onClick={handlePopulate} disabled={loading}>
+            <button onClick={handlePopulate} disabled={loading || clearing}>
                 {loading ? "Populating..." : "Populate"}
             </button>
-            <button onClick={handleClearData} disabled={loading}>
-                {loading ? "Clearing..." : "Clear Data"}
+            <button onClick={handleClearData} disabled={loading || clearing}>
+                {clearing ? "Clearing..." : "Clear Data"}
             </button>
             {successful === true && <p style={{ color: "green" }}>Successful ✅</p>}
             
