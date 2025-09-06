@@ -1,8 +1,16 @@
 
 import BaseEntityApi from './baseEntityApi';
 
-class monthlyIncomeSplitApi extends BaseEntityApi {
+class MonthlyIncomeSplitApi extends BaseEntityApi {
   protected entityName = 'monthlyIncomeSplit';
+
+  async getAllDetailed(): Promise<any> {
+    const json = await this.request<{ data: any[], headers: string[] }>(
+      `data/${this.entityName}/getAllDetailed`
+    );
+    return json;
+  }
+
 }
 
-export default monthlyIncomeSplitApi;
+export default MonthlyIncomeSplitApi;

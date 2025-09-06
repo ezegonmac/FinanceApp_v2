@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import MonthlyIncomeSplitApi from "../utils/apiClient/client/monthlyIncomeSplitApi";
-import AccountsApi from "../utils/apiClient/client/accountsApi";
 import ErrorMessage from "./ErrorMessage";
-import { joinObjects } from "../utils/entityUtils";
+import MonthlyIncomeSplitApi from "../utils/apiClient/client/monthlyIncomeSplitApi";
 
-export default function MonthlySplitCard({ sheetId }) {
+export default function MonthlySplitTable({ sheetId }) {
     const [headers, setHeaders] = useState<string[]>([]);
     const [tableData, setTableData] = useState<Object[]>();
     const [loading, setLoading] = useState(true);
@@ -12,48 +10,26 @@ export default function MonthlySplitCard({ sheetId }) {
     
     const [refreshKey, setRefreshKey] = useState(0);
 
+    const splitApi = useMemo(() => new MonthlyIncomeSplitApi(sheetId), [sheetId]);
+
     const [error, setError] = useState<any>(null);
     const clearError = () => setError(null);
-    
-    const splitsApi = useMemo(() => new MonthlyIncomeSplitApi(sheetId), [sheetId]);
-    
-    const accountsApi = useMemo(() => new AccountsApi(sheetId), [sheetId]);
-    let accounts = [] as string[][];
 
     useEffect(() => {
-        const fetchSplits = async () => {
+        const fetchData = async () => {
             setRefreshing(true);
             if (refreshKey === 0) setLoading(true);
 
             try {
-                const splits = await splitsApi.getAllObjects();
-                if (splits.length === 0) {
-                    setTableData([]);
-                    setHeaders([]);
-                    return;
-                }
-
-                const initialHeaders = Object.keys(splits[0]);
-
-                // fetch accounts if it is not present
-                const accountsExist = accounts?.length > 0;
-                if (accountsExist) return;
-
-                accounts = await accountsApi.getAllObjects();
-
-                const relations = {
-                    'toAccountId': accounts,
-                    'fromAccountId': accounts
-                }
-
-                const [joinedSplits, newHeaders] = joinObjects(splits, relations, initialHeaders);
-                
-                setTableData(joinedSplits);
-                setHeaders(newHeaders);
+                const result = await splitApi.getAllDetailed();
+                const { data, headers } = result;
+                const formatedData = formatTableData(data, headers);
+                setTableData(formatedData);
+                setHeaders(headers);
                 clearError();
             } catch (err) {
-                console.log(`Failed to get splits: ${err}`);
-                setError("Failed to get splits");
+                console.log(`Failed to get detailed splits: ${err}`);
+                setError("Failed to get detailed splits");
             } finally {
                 if (refreshKey === 0) setLoading(false);
                 setRefreshing(false);
@@ -61,9 +37,38 @@ export default function MonthlySplitCard({ sheetId }) {
         };
 
         if (sheetId) {
-            fetchSplits();
+            fetchData();
         }
-    }, [splitsApi, accountsApi, refreshKey, sheetId]);
+    }, [sheetId, refreshKey]);
+
+    const formatTableData = (tableData, headers) => {
+
+        let formatedData = [] as Object[];
+        tableData.forEach((row) => {
+            let formatedRow = {};
+            headers.forEach((header) => {
+                const value = row[header];
+                
+                // Check if its object
+                if (typeof value === 'object' && value !== null) {
+                    // Parse the different objects
+                    if (['fromAccount', 'toAccount'].includes(header)) {
+                        formatedRow[header] = value['name'];
+                        return;
+                    }
+                    if (['month'].includes(header)) {
+                        formatedRow[header] = `${value['month']}, ${['year']}`;
+                        return;
+                    }
+                }
+                
+                formatedRow[header] = value || JSON.stringify(value);
+            })
+            formatedData.push(formatedRow);
+            
+        })
+        return formatedData;
+    }
 
     return (
         <>
@@ -83,9 +88,6 @@ export default function MonthlySplitCard({ sheetId }) {
                             <tr key={i}>
                                 {headers.map(header => {
                                     const value = row[header];
-                                    if (typeof value === 'object' && value !== null) {
-                                        return <td key={header}>{value.name || JSON.stringify(value)}</td>;
-                                    }
                                     return <td key={header}>{value}</td>;
                                 })}
                             </tr>

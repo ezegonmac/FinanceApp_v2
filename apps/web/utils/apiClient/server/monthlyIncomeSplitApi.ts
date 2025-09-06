@@ -1,6 +1,6 @@
 import BaseSheetApi from './baseEntityApi';
 
-export default class monthlyIncomeSplitApi extends BaseSheetApi {
+export default class MonthlyIncomeSplitApi extends BaseSheetApi {
   constructor(sheetId: string) {
     super(sheetId, 'Monthly_Income_Split');
   }
@@ -27,5 +27,9 @@ export default class monthlyIncomeSplitApi extends BaseSheetApi {
       amount: data.amount,
     };
     await super.create(newIncomeSplit);
+  }
+
+  async getAllDetailed() {
+
   }
 }

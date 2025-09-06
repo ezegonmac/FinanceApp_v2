@@ -8,7 +8,7 @@ export default abstract class BaseEntityApi {
     this.sheetId = sheetId;
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = endpoint.includes('?') 
       ? `${this.baseUrl}/${endpoint}&id=${encodeURIComponent(this.sheetId)}`
       : `${this.baseUrl}/${endpoint}?id=${encodeURIComponent(this.sheetId)}`;
