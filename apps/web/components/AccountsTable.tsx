@@ -40,7 +40,7 @@ export default function AccountsTable({ sheetId }) {
             if (refreshKey === 0) setLoading(true);
 
             try {
-                const res = await accountsApi.getAll();
+                const res = await accountsApi.getAllObjects();
                 setAccounts(res);
                 clearError();
             } catch (err) {
@@ -65,7 +65,7 @@ export default function AccountsTable({ sheetId }) {
             return;
         }
         try {
-            await accountsApi.create(inputValue);
+            await accountsApi.create({name: inputValue});
             setRefreshKey(oldKey => oldKey + 1);
             setInputValue("");
         } catch (err) {
@@ -90,9 +90,13 @@ export default function AccountsTable({ sheetId }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {accounts.map((acc, i) => (
+                        {accounts.map((split, i) => (
                             <tr key={i}>
-                                {acc.map((cell, j) => <td key={j}>{cell}</td>)}
+                                {Object.entries(split).map((val, key) => 
+                                    <td key={key}>
+                                        {val[1]}
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>

@@ -22,6 +22,28 @@ export default abstract class BaseEntityApi {
         return data;
     }
 
+    async getAllObjects(): Promise<Object[]> {
+        const sheetData = await this.sheetApi.getSheet(this.sheetName);
+        const headers = sheetData[0];
+        const data = sheetData.slice(1, sheetData.length);
+        
+        const objects = data.reduce(
+            (acc, row) => {
+
+                let object = {};
+                for(const [i, header] of headers.entries()) {
+                    object[header] = row[i]; 
+                }
+                acc.push(object);
+
+                return acc;
+            },
+            [] as Object[],
+        );
+
+        return objects;
+    }
+
     async findById(id: string) {
         const data = await this.getAll();
         const transposed = transpose(data);

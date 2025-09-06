@@ -10,6 +10,7 @@ export function useSheetId() {
         if (storedSheetId) {
             setSheetId(storedSheetId);
         }
+        console.log("No sheetId");
     }, []);
 
     const clearSheetId = () => {
