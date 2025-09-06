@@ -38,6 +38,7 @@ export function AddAccountsStep({ sheetId, setData }) {
             <p>Add your finance accounts you want to track</p>
             <button onClick={handleLoadData}>Load Accounts</button>
             <button onClick={() => router.push("/accounts")}>Accounts</button>
+            <button onClick={() => router.push("/monthlySplits")}>Monthly Splits</button>
             {loading && <p>loading ...</p>}
 
             <ErrorMessage message={error}/>

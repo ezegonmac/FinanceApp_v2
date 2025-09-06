@@ -51,7 +51,7 @@ export default abstract class BaseEntityApi {
     return json.data;
   }
 
-  async create(name: string): Promise<void> {
-    await this.post(`data/${this.entityName}/create`, { name });
+  async create(data: Record<string, any>): Promise<void> {
+    await this.post(`data/${this.entityName}/create`, data);
   }
 }
