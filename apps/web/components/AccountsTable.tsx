@@ -7,7 +7,8 @@ export default function AccountsTable({ sheetId }) {
     const [headers, setHeaders] = useState<string[]>([]);
     const [accounts, setAccounts] = useState<String[][]>();
     const [loading, setLoading] = useState(true);
-    const [isAdding, setIsAdding] = useState(false);
+    const [refreshing, setRefreshing] = useState(true);
+    const [adding, setAdding] = useState(false);
     
     const [refreshKey, setRefreshKey] = useState(0);
     
@@ -35,6 +36,7 @@ export default function AccountsTable({ sheetId }) {
     useEffect(() => {
         const fetchAccounts = async () => {
             // Only show the main loading indicator on the initial load
+            setRefreshing(true);
             if (refreshKey === 0) setLoading(true);
 
             try {
@@ -46,6 +48,7 @@ export default function AccountsTable({ sheetId }) {
                 setError("Failed to get accounts");
             } finally {
                 if (refreshKey === 0) setLoading(false);
+                setRefreshing(false);
             }
         };
 
@@ -55,10 +58,10 @@ export default function AccountsTable({ sheetId }) {
     }, [accountsApi, refreshKey]);
 
     const handleAddAccount = async () => {
-        setIsAdding(true);
+        setAdding(true);
         if(!inputValue) {
             alert("An account name is required");
-            setIsAdding(false);
+            setAdding(false);
             return;
         }
         try {
@@ -69,7 +72,7 @@ export default function AccountsTable({ sheetId }) {
             console.log(`Failed to add account: ${err}`);
             setError("Failed to add account");
         } finally {
-            setIsAdding(false);
+            setAdding(false);
         }
     };
 
@@ -104,12 +107,14 @@ export default function AccountsTable({ sheetId }) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Enter Account name"
-                disabled={isAdding} // Disable input while adding
+                disabled={adding} // Disable input while adding
             /> &nbsp;
-            <button onClick={handleAddAccount} disabled={isAdding}>
-                {isAdding ? "Adding..." : "Add Account"}
+            <button onClick={handleAddAccount} disabled={adding}>
+                {adding ? "Adding..." : "Add Account"}
             </button> &nbsp;
-            <button onClick={() => setRefreshKey(oldKey => oldKey + 1)} disabled={isAdding || loading}>Refresh</button>
+            <button onClick={() => setRefreshKey(oldKey => oldKey + 1)} disabled={adding || loading || refreshing}>
+                {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
         </>
     );
 }

@@ -146,7 +146,7 @@ class SheetsApi {
 
     const response = await sheetsApi.spreadsheets.values.get({
       spreadsheetId: this.sheetId,
-      range: `'${'${sheetTitle}'}'!${range}`,
+      range: `'${sheetTitle}'!${range}`,
     });
 
     return response.data.values ?? [];
