@@ -1,4 +1,4 @@
-import MonthlySplitCard from "../components/MonthlySplitCard";
+import MonthlySplitTable from "../components/MonthlySplitTable";
 import { useSheetId } from "../hooks/useSheetId";
 
 export default function MontlySplitPage() {
@@ -8,7 +8,7 @@ export default function MontlySplitPage() {
         <div style={{fontFamily: 'sans-serif'}}>
             <h1>Montly Split</h1>
             {sheetId ? (
-                <MonthlySplitCard sheetId={sheetId}/>
+                <MonthlySplitTable sheetId={sheetId}/>
             ) : (
                 <p>Loading sheet...</p>
             )}
