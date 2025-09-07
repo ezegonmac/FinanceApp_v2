@@ -14,7 +14,7 @@ export default class MonthlyIncomeSplitApi extends BaseSheetApi {
       fromAccountId: number, 
       toAccountId: number,
       amount: number 
-    }): Promise<string[]> {
+    }): Promise<Object> {
 
     const allMonthlySplits = await this.getAll();
     const maxId = allMonthlySplits.reduce((max, row) => {
@@ -27,7 +27,6 @@ export default class MonthlyIncomeSplitApi extends BaseSheetApi {
       const monthApi = new MonthsApi(this.sheetId);
       try {
         const newMonth = await monthApi.create({month: data.month, year: data.year});
-
         data.monthId = newMonth["id"];
       
       } catch(e) {

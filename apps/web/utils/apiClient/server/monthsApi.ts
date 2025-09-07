@@ -5,7 +5,7 @@ export default class MonthsApi extends BaseSheetApi {
     super(sheetId, 'Month');
   }
 
-  async create(data: { month: number, year: number }): Promise<string[]> {
+  async create(data: { month: number, year: number }): Promise<Object> {
     const allMonths = await this.getAllObjects();
 
     allMonths.forEach((row) => {

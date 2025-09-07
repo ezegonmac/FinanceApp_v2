@@ -57,7 +57,7 @@ export default function MonthlySplitTable({ sheetId }) {
                         return;
                     }
                     if (['month'].includes(header)) {
-                        formattedRow[header] = `${value['month']}, ${['year']}`;
+                        formattedRow[header] = `${value['month']}, ${value['year']}`;
                         return;
                     }
                 }

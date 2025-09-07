@@ -57,11 +57,16 @@ export default abstract class BaseEntityApi {
         return result;
     }
 
-    async create(data: Record<string, any>): Promise<string[]> {
+    async create(data: Record<string, any>): Promise<Object> {
         const headers = await this.getHeaders();
         const values = headers.map(header => data[header] || '');
         await this.sheetApi.appendRow(this.sheetName, [values]);
-        return values;
+
+        let createdEntity = {};
+        headers.forEach(header => {
+            createdEntity[header] = data[header];
+        }); 
+        return createdEntity;
     }
 
 }
