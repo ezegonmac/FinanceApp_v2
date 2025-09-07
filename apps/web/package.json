@@ -10,13 +10,16 @@
   },
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
+    "@hookform/resolvers": "^5.2.1",
     "@tanstack/react-query": "^5.0.0",
     "dotenv": "^17.2.1",
     "firebase": "^10.0.0",
     "googleapis": "^105.0.0",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-hook-form": "^7.62.0",
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "yaml-loader": "^0.8.1"

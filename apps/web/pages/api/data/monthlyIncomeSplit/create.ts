@@ -1,4 +1,4 @@
-import monthlyIncomeSplitApi from '@utils/apiClient/server/monthlyIncomeSplitApi';
+import MonthlyIncomeSplitApi from '@utils/apiClient/server/monthlyIncomeSplitApi';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -6,11 +6,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const sheetId = req.query.id as string;
+  // const sheetId = req.query.id as string;
+  const { sheetId } = req.body;
   if (!sheetId) return res.status(400).json({ error: 'Missing sheet ID' });
 
   const { monthId } = req.body;
-  if (!monthId) return res.status(400).json({ error: 'Missing monthId' });
+  const { month } = req.body;
+  const { year } = req.body;
+  if (!monthId && !(month && year)) return res.status(400).json({ error: 'Missing monthId or missing month and year' });
 
   const { fromAccountId } = req.body;
   if (!fromAccountId) return res.status(400).json({ error: 'Missing fromAccountId' });
@@ -22,9 +25,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!amount) return res.status(400).json({ error: 'Missing amount' });
 
   try {
-    const splits = new monthlyIncomeSplitApi(sheetId);
+    const splits = new MonthlyIncomeSplitApi(sheetId);
     await splits.create({ 
       monthId,
+      month,
+      year,
       fromAccountId,
       toAccountId,
       amount

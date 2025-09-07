@@ -4,10 +4,12 @@ import SheetsApi from './sheetsApi';
 
 export default abstract class BaseEntityApi {
     protected sheetApi: SheetsApi;
+    protected sheetId: string;
     protected sheetName: string;
 
     constructor(sheetId: string, sheetName: string) {
         this.sheetApi = new SheetsApi(sheetId);
+        this.sheetId = sheetId;
         this.sheetName = sheetName;
     }
 
@@ -55,10 +57,11 @@ export default abstract class BaseEntityApi {
         return result;
     }
 
-    async create(data: Record<string, any>): Promise<void> {
+    async create(data: Record<string, any>): Promise<string[]> {
         const headers = await this.getHeaders();
         const values = headers.map(header => data[header] || '');
         await this.sheetApi.appendRow(this.sheetName, [values]);
+        return values;
     }
 
 }

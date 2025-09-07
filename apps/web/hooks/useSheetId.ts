@@ -9,6 +9,7 @@ export function useSheetId() {
         const storedSheetId = localStorage.getItem(STORAGE_KEY);
         if (storedSheetId) {
             setSheetId(storedSheetId);
+            console.log("Found sheetId");
         }
         console.log("No sheetId");
     }, []);

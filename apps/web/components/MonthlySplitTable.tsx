@@ -23,8 +23,8 @@ export default function MonthlySplitTable({ sheetId }) {
             try {
                 const result = await splitApi.getAllDetailed();
                 const { data, headers } = result;
-                const formatedData = formatTableData(data, headers);
-                setTableData(formatedData);
+                const formattedData = formatTableData(data, headers);
+                setTableData(formattedData);
                 setHeaders(headers);
                 clearError();
             } catch (err) {
@@ -43,9 +43,9 @@ export default function MonthlySplitTable({ sheetId }) {
 
     const formatTableData = (tableData, headers) => {
 
-        let formatedData = [] as Object[];
+        let formattedData = [] as Object[];
         tableData.forEach((row) => {
-            let formatedRow = {};
+            let formattedRow = {};
             headers.forEach((header) => {
                 const value = row[header];
                 
@@ -53,21 +53,21 @@ export default function MonthlySplitTable({ sheetId }) {
                 if (typeof value === 'object' && value !== null) {
                     // Parse the different objects
                     if (['fromAccount', 'toAccount'].includes(header)) {
-                        formatedRow[header] = value['name'];
+                        formattedRow[header] = value['name'];
                         return;
                     }
                     if (['month'].includes(header)) {
-                        formatedRow[header] = `${value['month']}, ${['year']}`;
+                        formattedRow[header] = `${value['month']}, ${['year']}`;
                         return;
                     }
                 }
                 
-                formatedRow[header] = value || JSON.stringify(value);
+                formattedRow[header] = value || JSON.stringify(value);
             })
-            formatedData.push(formatedRow);
+            formattedData.push(formattedRow);
             
         })
-        return formatedData;
+        return formattedData;
     }
 
     return (

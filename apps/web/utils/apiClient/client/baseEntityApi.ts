@@ -3,7 +3,7 @@ export default abstract class BaseEntityApi {
   protected baseUrl = "/api";
   protected abstract entityName: string;
 
-  constructor(sheetId: string) {
+  constructor(sheetId: string | null) {
     if (!sheetId) throw new Error("No sheet ID provided");
     this.sheetId = sheetId;
   }
