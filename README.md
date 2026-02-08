@@ -13,6 +13,17 @@ ERD (Entity Relationship Diagram): https://dbdiagram.io/d/6988d001bd82f5fce207a5
 
 # Features
 
+### Main Features
+- Create
+  - Accounts
+  - Incomes to these accounts
+  - Transactions between accounts
+  - Monthly Splits across accounts (The splits planned at the beginning of the month)
+  - Investments in different products in these accounts
+- View
+  - Current amount in each account
+  - Monthly splits, planned and real
+  - Performance of these investments
 
 # Setup
 
