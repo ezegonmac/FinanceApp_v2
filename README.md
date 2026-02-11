@@ -14,7 +14,7 @@ ERD (Entity Relationship Diagram): https://dbdiagram.io/d/6988d001bd82f5fce207a5
 # Features
 
 ### Main Features
-- Create
+- Create & List
   - Accounts
   - Incomes to these accounts
   - Transactions between accounts
@@ -26,6 +26,11 @@ ERD (Entity Relationship Diagram): https://dbdiagram.io/d/6988d001bd82f5fce207a5
   - Performance of these investments
 
 # Setup
+
+### 0. Prerequisites
+
+- Node.js (v20)
+- Docker (20.10)
 
 ### 1. Clone the repository
 ```bash
@@ -39,13 +44,18 @@ npm install
 ```
 
 ### 3. Configure environment variables
-Create a .env.local file from the existing .env.example:
+Create a .env.local file from the existing .env.example.
+
+To configure your database connection,create a /packages/db/.env from the existing /packages/db/.env.example.
+
+### 4. Start the database container
 ```
-DATABASE_URL="mysql://USER:PASSWORD@localhost:3306/financeapp"
+npm run db:start
 ```
 
-### 4. Configure environment variables
+### 5. Run Prisma migrations
 ```
+cd /packages/db
 npx prisma migrate dev
 ```
 Seed database:
@@ -54,8 +64,9 @@ Seed database:
 npx prisma db seed
 ```
 
-### 5. Configure environment variables
+### 6. Start development server
 ```
+cd ../..
 npm run dev
 ```
 The application will start in development mode 

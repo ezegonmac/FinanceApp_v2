@@ -44,9 +44,6 @@ Thumbs.db
 .env.production
 .env.*.local
 
-# Firebase (if using service account locally)
-firebase-service-account.json
-
 # macOS metadata
 *.DS_Store
 
@@ -62,3 +59,6 @@ firebase-service-account.json
 package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# MariaDB
+mariadb_data

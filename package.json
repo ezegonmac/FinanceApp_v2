@@ -3,14 +3,28 @@
   "version": "1.0.0",
   "packageManager": "npm@10.5.0",
   "private": true,
-  "workspaces":["apps/*", "packages/*"],
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "description": "",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "db:start": "docker compose up -d",
+    "db:stop": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d"
   },
   "devDependencies": {
+    "@types/node": "^25.2.3",
+    "prisma": "^7.3.0",
     "turbo": "^2.5.4"
+  },
+  "dependencies": {
+    "@prisma/adapter-mariadb": "^7.3.0",
+    "@prisma/client": "^7.3.0",
+    "dotenv": "^17.2.4"
   }
 }
