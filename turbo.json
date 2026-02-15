@@ -1,5 +1,5 @@
 {
-    "$schema": "https://turbo.build/schema.json",
+    "$schema": "https://turborepo.org/schema.json",
     "tasks": {
       "dev": {
         "cache": false,
@@ -8,6 +8,16 @@
       "build": {
         "dependsOn": ["^build"],
         "outputs": [".next/**", "dist/**"]
+      },
+      "db:generate": {
+        "cache": false
+      },
+      "db:migrate": {
+        "cache": false,
+        "persistent": true
+      },
+      "db:deploy": {
+        "cache": false
       },
       "lint": {}
     }

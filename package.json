@@ -15,12 +15,15 @@
     "lint": "turbo run lint",
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
-    "db:reset": "docker compose down -v && docker compose up -d"
+    "db:reset": "docker compose down -v && docker compose up -d",
+    "db:seed": "tsx packages/db/prisma/seed.ts"
   },
   "devDependencies": {
+    "typescript": "^5.9.3",
+    "tsx": "^4.21.0",
     "@types/node": "^25.2.3",
-    "prisma": "^7.3.0",
-    "turbo": "^2.5.4"
+    "turbo": "^2.5.4",
+    "prisma": "^7.4.0"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.3.0",

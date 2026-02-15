@@ -16,15 +16,27 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@api/*": ["../packages/api/*"],
-      "@ui/*":  ["../packages/ui/*"],
-      "@utils/*": ["./utils/*"],
-      "@schemas/*": ["./schemas/*"],
-      "@components/*": ["./components/*"],
-      "@hooks/*": ["./hooks/*"],
+      "@api/*": [
+        "../packages/api/*"
+      ],
+      "@ui/*": [
+        "../packages/ui/*"
+      ],
+      "@utils/*": [
+        "./utils/*"
+      ],
+      "@schemas/*": [
+        "./schemas/*"
+      ],
+      "@components/*": [
+        "./components/*"
+      ],
+      "@hooks/*": [
+        "./hooks/*"
+      ]
     }
   },
   "include": [

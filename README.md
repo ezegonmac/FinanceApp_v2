@@ -16,6 +16,16 @@ Time Tracker: https://track.toggl.com/timer
 # Features
 
 ### Main Features
+
+- Configuration
+  - TurboRepo monorepo with 2 packages: web and db 🔷
+  - Next.js for frontend and backend 🔷
+  - Prisma ORM for database management 🔷
+  - MariaDB as the database 🟨
+  - Tailwind CSS for styling 🟨
+  - TypeScript for type safety 🟨
+  - Docker for containerization 🟨
+
 - Create & List
   - Accounts 🔷
   - Incomes to these accounts 🟨
