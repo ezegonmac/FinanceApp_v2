@@ -3,18 +3,18 @@ version: "3.9"
 services:
   mariadb:
     image: mariadb:11
-    command: --default-authentication-plugin=mysql_native_password
     container_name: financeapp_db
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: financeapp
-      MYSQL_USER: financeuser
-      MYSQL_PASSWORD: financepass
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3309:3306"
+      - "${DB_PORT}:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   mariadb_data:

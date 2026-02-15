@@ -11,3 +11,12 @@ generator client {
 datasource db {
   provider = "mysql"
 }
+
+model Account {
+  id         Int       @id @default(autoincrement())
+  name       String
+  balance    Decimal   @default(0) // will be update with each transaction
+  created_at DateTime  @default(now())
+  active     Boolean   @default(true)
+}
+
