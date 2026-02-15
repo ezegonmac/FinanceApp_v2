@@ -2,10 +2,6 @@
 // npm install --save-dev prisma dotenv
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
-import * as path from "path";
-import dotenv from "dotenv";
-
-dotenv.config({ path: path.resolve(__dirname, "../../.env") }); // adjust path to root
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
