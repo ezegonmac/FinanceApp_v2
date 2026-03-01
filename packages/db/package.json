@@ -1,20 +1,23 @@
 {
   "name": "@repo/db",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "@types/node": "^25.2.3",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
+    "@types/mysql": "^2.15.27",
+    "@types/node": "^22.19.11",
     "prisma": "^7.4.0"
   },
   "dependencies": {
-    "@prisma/client": "^7.4.0"
+    "@prisma/adapter-mariadb": "^7.4.2",
+    "@prisma/client": "^7.4.2",
+    "dotenv": "^16.0.3",
+    "mariadb": "^3.4.5",
+    "mysql": "^2.18.1"
   },
   "exports": {
     ".": "./src/index.ts"

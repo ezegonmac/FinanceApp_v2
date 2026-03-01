@@ -1,33 +1,27 @@
 {
-  "name": "financeapp",
-  "version": "1.0.0",
-  "packageManager": "npm@10.5.0",
+  "name": "turborepo",
   "private": true,
-  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "db:start": "docker compose up -d",
+    "db:stop": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "turbo": "^2.8.9",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@11.10.0",
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "description": "",
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "db:start": "docker compose up -d",
-    "db:stop": "docker compose down",
-    "db:reset": "docker compose down -v && docker compose up -d",
-    "db:seed": "tsx packages/db/prisma/seed.ts"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3",
-    "tsx": "^4.21.0",
-    "@types/node": "^25.2.3",
-    "turbo": "^2.5.4",
-    "prisma": "^7.4.0"
-  },
-  "dependencies": {
-    "@prisma/adapter-mariadb": "^7.3.0",
-    "@prisma/client": "^7.3.0",
-    "dotenv": "^17.2.4"
-  }
+  ]
 }

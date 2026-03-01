@@ -18,13 +18,14 @@ Time Tracker: https://track.toggl.com/timer
 ### Main Features
 
 - Configuration
-  - TurboRepo monorepo with 2 packages: web and db 🔷
+  - TurboRepo monorepo with 2 packages: web and db ✅
   - Next.js for frontend and backend 🔷
   - Prisma ORM for database management 🔷
   - MariaDB as the database 🟨
   - Tailwind CSS for styling 🟨
   - TypeScript for type safety 🟨
-  - Docker for containerization 🟨
+  - Setup Docker for containerization 🟨
+  - Fix Prisma console not working 🟨
 
 - Create & List
   - Accounts 🔷
@@ -47,6 +48,7 @@ Time Tracker: https://track.toggl.com/timer
 
 - Node.js (v20)
 - Docker (20.10)
+- Turborepo (11.10.0)
 
 ### 1. Clone the repository
 ```bash
@@ -60,9 +62,11 @@ npm install
 ```
 
 ### 3. Configure environment variables
-Create a .env.local file from the existing .env.example.
+Create a .env file from the existing .env.example.
 
-To configure your database connection,create a /packages/db/.env from the existing /packages/db/.env.example.
+To configure the web app, create a /apps/web/.env file from the existing /apps/web/.env.example.
+
+To configure your database connection, create a /packages/db/.env from the existing /packages/db/.env.example.
 
 ### 4. Start the database container
 ```
@@ -72,17 +76,17 @@ npm run db:start
 ### 5. Run Prisma migrations
 From /packages/db run
 ```
+npx turbo db:generate
+npx turbo db:migrate
+or
 npx prisma migrate dev
-```
-Seed database:
-
-```
-npx prisma db seed
 ```
 
 ### 6. Start development server
-From the project root folder run
+From the project root folder (/turborepo) run
 ```
+npx turbo run dev --filter=web
+or
 npm run dev
 ```
 The application will start in development mode 
