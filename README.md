@@ -19,25 +19,31 @@ Time Tracker: https://track.toggl.com/timer
 
 - Configuration
   - TurboRepo monorepo with 2 packages: web and db ✅
-  - Next.js for frontend and backend 🔷
-  - Prisma ORM for database management 🔷
-  - MariaDB as the database 🟨
+  - Next.js for frontend and backend ✅
+  - Prisma ORM for database management ✅
+  - MariaDB as the database ✅
   - Tailwind CSS for styling 🟨
   - TypeScript for type safety 🟨
   - Setup Docker for containerization 🟨
   - Fix Prisma console not working 🟨
 
 - Create & List
-  - Accounts 🔷
+  - Accounts ✅
+  - Disabled accounts 🟨
   - Incomes to these accounts 🟨
   - Transactions between accounts 🟨
   - Monthly Splits across accounts (The splits planned at the beginning of the month) 🟨
   - Investments in different products in these accounts 🟨
 - View
+  - Account details 🔷
   - Current amount in each account 🟨
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
+- Actions
+  - Enable/Disable account 🟨
+  - Edit account details 🟨
 
+#### Status Legend
 🟨 Pending
 🔷 Ongoing
 ✅ Completed
@@ -133,6 +139,16 @@ npx prisma migrate dev --name <schema_name>
 Generate prisma client: 
 ```
 npx prisma generate
+```
+
+## Install new dependencies
+From the root folder run
+```
+npm install <dependency_name> --workspace=<package_name>
+```
+ie:
+```
+npm install zod --workspace=apps/web
 ```
 
 # Screenshots
