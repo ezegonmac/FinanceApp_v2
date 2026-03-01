@@ -35,7 +35,7 @@ Time Tracker: https://track.toggl.com/timer
   - Monthly Splits across accounts (The splits planned at the beginning of the month) 🟨
   - Investments in different products in these accounts 🟨
 - View
-  - Account details 🔷
+  - Account details ✅
   - Current amount in each account 🟨
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨

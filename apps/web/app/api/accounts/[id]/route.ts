@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic"; // recommended with Prisma
 
-// GET /api/accounts/:id
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -27,8 +26,10 @@ export async function GET(
   }
 
   try {
+    console.log(`Fetching account with ID: ${accountId}`);
+    console.log(`Type of accountId: ${typeof accountId}`);
     const account = await prisma.account.findUnique({
-      where: { id: accountId },
+        where: { id: accountId },
     });
 
     if (!account) {

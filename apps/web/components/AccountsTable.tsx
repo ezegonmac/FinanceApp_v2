@@ -2,6 +2,8 @@
 
 import ErrorMessage from "./ErrorMessage";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+
 
 export default function AccountsTable() {
 
@@ -90,7 +92,15 @@ export default function AccountsTable() {
                         {accounts.map((account) => (
                             <tr key={account.id}>
                                 <td>{account.id}</td>
-                                <td>{account.name}</td>
+                                <td>
+                                    <Link 
+                                        href={`/accounts/${account.id}`} 
+                                        style={
+                                            { color: "blue", textDecoration: "underline"}
+                                        }>
+                                        {account.name}
+                                    </Link>
+                                </td>
                                 <td>{account.balance}</td>
                                 <td>{new Date(account.created_at).toLocaleString()}</td>
                                 <td>{account.active ? "Yes" : "No"}</td>
