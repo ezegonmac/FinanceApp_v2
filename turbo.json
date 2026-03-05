@@ -28,6 +28,9 @@
     },
     "db:deploy": {
       "cache": false
+    },
+    "db:force_reset": {
+      "cache": false
     }
   }
 }

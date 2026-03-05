@@ -1,3 +1,4 @@
+import IncomesTable from "@/components/IncomesTable";
 import { prisma } from "@repo/db";
 
 export default async function AccountPage({
@@ -18,6 +19,13 @@ export default async function AccountPage({
         <div>
             <h1>Account: {account.name}</h1>
             <p>Balance: {account.balance?.toString() ?? "N/A"}</p>
+            <p>Created At: {account.created_at.toISOString()}</p>
+            <p>Active: {account.active ? "Yes" : "No"}</p>
+            <br />
+
+            <h2>Incomes for this Account</h2>
+            {/* IncomesTable will fetch and display incomes for this account */}
+            <IncomesTable accountId={accountId} />
         </div>
     );
 }

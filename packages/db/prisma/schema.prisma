@@ -19,4 +19,18 @@ model Account {
   balance    Decimal  @default(0) @db.Decimal(18,2)
   created_at DateTime @default(now())
   active     Boolean  @default(true)
+
+  Incomes  Income[]
 }
+
+model Income {
+  id            Int      @id @default(autoincrement())
+  account_id    Int
+  amount        Decimal  @db.Decimal(18,2)
+  description   String?
+  created_at      DateTime @default(now())
+  effective_date  DateTime @default(now())
+  
+  account Account @relation(fields: [account_id], references: [id])
+}
+

@@ -26,8 +26,6 @@ export async function GET(
   }
 
   try {
-    console.log(`Fetching account with ID: ${accountId}`);
-    console.log(`Type of accountId: ${typeof accountId}`);
     const account = await prisma.account.findUnique({
         where: { id: accountId },
     });

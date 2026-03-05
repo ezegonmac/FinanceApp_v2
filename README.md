@@ -30,7 +30,7 @@ Time Tracker: https://track.toggl.com/timer
 - Create & List
   - Accounts ✅
   - Disabled accounts 🟨
-  - Incomes to these accounts 🟨
+  - Incomes to these accounts ✅
   - Transactions between accounts 🟨
   - Monthly Splits across accounts (The splits planned at the beginning of the month) 🟨
   - Investments in different products in these accounts 🟨
@@ -82,8 +82,8 @@ npm run db:start
 ### 5. Run Prisma migrations
 From /packages/db run
 ```
-npx turbo db:generate
 npx turbo db:migrate
+npx turbo db:generate
 or
 npx prisma migrate dev
 ```
@@ -111,9 +111,8 @@ docker exec -it financeapp_db mariadb -u financeuser -p
 ```
 
 # Reset the database container
-From the root folder run
 ```
-npm run db:reset
+npx turbo db:force_reset
 ```
 
 # Run Prisma DB viewer
@@ -131,14 +130,19 @@ Prisma schema:
 packages/db/prisma/schema.prisma
 ```
 
-Run prisma migration: 
+Run prisma migration (from packages/db): 
 ```
 npx prisma migrate dev --name <schema_name>
 ```
-
-Generate prisma client: 
+or (prefered):
 ```
-npx prisma generate
+npx turbo db:migrate -- --name <schema_name>
+```
+
+Generate prisma client:
+(from the root folder)
+```
+npx turbo db:generate
 ```
 
 ## Install new dependencies

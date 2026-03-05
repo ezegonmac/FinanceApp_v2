@@ -1,6 +1,5 @@
 import { prisma } from "@repo/db";
 import { NextResponse } from "next/server";
-import { parse } from "path";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic"; // recommended with Prisma
