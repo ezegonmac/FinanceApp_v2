@@ -42,6 +42,7 @@ Time Tracker: https://track.toggl.com/timer
 - Actions
   - Enable/Disable account 🟨
   - Edit account details 🟨
+- Scheduled job to apply pending transactions at the end of the day 🟨
 
 #### Status Legend
 🟨 Pending

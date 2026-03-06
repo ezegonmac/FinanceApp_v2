@@ -1,4 +1,5 @@
 import IncomesTable from "@/components/IncomesTable";
+import TransactionsTable from "@/components/TransactionsTable";
 import { prisma } from "@repo/db";
 
 export default async function AccountPage({
@@ -26,6 +27,12 @@ export default async function AccountPage({
             <h2>Incomes for this Account</h2>
             {/* IncomesTable will fetch and display incomes for this account */}
             <IncomesTable accountId={accountId} />
+
+            <br />
+
+            <h2>Transactions for this Account</h2>
+            {/* TransactionsTable will fetch and display transactions for this account */}
+            <TransactionsTable accountId={accountId} />
         </div>
     );
 }
