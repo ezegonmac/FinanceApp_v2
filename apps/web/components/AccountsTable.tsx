@@ -78,19 +78,19 @@ export default function AccountsTable() {
             ) : error ? (
                 <ErrorMessage message={error} />
             ) : accounts && accounts.length > 0 ? (
-                <table>
+                <table style={{ borderCollapse: "collapse", width: "100%" }}>
                     <thead>
-                        <tr>
-                            <th key={"id"}>Id</th>
-                            <th key={"name"}>Name</th>
-                            <th key={"balance"}>Balance</th>
-                            <th key={"created_at"}>Created At</th>
-                            <th key={"active"}>Active</th>
+                        <tr style={{ borderBottom: "2px solid #000" }}>
+                            <th key={"id"} style={{ textAlign: "left" }}>Id</th>
+                            <th key={"name"} style={{ textAlign: "left" }}>Name</th>
+                            <th key={"balance"} style={{ textAlign: "left" }}>Balance</th>
+                            <th key={"created_at"} style={{ textAlign: "left" }}>Created At</th>
+                            <th key={"active"} style={{ textAlign: "left" }}>Active</th>
                         </tr>
                     </thead>
                     <tbody>
                         {accounts.map((account) => (
-                            <tr key={account.id}>
+                            <tr key={account.id} style={{ borderBottom: "1px solid #ccc" }}>
                                 <td>{account.id}</td>
                                 <td>
                                     <Link 

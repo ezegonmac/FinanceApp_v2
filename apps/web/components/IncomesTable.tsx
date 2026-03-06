@@ -85,27 +85,27 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
             ) : error ? (
                 <ErrorMessage message={error} />
             ) : incomes && incomes.length > 0 ? (
-                <table>
+                <table style={{ borderCollapse: "collapse", width: "100%" }}>
                     <thead>
-                        <tr>
-                            <th key={"id"}>Id</th>
-                            <th key={"amount"}>Amount</th>
-                            <th key={"description"}>Description</th>
-                            <th key={"created_at"}>Created At</th>
-                            <th key={"effective_date"}>Effective Date</th>
+                        <tr style={{ borderBottom: "2px solid #000" }}>
+                            <th key={"id"} style={{ textAlign: "left" }}>Id</th>
+                            <th key={"name"} style={{ textAlign: "left" }}>Name</th>
+                            <th key={"amount"} style={{ textAlign: "left" }}>Amount</th>
+                            <th key={"description"} style={{ textAlign: "left" }}>Description</th>
+                            <th key={"created_at"} style={{ textAlign: "left" }}>Created At</th>
+                            <th key={"effective_date"} style={{ textAlign: "left" }}>Effective Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         {incomes.map((income) => (
-                            <tr key={income.id}>
-                                <td>{income.id}</td>
+                            <tr key={income.id} style={{ borderBottom: "1px solid #ccc" }}>
                                 <td>
                                     <Link 
                                         href={`/incomes/${income.id}`} 
                                         style={
                                             { color: "blue", textDecoration: "underline"}
                                         }>
-                                        {income.name}
+                                        {income.id}
                                     </Link>
                                 </td>
                                 <td>{income.amount}</td>
@@ -119,6 +119,7 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
             ) : (
                 <p>No incomes available for this account.</p>
             )}
+            <br />
 
             <input
                 type="text"
