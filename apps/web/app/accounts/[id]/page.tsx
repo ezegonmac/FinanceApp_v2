@@ -29,6 +29,7 @@ export default async function AccountPage({
             <IncomesTable accountId={accountId} />
 
             <br />
+            <br />
 
             <h2>Transactions for this Account</h2>
             {/* TransactionsTable will fetch and display transactions for this account */}

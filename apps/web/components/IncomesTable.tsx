@@ -3,6 +3,7 @@
 import ErrorMessage from "./ErrorMessage";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { formatYearMonth } from "../utils/dates";
 
 export default function IncomesTable({ accountId }: { accountId: number }) {
 
@@ -11,6 +12,8 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
     const [error, setError] = useState<string | null>(null);
     const [incomeDescription, setIncomeDescription] = useState("");
     const [incomeAmount, setIncomeAmount] = useState("");
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [year, setYear] = useState(new Date().getFullYear());
     const [adding, setAdding] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -54,6 +57,37 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
 
         setAdding(true);
         setError(null);
+
+        // check if monthId is in storage, if not fetch it and store it
+        const monthIdKey = `monthId-${formatYearMonth(year, month)}`;
+        let monthId = localStorage.getItem(monthIdKey);
+        if (!monthId) {
+            try {
+                const response = await fetch(`/api/months`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        year: year,
+                        month: month,
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to fetch or create month");
+                }
+                const monthData = await response.json();
+                monthId = monthData.id;
+                if (!monthId) {
+                    throw new Error("Invalid month data received from server");
+                }
+                localStorage.setItem(monthIdKey, monthId);
+            } catch (err) {
+                setError("Failed to find or create month for the transaction");
+                return;
+            }
+        }
+
         try {
             const response = await fetch("/api/accounts/" + accountId + "/incomes", {
                 method: "POST",
@@ -63,6 +97,7 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
                 body: JSON.stringify({
                     description: incomeDescription,
                     amount: parseFloat(incomeAmount),
+                    month_id: parseInt(monthId),
                 }),
             });
             if (!response.ok) {
@@ -89,11 +124,10 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
                     <thead>
                         <tr style={{ borderBottom: "2px solid #000" }}>
                             <th key={"id"} style={{ textAlign: "left" }}>Id</th>
-                            <th key={"name"} style={{ textAlign: "left" }}>Name</th>
-                            <th key={"amount"} style={{ textAlign: "left" }}>Amount</th>
                             <th key={"description"} style={{ textAlign: "left" }}>Description</th>
+                            <th key={"amount"} style={{ textAlign: "left" }}>Amount</th>
+                            <th key={"month"} style={{ textAlign: "left" }}>Month</th>
                             <th key={"created_at"} style={{ textAlign: "left" }}>Created At</th>
-                            <th key={"effective_date"} style={{ textAlign: "left" }}>Effective Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,8 +144,8 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
                                 </td>
                                 <td>{income.amount}</td>
                                 <td>{income.description}</td>
+                                <td>{formatYearMonth(income.month.year, income.month.month)}</td>
                                 <td>{new Date(income.created_at).toLocaleString()}</td>
-                                <td>{new Date(income.effective_date).toLocaleDateString()}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -136,6 +170,17 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
                 onChange={(e) => setIncomeAmount(e.target.value)}
                 placeholder="Amount"
                 disabled={adding} // Disable input while adding
+            /> &nbsp;
+            <input
+                type="month"
+                style={{ width: "20em" }}
+                value={formatYearMonth(year, month)}
+                onChange={(e) => {
+                    const [year, month] = e.target.value.split("-");
+                    setYear(Number(year));
+                    setMonth(Number(month));
+                }}
+                disabled={adding}
             /> &nbsp;
             
             <button onClick={handleAddIncome} disabled={adding}>

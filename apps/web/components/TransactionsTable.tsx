@@ -3,6 +3,7 @@
 import ErrorMessage from "./ErrorMessage";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { formatYearMonth } from "../utils/dates";
 
 export default function TransactionsTable({ accountId }: { accountId: number }) {
 
@@ -21,10 +22,6 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
     useEffect(() => {
         fetchTransactions();
     }, [refreshKey]);
-
-    function formatYearMonth(year: number, month: number) {
-        return `${year}-${String(month).padStart(2, "0")}`;
-    }
 
     const fetchTransactions = async () => {
         setLoading(true);
