@@ -9,9 +9,10 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [transactionDescription, setTransactionDescription] = useState("");
-    const [transactionAmount, setTransactionAmount] = useState("");
-    const [transactionDate, setTransactionDate] = useState("");
+    const [description, setDescription] = useState("");
+    const [amount, setAmount] = useState("");
+    const [month, setMonth] = useState(new Date().getMonth() + 1); // Default to current month
+    const [year, setYear] = useState(new Date().getFullYear());
     const [toAccountId, setToAccountId] = useState("");
     const [adding, setAdding] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -20,6 +21,10 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
     useEffect(() => {
         fetchTransactions();
     }, [refreshKey]);
+
+    function formatYearMonth(year: number, month: number) {
+        return `${year}-${String(month).padStart(2, "0")}`;
+    }
 
     const fetchTransactions = async () => {
         setLoading(true);
@@ -41,25 +46,56 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
     const handleAddTransaction = async () => {
         
         // Frontend basic validation
-        if (!transactionDescription.trim()) {
+        if (!description.trim()) {
             setError("Transaction description cannot be empty");
             return;
         }
-        if (!transactionAmount.trim() || isNaN(Number(transactionAmount))) {
+        if (!amount.trim() || isNaN(Number(amount))) {
             setError("Transaction amount must be a valid number");
             return;
         }
-        if (Number(transactionAmount) <= 0) {
+        if (Number(amount) <= 0) {
             setError("Transaction amount must be greater than zero");
             return;
         }
 
         setAdding(true);
         setError(null);
+
+        // check if monthId is in storage, if not fetch it and store it
+        const monthIdKey = `monthId-${formatYearMonth(year, month)}`;
+        let monthId = localStorage.getItem(monthIdKey);
+        if (!monthId) {
+            try {
+                const response = await fetch(`/api/months`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        year: year,
+                        month: month,
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to fetch or create month");
+                }
+                const monthData = await response.json();
+                monthId = monthData.id;
+                if (!monthId) {
+                    throw new Error("Invalid month data received from server");
+                }
+                localStorage.setItem(monthIdKey, monthId);
+            } catch (err) {
+                setError("Failed to find or create month for the transaction");
+                return;
+            }
+        }
+
         console.log("Adding transaction with data:", {
-                    description: transactionDescription,
-                    amount: parseFloat(transactionAmount),
-                    effective_date: transactionDate || new Date().toISOString(), // Use selected date or default to now
+                    description: description,
+                    amount: parseFloat(amount),
+                    month_id: parseInt(monthId),
                     from_account_id: accountId,
                     to_account_id: parseInt(toAccountId),
                 }
@@ -71,9 +107,9 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    description: transactionDescription,
-                    amount: parseFloat(transactionAmount),
-                    effective_date: transactionDate || new Date().toISOString(), // Use selected date or default to now
+                    description: description,
+                    amount: parseFloat(amount),
+                    month_id: parseInt(monthId),
                     from_account_id: accountId,
                     to_account_id: parseInt(toAccountId),
                 }),
@@ -81,8 +117,8 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
             if (!response.ok) {
                 throw new Error("Failed to add transaction");
             }
-            setTransactionDescription("");
-            setTransactionAmount("");
+            setDescription("");
+            setAmount("");
             setRefreshKey(oldKey => oldKey + 1); // Trigger refresh after adding
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -102,11 +138,11 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
                     <thead>
                         <tr style={{ borderBottom: "2px solid #000" }}>
                             <th key={"id"} style={{ textAlign: "left" }}>Id</th>
-                            <th key={"name"} style={{ textAlign: "left" }}>Name</th>
                             <th key={"amount"} style={{ textAlign: "left" }}>Amount</th>
                             <th key={"description"} style={{ textAlign: "left" }}>Description</th>
+                            <th key={"month"} style={{ textAlign: "left" }}>Month</th>
+                            <th key={"status"} style={{ textAlign: "left" }}>Status</th>
                             <th key={"created_at"} style={{ textAlign: "left" }}>Created At</th>
-                            <th key={"effective_date"} style={{ textAlign: "left" }}>Effective Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,8 +159,13 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
                                 </td>
                                 <td>{transaction.amount}</td>
                                 <td>{transaction.description}</td>
+                                <td>{
+                                    transaction.month ? 
+                                    formatYearMonth(transaction.month.year, transaction.month.month) : 
+                                    "N/A"}
+                                </td>
+                                <td>{transaction.status}</td>
                                 <td>{new Date(transaction.created_at).toLocaleString()}</td>
-                                <td>{new Date(transaction.effective_date).toLocaleDateString()}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -139,24 +180,17 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
             <input
                 type="text"
                 style={{ width: "30em" }}
-                value={transactionDescription}
-                onChange={(e) => setTransactionDescription(e.target.value)}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Enter Transaction description"
                 disabled={adding} // Disable input while adding
             /> &nbsp;
             <input
                 type="number"
                 style={{ width: "15em" }}
-                value={transactionAmount}
-                onChange={(e) => setTransactionAmount(e.target.value)}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
                 placeholder="Amount"
-                disabled={adding} // Disable input while adding
-            /> &nbsp;
-            <input
-                type="date"
-                style={{ width: "20em" }}
-                value={new Date().toISOString().split("T")[0]} // Default to today
-                onChange={(e) => setTransactionDate(e.target.value)}
                 disabled={adding} // Disable input while adding
             /> &nbsp;
             <input
@@ -164,8 +198,19 @@ export default function TransactionsTable({ accountId }: { accountId: number }) 
                 style={{ width: "15em" }}
                 value={toAccountId}
                 onChange={(e) => setToAccountId(e.target.value)}
-                placeholder="To Account ID"
-                disabled={adding} // Disable input while adding
+                placeholder="To Account Id"
+                disabled={adding}
+            /> &nbsp;
+            <input
+                type="month"
+                style={{ width: "20em" }}
+                value={formatYearMonth(year, month)}
+                onChange={(e) => {
+                    const [year, month] = e.target.value.split("-");
+                    setYear(Number(year));
+                    setMonth(Number(month));
+                }}
+                disabled={adding}
             /> &nbsp;
             
             <button onClick={handleAddTransaction} disabled={adding}>

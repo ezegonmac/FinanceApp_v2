@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"; // recommended with Prisma
 const transactionSchema = z.object({
     amount: z.number().nonnegative(),
     description: z.string().optional(),
-    effective_date: z.string().transform((str) => new Date(str)),
+    month_id: z.number().int(),
     from_account_id: z.number(),
     to_account_id: z.number(),
     status: z.enum(["PENDING", "COMPLETED", "CANCELLED"]).default("PENDING"),
@@ -34,11 +34,36 @@ export async function POST(request: Request) {
     // Validate incoming request
     const parsed = transactionSchema.parse(body);
 
+    // Determine if the monthId is the current one or previous
+    // to decide if we apply the transaction immediately or keep it pending
+    const monthRecord = await prisma.month.findUnique({
+        where: { id: parsed.month_id },
+      });
+
+      if (!monthRecord) {
+        return NextResponse.json(
+          { error: "Month not found" },
+          { status: 400 }
+        );
+      }
+
+    // Get current year and month
     const now = new Date();
-    const isEffectiveNow = parsed.effective_date <= now;
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // 0-indexed, so +1
+
+    // Check if the month_id corresponds to current month
+    const isCurrentMonth =
+      monthRecord.year === currentYear && monthRecord.month === currentMonth;
+
+    // Check if the month_id corresponds to a previous month
+    const isPreviousMonth =
+      monthRecord.year < currentYear ||
+      (monthRecord.year === currentYear && monthRecord.month < currentMonth);
+
+    const isEffectiveNow = isCurrentMonth || isPreviousMonth;
 
     let newTransaction;
-
     if (isEffectiveNow) {
       // Apply balances immediately in a transaction
       newTransaction = await prisma.$transaction(async (tx) => {
@@ -48,7 +73,7 @@ export async function POST(request: Request) {
             to_account_id: parsed.to_account_id,
             amount: parsed.amount,
             description: parsed.description,
-            effective_date: parsed.effective_date,
+            month_id: parsed.month_id,
             status: "COMPLETED",
           },
         });
@@ -73,7 +98,7 @@ export async function POST(request: Request) {
           to_account_id: parsed.to_account_id,
           amount: parsed.amount,
           description: parsed.description,
-          effective_date: parsed.effective_date,
+          month_id: parsed.month_id,
           status: "PENDING",
         },
       });
@@ -81,7 +106,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newTransaction, { status: 201 });
   } catch (error: any) {
-    console.error(error);
     return NextResponse.json(
       { error: "Failed to create transaction" },
       { status: 500 }

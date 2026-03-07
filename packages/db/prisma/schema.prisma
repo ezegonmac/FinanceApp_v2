@@ -31,8 +31,10 @@ model Income {
   amount        Decimal  @db.Decimal(18,2)
   description   String?
   created_at      DateTime @default(now())
-  effective_date  DateTime @default(now())
   
+  month_id        Int
+  month          Month @relation(fields: [month_id], references: [id])
+
   account Account @relation(fields: [account_id], references: [id])
 }
 
@@ -43,19 +45,34 @@ model Transaction {
   amount          Decimal  @db.Decimal(18,2)
   description     String?
   created_at      DateTime @default(now())
-  effective_date  DateTime @default(now())
 
   from_account Account @relation("FromAccount", fields: [from_account_id], references: [id])
   to_account   Account @relation("ToAccount", fields: [to_account_id], references: [id])
 
+  month_id        Int
+  month          Month @relation(fields: [month_id], references: [id])
+
   status TransactionStatus @default(PENDING)
 
-  @@index([effective_date, status])
+  @@index([month_id, status])
 }
 
 enum TransactionStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+model Month {
+  id        Int      @id @default(autoincrement())
+  year      Int
+  month      Int
+  created_at DateTime @default(now())
+
+  @@unique([year, month], name: "year_month")
+  
+  // 0..* for a month
+  incomes Income[]
+  transactions Transaction[]
 }
 

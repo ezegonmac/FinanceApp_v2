@@ -1,6 +1,5 @@
 import { prisma } from "@repo/db";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 export const dynamic = "force-dynamic"; // recommended with Prisma
 
@@ -20,18 +19,18 @@ export async function GET(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "Invalid account id" }, { status: 400 });
     }
 
-    console.log("Fetching transactions for account ID:", accountId);
-
     const transactions = await prisma.transaction.findMany({
       where: {  OR: [
         { from_account_id: accountId },
         { to_account_id: accountId },
       ]},
+      include: {
+        month: true,
+      },
     });
 
     return NextResponse.json(transactions, { status: 200 });
   } catch (error) {
-    console.error("Error fetching transactions:", error);
     return NextResponse.json(
       { error: "Failed to fetch transactions" },
       { status: 500 }

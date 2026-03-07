@@ -31,11 +31,14 @@ Time Tracker: https://track.toggl.com/timer
   - Accounts ✅
   - Disabled accounts 🟨
   - Incomes to these accounts ✅
-  - Transactions between accounts 🟨
+  - Transactions between accounts ✅
   - Monthly Splits across accounts (The splits planned at the beginning of the month) 🟨
   - Investments in different products in these accounts 🟨
 - View
   - Account details ✅
+  - Current Month 🔷
+  - Past Months with old account state 🟨
+  - Month details (Incomes and splits, individual transactions) 🟨
   - Current amount in each account 🟨
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
