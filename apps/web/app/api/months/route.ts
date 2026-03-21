@@ -9,6 +9,23 @@ const monthSchema = z.object({
   month: z.number().int().min(1).max(12),
 });
 
+// GET /api/months
+export async function GET() {
+  try {
+    const months = await prisma.month.findMany({
+      orderBy: [{ year: "desc" }, { month: "desc" }],
+    });
+
+    return NextResponse.json(months);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to fetch months" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/months
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -39,4 +56,17 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+// Handle unsupported methods
+export function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      status: 405,
+      headers: {
+        Allow: "POST",
+      },
+    }
+  );
 }

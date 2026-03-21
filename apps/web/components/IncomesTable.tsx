@@ -3,7 +3,7 @@
 import ErrorMessage from "./ErrorMessage";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { formatYearMonth } from "../utils/dates";
+import { formatYearMonth } from "@repo/utils";
 
 export default function IncomesTable({ accountId }: { accountId: number }) {
 
@@ -88,6 +88,14 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
             }
         }
 
+        console.log(
+            {
+                description: incomeDescription,
+                amount: parseFloat(incomeAmount),
+                month_id: parseInt(monthId),
+            }
+        );
+
         try {
             const response = await fetch("/api/accounts/" + accountId + "/incomes", {
                 method: "POST",
@@ -154,6 +162,8 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
                 <p>No incomes available for this account.</p>
             )}
             <br />
+
+            <p style={{ fontWeight: "bold" }}>Add income:</p>
 
             <input
                 type="text"

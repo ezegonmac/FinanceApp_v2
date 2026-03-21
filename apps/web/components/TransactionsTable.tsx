@@ -3,7 +3,7 @@
 import ErrorMessage from "./ErrorMessage";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { formatYearMonth } from "../utils/dates";
+import { formatYearMonth } from "@repo/utils";
 
 export default function TransactionsTable({ accountId }: { accountId: number }) {
 

@@ -119,6 +119,11 @@ docker exec -it financeapp_db mariadb -u financeuser -p
 npx turbo db:force_reset
 ```
 
+# Stop the database container
+```
+npm run db:stop
+```
+
 # Run Prisma DB viewer
 From packages/db run
 ```

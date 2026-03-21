@@ -119,9 +119,14 @@ export async function POST(request: Request, { params }: RouteContext) {
       });
     }
 
+    console.log("Created income:", newIncome);
+
     return NextResponse.json(newIncome, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
+
+      console.error("Validation error:", error);
+
       return NextResponse.json(
         { error: "Invalid request data", details: error },
         { status: 400 }
