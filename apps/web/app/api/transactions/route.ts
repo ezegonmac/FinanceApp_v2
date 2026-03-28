@@ -2,6 +2,7 @@ import { prisma } from "@repo/db";
 import { getEuropeMadridDateParts } from "@repo/utils";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { recalculateMonthSnapshot } from "@/app/api/_lib/snapshots/recalculateMonthSnapshot";
 
 export const dynamic = "force-dynamic"; // recommended with Prisma
 
@@ -90,6 +91,10 @@ export async function POST(request: Request) {
 
         return transaction;
       });
+
+      // Recalculate snapshots for both accounts after a COMPLETED transaction
+      await recalculateMonthSnapshot(parsed.from_account_id, monthRecord.id);
+      await recalculateMonthSnapshot(parsed.to_account_id, monthRecord.id);
     } else {
       // Future transaction, keep pending
       newTransaction = await prisma.transaction.create({

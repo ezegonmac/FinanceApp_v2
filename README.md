@@ -43,6 +43,7 @@ Time Tracker: https://track.toggl.com/timer
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
 - Actions
+  - Select account instead of account id when creating transactions and incomes 🟨
   - Enable/Disable account 🟨
   - Edit account details 🟨
 - Scheduled job to apply pending incomes and transactions at the end of the day 

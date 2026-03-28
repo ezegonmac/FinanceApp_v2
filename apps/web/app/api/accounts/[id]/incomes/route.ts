@@ -2,6 +2,7 @@ import { prisma } from "@repo/db";
 import { getEuropeMadridDateParts } from "@repo/utils";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { recalculateMonthSnapshot } from "@/app/api/_lib/snapshots/recalculateMonthSnapshot";
 
 export const dynamic = "force-dynamic"; // recommended with Prisma
 
@@ -108,6 +109,9 @@ export async function POST(request: Request, { params }: RouteContext) {
 
         return income;
       });
+
+      // Snapshot must be recalculated after a COMPLETED income is created
+      await recalculateMonthSnapshot(accountId, monthRecord.id);
     } else {
       // Future incomes, keep pending until scheduler applies them
       newIncome = await prisma.income.create({

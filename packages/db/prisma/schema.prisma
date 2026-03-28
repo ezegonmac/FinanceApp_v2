@@ -23,6 +23,7 @@ model Account {
   Incomes  Income[]
   fromTransactions Transaction[] @relation("FromAccount")
   toTransactions   Transaction[] @relation("ToAccount")
+  monthSnapshots   MonthSnapshot[]
 }
 
 model Income {
@@ -100,6 +101,24 @@ model Month {
   // 0..* for a month
   incomes Income[]
   transactions Transaction[]
+  monthSnapshots MonthSnapshot[]
+}
+
+model MonthSnapshot {
+  id                     Int      @id @default(autoincrement())
+  month_id               Int
+  account_id             Int
+  total_incomes          Decimal  @default(0) @db.Decimal(18,2)
+  total_transactions_in  Decimal  @default(0) @db.Decimal(18,2)
+  total_transactions_out Decimal  @default(0) @db.Decimal(18,2)
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  month   Month   @relation(fields: [month_id], references: [id])
+  account Account @relation(fields: [account_id], references: [id])
+
+  @@unique([month_id, account_id], name: "month_account")
+  @@index([account_id])
 }
 
 model JobRun {

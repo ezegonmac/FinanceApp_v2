@@ -1,5 +1,6 @@
 import { Prisma, prisma } from "@repo/db";
 import { getEuropeMadridDateKey, getEuropeMadridDateParts } from "@repo/utils";
+import { recalculateAllSnapshotsForMonth } from "../snapshots/recalculateMonthSnapshot";
 
 const APPLY_PENDING_JOB_NAME = "apply-pending-transactions";
 
@@ -262,6 +263,9 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
         });
       }
     }
+
+    // Recalculate month snapshots for all accounts with activity this month
+    await recalculateAllSnapshotsForMonth(monthRecord.id);
 
     await prisma.jobRun.update({
       where: { id: jobRun.id },
