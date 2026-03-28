@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import TransactionsTable from "./TransactionsTable";
 import AddTransactionForm from "./AddTransactionForm";
 
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function AccountTransactionsView({ accountId }: Props) {
+  const router = useRouter();
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,11 +34,14 @@ export default function AccountTransactionsView({ accountId }: Props) {
     }
   };
 
-  const refresh = () => setRefreshKey((k) => k + 1);
+  const refresh = () => {
+    setRefreshKey((k) => k + 1);
+    router.refresh();
+  };
 
   return (
     <>
-      <TransactionsTable transactions={transactions} loading={loading} error={error} showMonth={true} showAccount={false} />
+      <TransactionsTable transactions={transactions} loading={loading} error={error} showMonth={true} showFromAccount={false} showToAccount={true} />
       <br />
       <AddTransactionForm accountId={accountId} onAdded={refresh} />
       &nbsp;

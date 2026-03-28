@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import IncomesTable from "./IncomesTable";
 import AddIncomeForm from "./AddIncomeForm";
 
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function AccountIncomesView({ accountId }: Props) {
+  const router = useRouter();
   const [incomes, setIncomes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,10 @@ export default function AccountIncomesView({ accountId }: Props) {
     }
   };
 
-  const refresh = () => setRefreshKey((k) => k + 1);
+  const refresh = () => {
+    setRefreshKey((k) => k + 1);
+    router.refresh();
+  };
 
   return (
     <>

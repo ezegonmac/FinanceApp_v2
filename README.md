@@ -37,13 +37,13 @@ Time Tracker: https://track.toggl.com/timer
 - View
   - Account details ✅
   - Current Month ✅
-  - Past Months with old account state 🟨
-  - Month details (Incomes and splits, individual transactions) 🟨
-  - Current amount in each account 🟨
+  - Past Months with old account state ✅
+  - Month details (Incomes and splits, individual transactions) ✅
+  - Current amount in each account ✅
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
 - Actions
-  - Select account instead of account id when creating transactions and incomes 🟨
+  - Select account instead of account id when creating transactions and incomes ✅
   - Enable/Disable account 🟨
   - Edit account details 🟨
 - Scheduled job to apply pending incomes and transactions at the end of the day 

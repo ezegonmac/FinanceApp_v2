@@ -1,12 +1,18 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatYearMonth } from "@repo/utils";
 import ErrorMessage from "../ErrorMessage";
 
 type Props = {
   accountId: number;
   onAdded: () => void;
+};
+
+type AccountOption = {
+  id: number;
+  name: string;
+  active: boolean;
 };
 
 export default function AddTransactionForm({ accountId, onAdded }: Props) {
@@ -17,6 +23,28 @@ export default function AddTransactionForm({ accountId, onAdded }: Props) {
   const [year, setYear] = useState(new Date().getFullYear());
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<AccountOption[]>([]);
+
+  useEffect(() => {
+    void fetchAccounts();
+  }, [accountId]);
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await fetch("/api/accounts");
+      if (!response.ok) throw new Error("Failed to fetch accounts");
+      const data = (await response.json()) as AccountOption[];
+      const activeAccounts = data.filter((account) => account.active);
+      setAccounts(activeAccounts);
+
+      const firstDestination = activeAccounts.find((account) => account.id !== accountId);
+      if (firstDestination) {
+        setToAccountId(String(firstDestination.id));
+      }
+    } catch {
+      setError("Failed to fetch accounts");
+    }
+  };
 
   const handleAdd = async () => {
     setAdding(true);
@@ -38,7 +66,7 @@ export default function AddTransactionForm({ accountId, onAdded }: Props) {
       return;
     }
     if (!toAccountId.trim() || isNaN(Number(toAccountId))) {
-      setError("To Account Id must be a valid number");
+      setError("Please select a destination account");
       setAdding(false);
       return;
     }
@@ -93,14 +121,22 @@ export default function AddTransactionForm({ accountId, onAdded }: Props) {
         placeholder="Amount"
         disabled={adding}
       /> &nbsp;
-      <input
-        type="number"
+      <select
         style={{ width: "15em" }}
         value={toAccountId}
         onChange={(e) => setToAccountId(e.target.value)}
-        placeholder="To Account Id"
-        disabled={adding}
-      /> &nbsp;
+        disabled={adding || accounts.length === 0}
+      >
+        <option value="">Select destination account</option>
+        {accounts
+          .filter((account) => account.id !== accountId)
+          .map((account) => (
+            <option key={account.id} value={String(account.id)}>
+              {account.name}
+            </option>
+          ))}
+      </select>
+      &nbsp;
       <input
         type="month"
         style={{ width: "20em" }}

@@ -26,6 +26,8 @@ export async function GET(request: Request, { params }: RouteContext) {
       ]},
       include: {
         month: true,
+        from_account: true,
+        to_account: true,
       },
     });
 

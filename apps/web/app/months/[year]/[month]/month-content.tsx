@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { formatYearMonthLong } from "@repo/utils";
 import IncomesTable from "@/components/incomes/IncomesTable";
 import TransactionsTable from "@/components/transactions/TransactionsTable";
+import MonthSnapshotsTable from "@/components/snapshots/MonthSnapshotsTable";
 
 type Props = {
   year: number;
@@ -104,9 +105,6 @@ export default function MonthContent({ year, month }: Props) {
     handleNavigate(nextYear, nextMonth);
   }
 
-  const fmt = (val: string) =>
-    Number(val).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
-
   return (
     <div>
       <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
@@ -124,42 +122,7 @@ export default function MonthContent({ year, month }: Props) {
       ) : (
         <>
           <h2>Monthly Summary</h2>
-          {snapshotsLoading ? (
-            <p>Loading summary…</p>
-          ) : snapshots.length === 0 ? (
-            <p style={{ color: "#888" }}>No snapshot data yet for this month.</p>
-          ) : (
-            <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: "1rem" }}>
-              <thead>
-                <tr>
-                  {["Account", "Incomes", "Transfers In", "Transfers Out", "Net Change"].map((h) => (
-                    <th key={h} style={{ textAlign: "left", padding: "6px 10px", borderBottom: "1px solid #ccc" }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {snapshots.map((s) => {
-                  const net =
-                    Number(s.total_incomes) +
-                    Number(s.total_transactions_in) -
-                    Number(s.total_transactions_out);
-                  return (
-                    <tr key={s.id}>
-                      <td style={{ padding: "6px 10px" }}>{s.account.name}</td>
-                      <td style={{ padding: "6px 10px" }}>{fmt(s.total_incomes)}</td>
-                      <td style={{ padding: "6px 10px" }}>{fmt(s.total_transactions_in)}</td>
-                      <td style={{ padding: "6px 10px" }}>{fmt(s.total_transactions_out)}</td>
-                      <td style={{ padding: "6px 10px", color: net >= 0 ? "green" : "red" }}>
-                        {net >= 0 ? "+" : ""}{net.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+          <MonthSnapshotsTable snapshots={snapshots} loading={snapshotsLoading} />
 
           <h2>Incomes for this Month</h2>
           <IncomesTable
