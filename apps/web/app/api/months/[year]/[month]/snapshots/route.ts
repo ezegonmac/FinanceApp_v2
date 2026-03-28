@@ -1,5 +1,7 @@
 import { prisma } from "@repo/db";
+import { getEuropeMadridDateParts } from "@repo/utils";
 import { NextResponse } from "next/server";
+import { recalculateAllSnapshotsForMonth } from "@/app/api/_lib/snapshots/recalculateMonthSnapshot";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +25,16 @@ export async function GET(
 
     if (!monthRecord) {
       return NextResponse.json([], { status: 200 });
+    }
+
+    const { year: currentYear, month: currentMonth } = getEuropeMadridDateParts();
+    const isCurrentMonth = year === currentYear && month === currentMonth;
+
+    if (isCurrentMonth) {
+      await recalculateAllSnapshotsForMonth(monthRecord.id, {
+        includeAllActiveAccounts: true,
+        isFinal: false,
+      });
     }
 
     const snapshots = await prisma.monthSnapshot.findMany({

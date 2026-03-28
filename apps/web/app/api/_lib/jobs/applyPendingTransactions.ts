@@ -1,6 +1,9 @@
 import { Prisma, prisma } from "@repo/db";
 import { getEuropeMadridDateKey, getEuropeMadridDateParts } from "@repo/utils";
-import { recalculateAllSnapshotsForMonth } from "../snapshots/recalculateMonthSnapshot";
+import {
+  finalizeMonthSnapshots,
+  recalculateAllSnapshotsForMonth,
+} from "../snapshots/recalculateMonthSnapshot";
 
 const APPLY_PENDING_JOB_NAME = "apply-pending-transactions";
 
@@ -23,6 +26,14 @@ function getErrorMessage(error: unknown) {
 
 function isUniqueConstraintError(error: unknown) {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+}
+
+function getPreviousYearMonth(year: number, month: number) {
+  if (month === 1) {
+    return { year: year - 1, month: 12 };
+  }
+
+  return { year, month: month - 1 };
 }
 
 export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<ApplyPendingTransactionsResult> {
@@ -116,36 +127,19 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
   let skipped = 0;
 
   try {
-    const monthRecord = await prisma.month.findUnique({
+    const monthRecord = await prisma.month.upsert({
       where: {
         year_month: {
           year,
           month,
         },
       },
+      update: {},
+      create: {
+        year,
+        month,
+      },
     });
-
-    if (!monthRecord) {
-      await prisma.jobRun.update({
-        where: { id: jobRun.id },
-        data: {
-          status: "COMPLETED",
-          finished_at: new Date(),
-          processed_count: 0,
-          failed_count: 0,
-          skipped_count: 0,
-        },
-      });
-
-      return {
-        alreadyRun: false,
-        status: "completed",
-        madridDate,
-        processed: 0,
-        failed: 0,
-        skipped: 0,
-      };
-    }
 
     const pendingTransactions = await prisma.transaction.findMany({
       where: {
@@ -264,8 +258,15 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
       }
     }
 
-    // Recalculate month snapshots for all accounts with activity this month
-    await recalculateAllSnapshotsForMonth(monthRecord.id);
+    // Recalculate current month snapshots for all active accounts (provisional/live)
+    await recalculateAllSnapshotsForMonth(monthRecord.id, {
+      includeAllActiveAccounts: true,
+      isFinal: false,
+    });
+
+    // Finalize previous month snapshots so historical metrics are locked
+    const previous = getPreviousYearMonth(year, month);
+    await finalizeMonthSnapshots(previous.year, previous.month);
 
     await prisma.jobRun.update({
       where: { id: jobRun.id },

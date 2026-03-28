@@ -143,6 +143,17 @@ POST /api/internal/jobs/apply-pending-transactions
 Authorization: Bearer <CRON_SECRET>
 ```
 
+Snapshot lifecycle:
+- Recalculates current month snapshots for all active accounts (live/provisional values)
+- Finalizes previous month snapshots (`is_final = true`, `closed_at` set)
+- Keeps historical months locked unless data is edited and recalculated
+
+Month snapshots endpoint:
+```
+GET /api/months/:year/:month/snapshots
+```
+For the current month, snapshots are refreshed before returning data so metrics are always available.
+
 Example cURL:
 ```
 curl -X POST http://localhost:3000/api/internal/jobs/apply-pending-transactions \

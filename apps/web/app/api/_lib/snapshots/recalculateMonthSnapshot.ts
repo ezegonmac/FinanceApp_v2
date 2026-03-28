@@ -1,5 +1,14 @@
 import { prisma } from "@repo/db";
 
+type RecalculateSnapshotOptions = {
+  isFinal?: boolean;
+};
+
+type RecalculateAllOptions = {
+  includeAllActiveAccounts?: boolean;
+  isFinal?: boolean;
+};
+
 /**
  * Recalculates and upserts the MonthSnapshot for a given account and month.
  * Each snapshot is independent (no running balance), so editing one month
@@ -10,7 +19,8 @@ import { prisma } from "@repo/db";
  */
 export async function recalculateMonthSnapshot(
   accountId: number,
-  monthId: number
+  monthId: number,
+  options: RecalculateSnapshotOptions = {}
 ): Promise<void> {
   const [incomesAgg, txInAgg, txOutAgg] = await Promise.all([
     prisma.income.aggregate({
@@ -56,11 +66,15 @@ export async function recalculateMonthSnapshot(
       total_incomes: totalIncomes,
       total_transactions_in: totalIn,
       total_transactions_out: totalOut,
+      is_final: options.isFinal ?? false,
+      closed_at: options.isFinal ? new Date() : null,
     },
     update: {
       total_incomes: totalIncomes,
       total_transactions_in: totalIn,
       total_transactions_out: totalOut,
+      is_final: options.isFinal ?? false,
+      closed_at: options.isFinal ? new Date() : null,
     },
   });
 }
@@ -72,7 +86,8 @@ export async function recalculateMonthSnapshot(
  * @param monthId - The Month.id to recalculate all snapshots for
  */
 export async function recalculateAllSnapshotsForMonth(
-  monthId: number
+  monthId: number,
+  options: RecalculateAllOptions = {}
 ): Promise<void> {
   // Collect distinct account IDs with completed activity in this month
   const [incomeAccounts, txFromAccounts, txToAccounts] = await Promise.all([
@@ -99,9 +114,45 @@ export async function recalculateAllSnapshotsForMonth(
     ...txToAccounts.map((r) => r.to_account_id),
   ]);
 
+  if (options.includeAllActiveAccounts) {
+    const activeAccounts = await prisma.account.findMany({
+      where: { active: true },
+      select: { id: true },
+    });
+
+    for (const activeAccount of activeAccounts) {
+      accountIds.add(activeAccount.id);
+    }
+  }
+
   await Promise.all(
     [...accountIds].map((accountId) =>
-      recalculateMonthSnapshot(accountId, monthId)
+      recalculateMonthSnapshot(accountId, monthId, {
+        isFinal: options.isFinal,
+      })
     )
   );
+}
+
+export async function finalizeMonthSnapshots(
+  year: number,
+  month: number
+): Promise<void> {
+  const monthRecord = await prisma.month.findUnique({
+    where: {
+      year_month: {
+        year,
+        month,
+      },
+    },
+  });
+
+  if (!monthRecord) {
+    return;
+  }
+
+  await recalculateAllSnapshotsForMonth(monthRecord.id, {
+    includeAllActiveAccounts: true,
+    isFinal: true,
+  });
 }
