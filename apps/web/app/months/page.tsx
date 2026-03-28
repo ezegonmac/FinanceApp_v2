@@ -45,7 +45,7 @@ export default function MonthsPage() {
                                 <tr key={month.id} style={{ borderBottom: "1px solid #ccc" }}>
                                     <td>
                                         <Link 
-                                            href={`/months/${month.id}`} 
+                                            href={`/months/${month.year}/${month.month}`}
                                             style={
                                                 { color: "blue", textDecoration: "underline"}
                                             }>

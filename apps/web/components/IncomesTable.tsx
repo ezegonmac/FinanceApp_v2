@@ -40,61 +40,25 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
     };
 
     const handleAddIncome = async () => {
-        
+        setAdding(true);
+        setError(null);
+
         // Frontend basic validation
         if (!incomeDescription.trim()) {
             setError("Income description cannot be empty");
+            setAdding(false);
             return;
         }
         if (!incomeAmount.trim() || isNaN(Number(incomeAmount))) {
             setError("Income amount must be a valid number");
+            setAdding(false);
             return;
         }
         if (Number(incomeAmount) <= 0) {
             setError("Income amount must be greater than zero");
+            setAdding(false);
             return;
         }
-
-        setAdding(true);
-        setError(null);
-
-        // check if monthId is in storage, if not fetch it and store it
-        const monthIdKey = `monthId-${formatYearMonth(year, month)}`;
-        let monthId = localStorage.getItem(monthIdKey);
-        if (!monthId) {
-            try {
-                const response = await fetch(`/api/months`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        year: year,
-                        month: month,
-                    }),
-                });
-                if (!response.ok) {
-                    throw new Error("Failed to fetch or create month");
-                }
-                const monthData = await response.json();
-                monthId = monthData.id;
-                if (!monthId) {
-                    throw new Error("Invalid month data received from server");
-                }
-                localStorage.setItem(monthIdKey, monthId);
-            } catch (err) {
-                setError("Failed to find or create month for the transaction");
-                return;
-            }
-        }
-
-        console.log(
-            {
-                description: incomeDescription,
-                amount: parseFloat(incomeAmount),
-                month_id: parseInt(monthId),
-            }
-        );
 
         try {
             const response = await fetch("/api/accounts/" + accountId + "/incomes", {
@@ -105,7 +69,8 @@ export default function IncomesTable({ accountId }: { accountId: number }) {
                 body: JSON.stringify({
                     description: incomeDescription,
                     amount: parseFloat(incomeAmount),
-                    month_id: parseInt(monthId),
+                    year,
+                    month,
                 }),
             });
             if (!response.ok) {
