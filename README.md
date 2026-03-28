@@ -31,6 +31,9 @@ Time Tracker: https://track.toggl.com/timer
   - Accounts ✅
   - Disabled accounts 🟨
   - Incomes to these accounts ✅
+  - Expenses from these accounts 🟨
+  - Recurrent expenses (fixed and variable) 🟨
+  - Recurrent incomes 🟨
   - Transactions between accounts ✅
   - Monthly Splits across accounts (The splits planned at the beginning of the month) 🟨
   - Investments in different products in these accounts 🟨
@@ -40,6 +43,7 @@ Time Tracker: https://track.toggl.com/timer
   - Past Months with old account state ✅
   - Month details (Incomes and splits, individual transactions) ✅
   - Current amount in each account ✅
+  - Metrics page with basic data ✅
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
 - Actions
