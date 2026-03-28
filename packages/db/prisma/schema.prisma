@@ -42,18 +42,24 @@ model Transaction {
   id            Int      @id @default(autoincrement())
   from_account_id Int
   to_account_id   Int
+  job_run_id      Int?
   amount          Decimal  @db.Decimal(18,2)
   description     String?
   created_at      DateTime @default(now())
 
+  processed_at    DateTime?
+  processing_error String?
+
   from_account Account @relation("FromAccount", fields: [from_account_id], references: [id])
   to_account   Account @relation("ToAccount", fields: [to_account_id], references: [id])
+  job_run      JobRun? @relation(fields: [job_run_id], references: [id])
 
   month_id        Int
   month          Month @relation(fields: [month_id], references: [id])
 
   status TransactionStatus @default(PENDING)
 
+  @@index([job_run_id])
   @@index([month_id, status])
 }
 
@@ -61,6 +67,12 @@ enum TransactionStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+enum JobRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
 }
 
 model Month {
@@ -74,5 +86,21 @@ model Month {
   // 0..* for a month
   incomes Income[]
   transactions Transaction[]
+}
+
+model JobRun {
+  id             Int          @id @default(autoincrement())
+  job_name       String
+  madrid_date    String       @db.VarChar(10)
+  status         JobRunStatus @default(RUNNING)
+  started_at     DateTime     @default(now())
+  finished_at    DateTime?
+  processed_count Int         @default(0)
+  failed_count   Int          @default(0)
+  skipped_count  Int          @default(0)
+  error_message  String?
+  transactions   Transaction[]
+
+  @@unique([job_name, madrid_date], name: "job_name_madrid_date")
 }
 

@@ -27,7 +27,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/">Home</Link> |{" "}
             <Link href="/accounts">Accounts</Link> |{" "}
             <Link href="/months">Months</Link> |{" "}
-            <Link href="/months/current">Current Month</Link>
+            <Link href="/months/current">Current Month</Link> |{" "}
+            <Link href="/admin">Admin</Link>
           </nav>
         </header>
         <main style={{ padding: "1rem" }}>{children}</main>

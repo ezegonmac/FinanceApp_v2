@@ -36,7 +36,7 @@ Time Tracker: https://track.toggl.com/timer
   - Investments in different products in these accounts 🟨
 - View
   - Account details ✅
-  - Current Month 🔷
+  - Current Month ✅
   - Past Months with old account state 🟨
   - Month details (Incomes and splits, individual transactions) 🟨
   - Current amount in each account 🟨
@@ -45,7 +45,9 @@ Time Tracker: https://track.toggl.com/timer
 - Actions
   - Enable/Disable account 🟨
   - Edit account details 🟨
-- Scheduled job to apply pending transactions at the end of the day 🟨
+- Scheduled job to apply pending transactions at the end of the day 
+  - API endpoint ✅
+  - Automate with server cron 🟨
 
 #### Status Legend
 🟨 Pending
@@ -77,6 +79,9 @@ Create a .env file from the existing .env.example.
 To configure the web app, create a /apps/web/.env file from the existing /apps/web/.env.example.
 
 To configure your database connection, create a /packages/db/.env from the existing /packages/db/.env.example.
+
+For scheduled jobs, set these values:
+- CRON_SECRET: shared secret used by internal job endpoint
 
 ### 4. Start the database container
 ```
@@ -128,6 +133,24 @@ npm run db:stop
 From packages/db run
 ```
 npx prisma studio
+```
+
+# Scheduled job: apply pending transactions
+The endpoint below processes PENDING transactions for the current month using Europe/Madrid timezone.
+```
+POST /api/internal/jobs/apply-pending-transactions
+Authorization: Bearer <CRON_SECRET>
+```
+
+Example cURL:
+```
+curl -X POST http://localhost:3000/api/internal/jobs/apply-pending-transactions \
+  -H "Authorization: Bearer <CRON_SECRET>"
+```
+
+To automate from a server cron (daily near end of day in Europe/Madrid):
+```
+55 23 * * * curl -X POST http://localhost:3000/api/internal/jobs/apply-pending-transactions -H "Authorization: Bearer <CRON_SECRET>"
 ```
 
 # Dev workflow
