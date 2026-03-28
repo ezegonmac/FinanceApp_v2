@@ -1,4 +1,5 @@
 import { prisma } from "@repo/db";
+import { getEuropeMadridDateParts } from "@repo/utils";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -31,6 +32,7 @@ export async function GET(request: Request, { params }: RouteContext) {
       where: { account_id: accountId },
       include: {
         month: true,
+        job_run: true,
       },
     });
 
@@ -71,10 +73,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       },
     });
 
-    // Get current year and month
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1; // 0-indexed, so +1
+    const { year: currentYear, month: currentMonth } = getEuropeMadridDateParts();
 
     // Check if the month corresponds to current month
     const isCurrentMonth =
@@ -89,7 +88,7 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     let newIncome;
     if (isEffectiveNow) {
-      // Apply balances immediately in a incomes
+      // Apply balances immediately for current/past month incomes
       newIncome = await prisma.$transaction(async (tx) => {
         const income = await tx.income.create({
           data: {
@@ -97,7 +96,8 @@ export async function POST(request: Request, { params }: RouteContext) {
             amount: parsed.amount,
             month_id: monthRecord.id,
             account_id: accountId,
-            // status: "COMPLETED",
+            status: "COMPLETED",
+            processed_at: new Date(),
           },
         });
 
@@ -109,14 +109,14 @@ export async function POST(request: Request, { params }: RouteContext) {
         return income;
       });
     } else {
-      // Future incomes, keep pending
+      // Future incomes, keep pending until scheduler applies them
       newIncome = await prisma.income.create({
         data: {
           description: parsed.description,
           amount: parsed.amount,
           month_id: monthRecord.id,
           account_id: accountId,
-          // status: "PENDING",
+          status: "PENDING",
         },
       });
     }

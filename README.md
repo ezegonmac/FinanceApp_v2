@@ -45,7 +45,7 @@ Time Tracker: https://track.toggl.com/timer
 - Actions
   - Enable/Disable account 🟨
   - Edit account details 🟨
-- Scheduled job to apply pending transactions at the end of the day 
+- Scheduled job to apply pending incomes and transactions at the end of the day 
   - API endpoint ✅
   - Automate with server cron 🟨
 
@@ -135,8 +135,8 @@ From packages/db run
 npx prisma studio
 ```
 
-# Scheduled job: apply pending transactions
-The endpoint below processes PENDING transactions for the current month using Europe/Madrid timezone.
+# Scheduled job: apply pending month items
+The endpoint below processes PENDING incomes and transactions for the current month using Europe/Madrid timezone.
 ```
 POST /api/internal/jobs/apply-pending-transactions
 Authorization: Bearer <CRON_SECRET>

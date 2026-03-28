@@ -1,4 +1,5 @@
 import { prisma } from "@repo/db";
+import { getEuropeMadridDateParts } from "@repo/utils";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -49,10 +50,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // Get current year and month
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1; // 0-indexed, so +1
+    const { year: currentYear, month: currentMonth } = getEuropeMadridDateParts();
 
     // Check if the month corresponds to current month
     const isCurrentMonth =

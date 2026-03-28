@@ -32,6 +32,7 @@ export default function IncomesTable({
           <th style={{ textAlign: "left" }}>Amount</th>
           {showMonth && <th style={{ textAlign: "left" }}>Month</th>}
           {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
+          <th style={{ textAlign: "left" }}>Status</th>
           <th style={{ textAlign: "left" }}>Created At</th>
         </tr>
       </thead>
@@ -51,6 +52,7 @@ export default function IncomesTable({
             {showAccount && (
               <td>{income.account?.name ?? income.account_id}</td>
             )}
+            <td>{income.status ?? "COMPLETED"}</td>
             <td>{new Date(income.created_at).toLocaleString()}</td>
           </tr>
         ))}

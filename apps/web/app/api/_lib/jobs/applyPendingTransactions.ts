@@ -207,6 +207,62 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
       }
     }
 
+    const pendingIncomes = await prisma.income.findMany({
+      where: {
+        month_id: monthRecord.id,
+        status: "PENDING",
+      },
+      orderBy: { id: "asc" },
+    });
+
+    for (const pendingIncome of pendingIncomes) {
+      try {
+        const result = await prisma.$transaction(async (tx) => {
+          const claimResult = await tx.income.updateMany({
+            where: {
+              id: pendingIncome.id,
+              status: "PENDING",
+            },
+            data: {
+              status: "COMPLETED",
+              processed_at: new Date(),
+              processing_error: null,
+              job_run_id: jobRun.id,
+            },
+          });
+
+          if (claimResult.count === 0) {
+            return "skipped" as const;
+          }
+
+          await tx.account.update({
+            where: { id: pendingIncome.account_id },
+            data: { balance: { increment: pendingIncome.amount } },
+          });
+
+          return "processed" as const;
+        });
+
+        if (result === "processed") {
+          processed += 1;
+        } else {
+          skipped += 1;
+        }
+      } catch (error) {
+        failed += 1;
+
+        await prisma.income.updateMany({
+          where: {
+            id: pendingIncome.id,
+            status: "PENDING",
+          },
+          data: {
+            processing_error: getErrorMessage(error),
+          },
+        });
+      }
+    }
+
     await prisma.jobRun.update({
       where: { id: jobRun.id },
       data: {

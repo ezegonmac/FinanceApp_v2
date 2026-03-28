@@ -28,14 +28,22 @@ model Account {
 model Income {
   id            Int      @id @default(autoincrement())
   account_id    Int
+  job_run_id    Int?
   amount        Decimal  @db.Decimal(18,2)
   description   String?
-  created_at      DateTime @default(now())
+  created_at    DateTime @default(now())
+  processed_at  DateTime?
+  processing_error String?
   
-  month_id        Int
-  month          Month @relation(fields: [month_id], references: [id])
+  month_id      Int
+  month         Month @relation(fields: [month_id], references: [id])
+  job_run       JobRun? @relation(fields: [job_run_id], references: [id])
 
-  account Account @relation(fields: [account_id], references: [id])
+  account       Account @relation(fields: [account_id], references: [id])
+  status        IncomeStatus @default(COMPLETED)
+
+  @@index([job_run_id])
+  @@index([month_id, status])
 }
 
 model Transaction {
@@ -64,6 +72,12 @@ model Transaction {
 }
 
 enum TransactionStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum IncomeStatus {
   PENDING
   COMPLETED
   CANCELLED
@@ -99,6 +113,7 @@ model JobRun {
   failed_count   Int          @default(0)
   skipped_count  Int          @default(0)
   error_message  String?
+  incomes        Income[]
   transactions   Transaction[]
 
   @@unique([job_name, madrid_date], name: "job_name_madrid_date")

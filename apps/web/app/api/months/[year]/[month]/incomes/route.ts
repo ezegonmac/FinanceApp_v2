@@ -30,6 +30,7 @@ export async function GET(
       include: {
         month: true,
         account: true,
+        job_run: true,
       },
     });
 
