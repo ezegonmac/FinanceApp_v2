@@ -47,7 +47,7 @@ Time Tracker: https://track.toggl.com/timer
   - Metrics page with basic data ✅
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
-  - Todo tab with pending todo expenses and transactions that are not marked as automated (bool attribute) 🟨
+  - Todo tab with pending todo recurrent expenses and recurrent transactions that are not marked as automated (bool attribute) 🟨
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
   - Pause and resume recurrent incomes 🟨
@@ -56,8 +56,10 @@ Time Tracker: https://track.toggl.com/timer
   - Delete recurrent expenses (with its associated expenses) ✅
   - Modify recurrent incomes start and end dates 🟨
   - Modify recurrent expenses start and end dates 🟨
-  - Allow recurrent incomes with no end date 🟨
-  - Allow recurrent expenses with no end date 🟨
+  - Modify recurrent transactions start and end dates 🟨
+  - Allow recurrent incomes with no end date ✅
+  - Allow recurrent expenses with no end date ✅
+  - Allow recurrent transactions with no end date 🟨
   - Enable/Disable account 🟨
   - Edit account details 🟨
   - Edit income and expense details 🟨
