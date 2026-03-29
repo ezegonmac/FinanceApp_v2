@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ErrorMessage from "../ErrorMessage";
+import { useDebug } from "../debug/DebugContext";
 
 type RecurrentTransaction = {
   id: number;
@@ -35,6 +36,8 @@ export default function RecurrentTransactionsTable({
   onDelete,
   deletingId,
 }: Props) {
+  const { debug } = useDebug();
+
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!recurrentTransactions || recurrentTransactions.length === 0) {
@@ -45,7 +48,7 @@ export default function RecurrentTransactionsTable({
     <table style={{ borderCollapse: "collapse", width: "100%" }}>
       <thead>
         <tr style={{ borderBottom: "2px solid #000" }}>
-          <th style={{ textAlign: "left" }}>Id</th>
+          {debug && <th style={{ textAlign: "left" }}>Id</th>}
           <th style={{ textAlign: "left" }}>From Account</th>
           <th style={{ textAlign: "left" }}>To Account</th>
           <th style={{ textAlign: "left" }}>Description</th>
@@ -55,14 +58,14 @@ export default function RecurrentTransactionsTable({
           <th style={{ textAlign: "left" }}>End</th>
           <th style={{ textAlign: "left" }}>Next Run</th>
           <th style={{ textAlign: "left" }}>Last Applied Month Id</th>
-          <th style={{ textAlign: "left" }}>Created At</th>
+          {debug && <th style={{ textAlign: "left" }}>Created At</th>}
           <th style={{ textAlign: "left" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
         {recurrentTransactions.map((item) => (
           <tr key={item.id} style={{ borderBottom: "1px solid #ccc" }}>
-            <td>{item.id}</td>
+            {debug && <td>{item.id}</td>}
             <td>
               <Link href={`/accounts/${item.from_account_id}`} style={{ color: "blue" }}>
                 {item.from_account_name ?? item.from_account_id}
@@ -84,12 +87,9 @@ export default function RecurrentTransactionsTable({
                 : "-"}
             </td>
             <td>{item.last_applied_month_id ?? "-"}</td>
-            <td>{new Date(item.created_at).toLocaleString()}</td>
+            {debug && <td>{new Date(item.created_at).toLocaleString()}</td>}
             <td>
-              <button
-                onClick={() => onDelete?.(item.id)}
-                disabled={deletingId === item.id}
-              >
+              <button onClick={() => onDelete?.(item.id)} disabled={deletingId === item.id}>
                 {deletingId === item.id ? "Deleting..." : "Delete"}
               </button>
             </td>

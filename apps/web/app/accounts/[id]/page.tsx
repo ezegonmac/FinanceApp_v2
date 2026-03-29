@@ -1,6 +1,7 @@
 import AccountIncomesView from "@/components/incomes/AccountIncomesView";
 import AccountTransactionsView from "@/components/transactions/AccountTransactionsView";
 import AccountExpensesView from "@/components/expenses/AccountExpensesView";
+import AccountSummary from "@/components/accounts/AccountSummary";
 import { prisma } from "@repo/db";
 
 export default async function AccountPage({
@@ -19,11 +20,12 @@ export default async function AccountPage({
 
     return (
         <div>
-            <h1>{account.name}</h1>
-            <p><b>Balance:</b> {account.balance?.toString() ?? "N/A"}</p>
-            <p><b>Created At:</b> {account.created_at.toISOString()}</p>
-            <p><b>Active:</b> {account.active ? "✅" : "❌"}</p>
-            <br />
+            <AccountSummary
+              name={account.name}
+              balance={account.balance?.toString() ?? "N/A"}
+              createdAtIso={account.created_at.toISOString()}
+              active={account.active}
+            />
 
             <h2>Incomes for this Account</h2>
             <AccountIncomesView accountId={accountId} />

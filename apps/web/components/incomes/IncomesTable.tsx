@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { formatYearMonth } from "@repo/utils";
 import ErrorMessage from "../ErrorMessage";
+import { useDebug } from "../debug/DebugContext";
 
 type Props = {
   incomes: any[];
@@ -19,6 +20,7 @@ export default function IncomesTable({
   showMonth = true,
   showAccount = false,
 }: Props) {
+  const { debug } = useDebug();
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!incomes || incomes.length === 0) return <p>No incomes available.</p>;
@@ -27,24 +29,24 @@ export default function IncomesTable({
     <table style={{ borderCollapse: "collapse", width: "100%" }}>
       <thead>
         <tr style={{ borderBottom: "2px solid #000" }}>
-          <th style={{ textAlign: "left" }}>Id</th>
+          {debug && <th style={{ textAlign: "left" }}>Id</th>}
           <th style={{ textAlign: "left" }}>Description</th>
           <th style={{ textAlign: "left" }}>Amount</th>
           {showMonth && <th style={{ textAlign: "left" }}>Month</th>}
           {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
           <th style={{ textAlign: "left" }}>Status</th>
-          <th style={{ textAlign: "left" }}>Created At</th>
+          {debug && <th style={{ textAlign: "left" }}>Created At</th>}
         </tr>
       </thead>
       <tbody>
         {incomes.map((income) => (
           <tr key={income.id} style={{ borderBottom: "1px solid #ccc" }}>
+            {debug && <td>{income.id}</td>}
             <td>
               <Link href={`/incomes/${income.id}`} style={{ color: "blue" }}>
-                {income.id}
+                {income.description}
               </Link>
             </td>
-            <td>{income.description}</td>
             <td>{income.amount}</td>
             {showMonth && (
               <td>{income.month ? formatYearMonth(income.month.year, income.month.month) : "N/A"}</td>
@@ -57,7 +59,7 @@ export default function IncomesTable({
               </td>
             )}
             <td>{income.status ?? "COMPLETED"}</td>
-            <td>{new Date(income.created_at).toLocaleString()}</td>
+            {debug && <td>{new Date(income.created_at).toLocaleString()}</td>}
           </tr>
         ))}
       </tbody>

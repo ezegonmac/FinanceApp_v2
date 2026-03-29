@@ -3,11 +3,13 @@
 import ErrorMessage from "./ErrorMessage";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useDebug } from "./debug/DebugContext";
 
 
 export default function AccountsTable() {
 
     const [accounts, setAccounts] = useState<any[]>([]);
+    const { debug } = useDebug();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [accountName, setAccountName] = useState("");
@@ -81,17 +83,17 @@ export default function AccountsTable() {
                 <table style={{ borderCollapse: "collapse", width: "100%" }}>
                     <thead>
                         <tr style={{ borderBottom: "2px solid #000" }}>
-                            <th key={"id"} style={{ textAlign: "left" }}>Id</th>
+                            {debug && <th key={"id"} style={{ textAlign: "left" }}>Id</th>}
                             <th key={"name"} style={{ textAlign: "left" }}>Name</th>
                             <th key={"balance"} style={{ textAlign: "left" }}>Balance</th>
-                            <th key={"created_at"} style={{ textAlign: "left" }}>Created At</th>
                             <th key={"active"} style={{ textAlign: "left" }}>Active</th>
+                            {debug && <th key={"created_at"} style={{ textAlign: "left" }}>Created At</th>}
                         </tr>
                     </thead>
                     <tbody>
                         {accounts.map((account) => (
                             <tr key={account.id} style={{ borderBottom: "1px solid #ccc" }}>
-                                <td>{account.id}</td>
+                                {debug && <td>{account.id}</td>}
                                 <td>
                                     <Link 
                                         href={`/accounts/${account.id}`} 
@@ -102,8 +104,8 @@ export default function AccountsTable() {
                                     </Link>
                                 </td>
                                 <td>{account.balance}</td>
-                                <td>{new Date(account.created_at).toLocaleString()}</td>
                                 <td>{account.active ? "Yes" : "No"}</td>
+                                {debug && <td>{new Date(account.created_at).toLocaleString()}</td>}
                             </tr>
                         ))}
                     </tbody>

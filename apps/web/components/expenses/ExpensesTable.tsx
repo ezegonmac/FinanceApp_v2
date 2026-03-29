@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatYearMonth } from "@repo/utils";
 import ErrorMessage from "../ErrorMessage";
 import ExpensesCircularPlot from "./ExpensesCircularPlot";
+import { useDebug } from "../debug/DebugContext";
 
 type Props = {
   expenses: any[];
@@ -22,6 +23,7 @@ export default function ExpensesTable({
   showAccount = false,
   showCircularPlot = false,
 }: Props) {
+  const { debug } = useDebug();
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!expenses || expenses.length === 0) return <p>No expenses available.</p>;
@@ -31,25 +33,25 @@ export default function ExpensesTable({
       <table style={{ borderCollapse: "collapse", width: "100%" }}>
         <thead>
           <tr style={{ borderBottom: "2px solid #000" }}>
-            <th style={{ textAlign: "left" }}>Id</th>
+            {debug && <th style={{ textAlign: "left" }}>Id</th>}
             <th style={{ textAlign: "left" }}>Description</th>
             <th style={{ textAlign: "left" }}>Amount</th>
             <th style={{ textAlign: "left" }}>Type</th>
             {showMonth && <th style={{ textAlign: "left" }}>Month</th>}
             {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
             <th style={{ textAlign: "left" }}>Status</th>
-            <th style={{ textAlign: "left" }}>Created At</th>
+            {debug && <th style={{ textAlign: "left" }}>Created At</th>}
           </tr>
         </thead>
         <tbody>
           {expenses.map((expense) => (
             <tr key={expense.id} style={{ borderBottom: "1px solid #ccc" }}>
+              {debug && <td>{expense.id}</td>}
               <td>
                 <Link href={`/expenses/${expense.id}`} style={{ color: "blue" }}>
-                  {expense.id}
+                  {expense.description}
                 </Link>
               </td>
-              <td>{expense.description}</td>
               <td>{expense.amount}</td>
               <td>{expense.kind ?? "FIXED"}</td>
               {showMonth && (
@@ -63,7 +65,7 @@ export default function ExpensesTable({
                 </td>
               )}
               <td>{expense.status ?? "COMPLETED"}</td>
-              <td>{new Date(expense.created_at).toLocaleString()}</td>
+              {debug && <td>{new Date(expense.created_at).toLocaleString()}</td>}
             </tr>
           ))}
         </tbody>
