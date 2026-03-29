@@ -34,7 +34,7 @@ Time Tracker: https://track.toggl.com/timer
   - Expenses from these accounts ✅
   - Recurrent expenses (fixed and variable) ✅
   - Recurrent incomes (start-of-month auto-apply) ✅
-  - Recurrent transactions 🟨
+  - Recurrent transactions ✅
   - Transactions between accounts ✅
   - Monthly Splits across accounts (The splits planned at the beginning of the month) (recurrent transactions) 🟨
   - Investments in different products in these accounts 🟨
@@ -59,16 +59,20 @@ Time Tracker: https://track.toggl.com/timer
   - Modify recurrent transactions start and end dates 🟨
   - Allow recurrent incomes with no end date ✅
   - Allow recurrent expenses with no end date ✅
-  - Allow recurrent transactions with no end date 🟨
+  - Allow recurrent transactions with no end date ✅
   - Enable/Disable account 🟨
   - Edit account details 🟨
   - Edit income and expense details 🟨
   - Edit transaction details 🟨
+  - Delete individual transactions, incomes and expenses 🟨
   - Modify recurrent income, expense and transaction frequency 🟨
 - Scheduled job to apply pending incomes, expenses and transactions at the end of the day 
   - API endpoint ✅
   - Automate with server cron 🟨
-- I want to be able to differentiate the expense actual value and the one used for expense metrics 🟨
+- I want to be able to differentiate the expense actual value and the one used for expense metrics. Adjust for analytics 🟨
+- The admin can enable and disable the debug mode. In debug mode, there will be additional columns shown in the tables 🟨
+- Bugs
+  - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
 
 #### Status Legend
 🟨 Pending

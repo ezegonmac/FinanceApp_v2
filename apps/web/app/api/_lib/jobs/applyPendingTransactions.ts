@@ -12,6 +12,7 @@ import {
 } from "./processors/pendingItems";
 import { applyRecurrentExpensesForMonth } from "./processors/recurrentExpenses";
 import { applyRecurrentIncomesForMonth } from "./processors/recurrentIncomes";
+import { applyRecurrentTransactionsForMonth } from "./processors/recurrentTransactions";
 import type { ApplyPendingTransactionsResult, ProcessCounts } from "./types";
 import { addCounts, getPreviousYearMonth } from "./utils";
 
@@ -53,6 +54,11 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
     addCounts(
       counts,
       await applyRecurrentExpensesForMonth(year, month, monthRecord.id, jobRun.id)
+    );
+
+    addCounts(
+      counts,
+      await applyRecurrentTransactionsForMonth(year, month, monthRecord.id, jobRun.id)
     );
 
     addCounts(
