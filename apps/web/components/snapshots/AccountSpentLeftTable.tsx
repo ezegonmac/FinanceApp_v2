@@ -54,6 +54,7 @@ const fmt = (value: number) => {
 };
 
 const fmtPct = (value: number) => (value === 0 ? "-" : `${value.toFixed(1)}%`);
+const cleanLabel = (value: string) => value.replace(/^Transfer\s+(In|Out):\s*/i, "");
 
 const th: React.CSSProperties = {
   textAlign: "left",
@@ -149,7 +150,7 @@ export default function AccountSpentLeftTable({
             .filter((item) => item.from_account_id === account.id)
             .map((item) => ({
               key: `tx-out-${item.id}`,
-              label: `Transfer Out: ${item.description || `Transaction #${item.id}`}`,
+              label: `${item.description || `Transaction #${item.id}`}`,
               amount: Number(item.amount),
             })),
         ];
@@ -226,7 +227,7 @@ export default function AccountSpentLeftTable({
                 ) : (
                   outMovements.map((movement) => (
                     <tr key={`${account.id}-${movement.key}`} style={{ borderBottom: "1px solid #f2f2f2" }}>
-                      <td style={td}>{movement.label}</td>
+                      <td style={td}>{cleanLabel(movement.label)}</td>
                       <td style={tdNum}>{fmt(movement.amount)}</td>
                       <td style={tdNum}>{fmtPct(movement.pctOfOut)}</td>
                       <td style={tdNum}>{fmtPct(movement.pctOfIn)}</td>
@@ -251,7 +252,7 @@ export default function AccountSpentLeftTable({
                 ) : (
                   outMovements.map((movement) => (
                     <div key={`legend-${account.id}-${movement.key}`}>
-                      <span style={{ color: movement.color }}>■</span> {movement.label} {fmtPct(movement.pctOfIn)}
+                      <span style={{ color: movement.color }}>■</span> {cleanLabel(movement.label)} {fmtPct(movement.pctOfIn)}
                     </div>
                   ))
                 )}

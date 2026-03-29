@@ -107,6 +107,7 @@ const donutHole: React.CSSProperties = {
 };
 
 const donutPct = (value: number) => (value === 0 ? "-" : `${value.toFixed(1)}%`);
+const cleanLabel = (value: string) => value.replace(/^Transfer\s+(In|Out):\s*/i, "");
 
 function colorFor(index: number, total: number, baseHue: number) {
   const step = total > 0 ? 260 / total : 0;
@@ -183,7 +184,7 @@ function SectionRows({
       ) : (
         rows.map((row) => (
           <tr key={row.key}>
-            <td style={cell}>{row.label}</td>
+            <td style={cell}>{cleanLabel(row.label)}</td>
             <td style={numCell}>{fmt(row.inAmount)}</td>
             <td style={numCell}>{fmt(row.outAmount)}</td>
             <td style={numCell}>{pct(row.inAmount, totalIn)}</td>
@@ -358,7 +359,7 @@ export default function AccountMovementsBreakdownTable({
                   ) : (
                     inSlices.map((slice) => (
                       <div key={`in-legend-${slice.key}`}>
-                        <span style={{ color: slice.color }}>■</span> {slice.label} {donutPct(slice.pct)}
+                        <span style={{ color: slice.color }}>■</span> {cleanLabel(slice.label)} {donutPct(slice.pct)}
                       </div>
                     ))
                   )}
@@ -378,7 +379,7 @@ export default function AccountMovementsBreakdownTable({
                   ) : (
                     outSlices.map((slice) => (
                       <div key={`out-legend-${slice.key}`}>
-                        <span style={{ color: slice.color }}>■</span> {slice.label} {donutPct(slice.pct)}
+                        <span style={{ color: slice.color }}>■</span> {cleanLabel(slice.label)} {donutPct(slice.pct)}
                       </div>
                     ))
                   )}

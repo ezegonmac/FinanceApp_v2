@@ -219,6 +219,7 @@ export default function MonthContent({ year, month }: Props) {
             error={expensesError}
             showMonth={false}
             showAccount={true}
+            showCircularPlot={true}
           />
         </>
       )}

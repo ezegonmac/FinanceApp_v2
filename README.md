@@ -68,6 +68,7 @@ Time Tracker: https://track.toggl.com/timer
 - Scheduled job to apply pending incomes, expenses and transactions at the end of the day 
   - API endpoint ✅
   - Automate with server cron 🟨
+- I want to be able to differentiate the expense actual value and the one used for expense metrics 🟨
 
 #### Status Legend
 🟨 Pending
