@@ -22,8 +22,16 @@ export async function recalculateMonthSnapshot(
   monthId: number,
   options: RecalculateSnapshotOptions = {}
 ): Promise<void> {
-  const [incomesAgg, txInAgg, txOutAgg] = await Promise.all([
+  const [incomesAgg, expensesAgg, txInAgg, txOutAgg] = await Promise.all([
     prisma.income.aggregate({
+      where: {
+        account_id: accountId,
+        month_id: monthId,
+        status: "COMPLETED",
+      },
+      _sum: { amount: true },
+    }),
+    prisma.expense.aggregate({
       where: {
         account_id: accountId,
         month_id: monthId,
@@ -50,6 +58,7 @@ export async function recalculateMonthSnapshot(
   ]);
 
   const totalIncomes = incomesAgg._sum.amount ?? 0;
+  const totalExpenses = expensesAgg._sum.amount ?? 0;
   const totalIn = txInAgg._sum.amount ?? 0;
   const totalOut = txOutAgg._sum.amount ?? 0;
 
@@ -64,6 +73,7 @@ export async function recalculateMonthSnapshot(
       month_id: monthId,
       account_id: accountId,
       total_incomes: totalIncomes,
+      total_expenses: totalExpenses,
       total_transactions_in: totalIn,
       total_transactions_out: totalOut,
       is_final: options.isFinal ?? false,
@@ -71,6 +81,7 @@ export async function recalculateMonthSnapshot(
     },
     update: {
       total_incomes: totalIncomes,
+      total_expenses: totalExpenses,
       total_transactions_in: totalIn,
       total_transactions_out: totalOut,
       is_final: options.isFinal ?? false,
@@ -90,8 +101,13 @@ export async function recalculateAllSnapshotsForMonth(
   options: RecalculateAllOptions = {}
 ): Promise<void> {
   // Collect distinct account IDs with completed activity in this month
-  const [incomeAccounts, txFromAccounts, txToAccounts] = await Promise.all([
+  const [incomeAccounts, expenseAccounts, txFromAccounts, txToAccounts] = await Promise.all([
     prisma.income.findMany({
+      where: { month_id: monthId, status: "COMPLETED" },
+      select: { account_id: true },
+      distinct: ["account_id"],
+    }),
+    prisma.expense.findMany({
       where: { month_id: monthId, status: "COMPLETED" },
       select: { account_id: true },
       distinct: ["account_id"],
@@ -110,6 +126,7 @@ export async function recalculateAllSnapshotsForMonth(
 
   const accountIds = new Set<number>([
     ...incomeAccounts.map((r) => r.account_id),
+    ...expenseAccounts.map((r) => r.account_id),
     ...txFromAccounts.map((r) => r.from_account_id),
     ...txToAccounts.map((r) => r.to_account_id),
   ]);

@@ -9,7 +9,7 @@ type Props = {
   onAdded: () => void;
 };
 
-export default function AddIncomeForm({ accountId, onAdded }: Props) {
+export default function AddExpenseForm({ accountId, onAdded }: Props) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -26,11 +26,13 @@ export default function AddIncomeForm({ accountId, onAdded }: Props) {
       setAdding(false);
       return;
     }
+
     if (!amount.trim() || isNaN(Number(amount))) {
       setError("Amount must be a valid number");
       setAdding(false);
       return;
     }
+
     if (Number(amount) <= 0) {
       setError("Amount must be greater than zero");
       setAdding(false);
@@ -38,12 +40,19 @@ export default function AddIncomeForm({ accountId, onAdded }: Props) {
     }
 
     try {
-      const response = await fetch(`/api/accounts/${accountId}/incomes`, {
+      const response = await fetch(`/api/accounts/${accountId}/expenses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description, amount: parseFloat(amount), year, month }),
+        body: JSON.stringify({
+          description,
+          amount: parseFloat(amount),
+          year,
+          month,
+        }),
       });
-      if (!response.ok) throw new Error("Failed to add income");
+
+      if (!response.ok) throw new Error("Failed to add expense");
+
       setDescription("");
       setAmount("");
       onAdded();
@@ -55,30 +64,30 @@ export default function AddIncomeForm({ accountId, onAdded }: Props) {
   };
 
   return (
-    <div 
-      style={
-        { 
-          marginTop: "1rem", 
-          padding: "1rem", 
-          border: "1px solid #ccc", 
-          borderRadius: "5px",
-          gap: "0.5rem",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-        }
-      }>
+    <div
+      style={{
+        marginTop: "1rem",
+        padding: "1rem",
+        border: "1px solid #ccc",
+        borderRadius: "5px",
+        gap: "0.5rem",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+      }}
+    >
       {error && <ErrorMessage message={error} />}
-      <p style={{ fontWeight: "bold" }}>Add income:</p>
+      <p style={{ fontWeight: "bold" }}>Add expense:</p>
       <div>
         <input
           type="text"
           style={{ width: "20em" }}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter Income description"
+          placeholder="Enter Expense description"
           disabled={adding}
-        /> &nbsp;
+        />
+        &nbsp;
         <input
           type="number"
           style={{ width: "10em" }}
@@ -86,7 +95,8 @@ export default function AddIncomeForm({ accountId, onAdded }: Props) {
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Amount"
           disabled={adding}
-        /> &nbsp;
+        />
+        &nbsp;
         <input
           type="month"
           style={{ width: "10em" }}
@@ -97,10 +107,10 @@ export default function AddIncomeForm({ accountId, onAdded }: Props) {
             setMonth(Number(m));
           }}
           disabled={adding}
-        /> &nbsp;
+        />
       </div>
       <button onClick={handleAdd} disabled={adding}>
-        {adding ? "Adding..." : "Add Income"}
+        {adding ? "Adding..." : "Add Expense"}
       </button>
     </div>
   );

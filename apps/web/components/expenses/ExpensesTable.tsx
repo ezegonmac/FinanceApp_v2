@@ -5,15 +5,15 @@ import { formatYearMonth } from "@repo/utils";
 import ErrorMessage from "../ErrorMessage";
 
 type Props = {
-  incomes: any[];
+  expenses: any[];
   loading?: boolean;
   error?: string | null;
   showMonth?: boolean;
   showAccount?: boolean;
 };
 
-export default function IncomesTable({
-  incomes,
+export default function ExpensesTable({
+  expenses,
   loading,
   error,
   showMonth = true,
@@ -21,7 +21,7 @@ export default function IncomesTable({
 }: Props) {
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
-  if (!incomes || incomes.length === 0) return <p>No incomes available.</p>;
+  if (!expenses || expenses.length === 0) return <p>No expenses available.</p>;
 
   return (
     <table style={{ borderCollapse: "collapse", width: "100%" }}>
@@ -37,27 +37,27 @@ export default function IncomesTable({
         </tr>
       </thead>
       <tbody>
-        {incomes.map((income) => (
-          <tr key={income.id} style={{ borderBottom: "1px solid #ccc" }}>
+        {expenses.map((expense) => (
+          <tr key={expense.id} style={{ borderBottom: "1px solid #ccc" }}>
             <td>
-              <Link href={`/incomes/${income.id}`} style={{ color: "blue" }}>
-                {income.id}
+              <Link href={`/expenses/${expense.id}`} style={{ color: "blue" }}>
+                {expense.id}
               </Link>
             </td>
-            <td>{income.description}</td>
-            <td>{income.amount}</td>
+            <td>{expense.description}</td>
+            <td>{expense.amount}</td>
             {showMonth && (
-              <td>{income.month ? formatYearMonth(income.month.year, income.month.month) : "N/A"}</td>
+              <td>{expense.month ? formatYearMonth(expense.month.year, expense.month.month) : "N/A"}</td>
             )}
             {showAccount && (
               <td>
-                <Link href={`/accounts/${income.account_id}`} style={{ color: "blue" }}>
-                  {income.account?.name ?? income.account_id}
+                <Link href={`/accounts/${expense.account_id}`} style={{ color: "blue" }}>
+                  {expense.account?.name ?? expense.account_id}
                 </Link>
               </td>
             )}
-            <td>{income.status ?? "COMPLETED"}</td>
-            <td>{new Date(income.created_at).toLocaleString()}</td>
+            <td>{expense.status ?? "COMPLETED"}</td>
+            <td>{new Date(expense.created_at).toLocaleString()}</td>
           </tr>
         ))}
       </tbody>

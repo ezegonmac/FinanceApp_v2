@@ -7,15 +7,15 @@ export type MonthlySummaryRow = {
   year: number;
   month: number;
   total_incomes: number;
-  total_transactions_out: number;
+  total_expenses: number;
   net_change: number;
   running_total: number;
 };
 
 export type MonthlySummaryResponse = {
   rows: MonthlySummaryRow[];
-  totals: { total_incomes: number; total_transactions_out: number; net_change: number };
-  averages: { total_incomes: number; total_transactions_out: number; net_change: number };
+  totals: { total_incomes: number; total_expenses: number; net_change: number };
+  averages: { total_incomes: number; total_expenses: number; net_change: number };
 };
 
 // GET /api/metrics/monthly-summary
@@ -34,12 +34,12 @@ export async function GET() {
         (sum, s) => sum + Number(s.total_incomes),
         0
       );
-      const total_transactions_out = m.monthSnapshots.reduce(
-        (sum, s) => sum + Number(s.total_transactions_out),
+      const total_expenses = m.monthSnapshots.reduce(
+        (sum, s) => sum + Number(s.total_expenses),
         0
       );
-      const net_change = total_incomes - total_transactions_out;
-      return { year: m.year, month: m.month, total_incomes, total_transactions_out, net_change };
+      const net_change = total_incomes - total_expenses;
+      return { year: m.year, month: m.month, total_incomes, total_expenses, net_change };
     });
 
     // Compute running total anchored to sum of current account balances
@@ -65,14 +65,14 @@ export async function GET() {
     const totals = rows.reduce(
       (acc, r) => ({
         total_incomes: acc.total_incomes + r.total_incomes,
-        total_transactions_out: acc.total_transactions_out + r.total_transactions_out,
+        total_expenses: acc.total_expenses + r.total_expenses,
         net_change: acc.net_change + r.net_change,
       }),
-      { total_incomes: 0, total_transactions_out: 0, net_change: 0 }
+      { total_incomes: 0, total_expenses: 0, net_change: 0 }
     );
     const averages = {
       total_incomes: count > 0 ? totals.total_incomes / count : 0,
-      total_transactions_out: count > 0 ? totals.total_transactions_out / count : 0,
+      total_expenses: count > 0 ? totals.total_expenses / count : 0,
       net_change: count > 0 ? totals.net_change / count : 0,
     };
 

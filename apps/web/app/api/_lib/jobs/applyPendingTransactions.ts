@@ -258,6 +258,62 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
       }
     }
 
+    const pendingExpenses = await prisma.expense.findMany({
+      where: {
+        month_id: monthRecord.id,
+        status: "PENDING",
+      },
+      orderBy: { id: "asc" },
+    });
+
+    for (const pendingExpense of pendingExpenses) {
+      try {
+        const result = await prisma.$transaction(async (tx) => {
+          const claimResult = await tx.expense.updateMany({
+            where: {
+              id: pendingExpense.id,
+              status: "PENDING",
+            },
+            data: {
+              status: "COMPLETED",
+              processed_at: new Date(),
+              processing_error: null,
+              job_run_id: jobRun.id,
+            },
+          });
+
+          if (claimResult.count === 0) {
+            return "skipped" as const;
+          }
+
+          await tx.account.update({
+            where: { id: pendingExpense.account_id },
+            data: { balance: { decrement: pendingExpense.amount } },
+          });
+
+          return "processed" as const;
+        });
+
+        if (result === "processed") {
+          processed += 1;
+        } else {
+          skipped += 1;
+        }
+      } catch (error) {
+        failed += 1;
+
+        await prisma.expense.updateMany({
+          where: {
+            id: pendingExpense.id,
+            status: "PENDING",
+          },
+          data: {
+            processing_error: getErrorMessage(error),
+          },
+        });
+      }
+    }
+
     // Recalculate current month snapshots for all active accounts (provisional/live)
     await recalculateAllSnapshotsForMonth(monthRecord.id, {
       includeAllActiveAccounts: true,

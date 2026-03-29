@@ -21,6 +21,7 @@ model Account {
   active     Boolean  @default(true)
 
   Incomes  Income[]
+  expenses Expense[]
   fromTransactions Transaction[] @relation("FromAccount")
   toTransactions   Transaction[] @relation("ToAccount")
   monthSnapshots   MonthSnapshot[]
@@ -72,6 +73,27 @@ model Transaction {
   @@index([month_id, status])
 }
 
+model Expense {
+  id               Int      @id @default(autoincrement())
+  account_id       Int
+  job_run_id       Int?
+  amount           Decimal  @db.Decimal(18,2)
+  description      String?
+  created_at       DateTime @default(now())
+  processed_at     DateTime?
+  processing_error String?
+
+  month_id Int
+  month    Month @relation(fields: [month_id], references: [id])
+  job_run  JobRun? @relation(fields: [job_run_id], references: [id])
+
+  account Account @relation(fields: [account_id], references: [id])
+  status  ExpenseStatus @default(PENDING)
+
+  @@index([job_run_id])
+  @@index([month_id, status])
+}
+
 enum TransactionStatus {
   PENDING
   COMPLETED
@@ -79,6 +101,12 @@ enum TransactionStatus {
 }
 
 enum IncomeStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum ExpenseStatus {
   PENDING
   COMPLETED
   CANCELLED
@@ -100,6 +128,7 @@ model Month {
   
   // 0..* for a month
   incomes Income[]
+  expenses Expense[]
   transactions Transaction[]
   monthSnapshots MonthSnapshot[]
 }
@@ -109,6 +138,7 @@ model MonthSnapshot {
   month_id               Int
   account_id             Int
   total_incomes          Decimal  @default(0) @db.Decimal(18,2)
+  total_expenses         Decimal  @default(0) @db.Decimal(18,2)
   total_transactions_in  Decimal  @default(0) @db.Decimal(18,2)
   total_transactions_out Decimal  @default(0) @db.Decimal(18,2)
   is_final               Boolean  @default(false)
@@ -135,6 +165,7 @@ model JobRun {
   skipped_count  Int          @default(0)
   error_message  String?
   incomes        Income[]
+  expenses       Expense[]
   transactions   Transaction[]
 
   @@unique([job_name, madrid_date], name: "job_name_madrid_date")

@@ -31,7 +31,7 @@ Time Tracker: https://track.toggl.com/timer
   - Accounts ✅
   - Disabled accounts 🟨
   - Incomes to these accounts ✅
-  - Expenses from these accounts 🟨
+  - Expenses from these accounts ✅
   - Recurrent expenses (fixed and variable) 🟨
   - Recurrent incomes 🟨
   - Transactions between accounts ✅
@@ -50,7 +50,7 @@ Time Tracker: https://track.toggl.com/timer
   - Select account instead of account id when creating transactions and incomes ✅
   - Enable/Disable account 🟨
   - Edit account details 🟨
-- Scheduled job to apply pending incomes and transactions at the end of the day 
+- Scheduled job to apply pending incomes, expenses and transactions at the end of the day 
   - API endpoint ✅
   - Automate with server cron 🟨
 
@@ -141,7 +141,7 @@ npx prisma studio
 ```
 
 # Scheduled job: apply pending month items
-The endpoint below processes PENDING incomes and transactions for the current month using Europe/Madrid timezone.
+The endpoint below processes PENDING incomes, expenses and transactions for the current month using Europe/Madrid timezone.
 ```
 POST /api/internal/jobs/apply-pending-transactions
 Authorization: Bearer <CRON_SECRET>

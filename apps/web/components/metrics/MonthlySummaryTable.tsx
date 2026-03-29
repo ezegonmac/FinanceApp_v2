@@ -3,7 +3,7 @@ import type { MonthlySummaryRow } from "@/app/api/metrics/monthly-summary/route"
 
 type Aggregation = {
   total_incomes: number;
-  total_transactions_out: number;
+  total_expenses: number;
   net_change: number;
 };
 
@@ -25,7 +25,7 @@ export default function MonthlySummaryTable({ rows, totals, averages }: Props) {
   if (!rows || rows.length === 0)
     return <p style={{ color: "#888" }}>No monthly data yet.</p>;
 
-  const headers = ["Month", "Incomes", "Net Change", "Running Total"];
+  const headers = ["Month", "Incomes", "Expenses", "Net Change", "Running Total"];
 
   return (
     <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: "1rem" }}>
@@ -45,6 +45,7 @@ export default function MonthlySummaryTable({ rows, totals, averages }: Props) {
             <tr key={`${r.year}-${r.month}`} style={{ borderBottom: "1px solid #eee" }}>
               <td style={{ padding: "6px 10px" }}>{formatYearMonthLong(r.year, r.month)}</td>
               <td style={{ padding: "6px 10px" }}>{fmt(r.total_incomes)}</td>
+              <td style={{ padding: "6px 10px" }}>{fmt(r.total_expenses)}</td>
               <td style={netStyle(net)}>
                 {net >= 0 ? "+" : ""}{fmt(net)}
               </td>
@@ -57,6 +58,7 @@ export default function MonthlySummaryTable({ rows, totals, averages }: Props) {
         <tr style={{ borderTop: "2px solid #ccc", fontStyle: "italic", color: "#555" }}>
           <td style={{ padding: "6px 10px" }}>Average</td>
           <td style={{ padding: "6px 10px" }}>{fmt(averages.total_incomes)}</td>
+          <td style={{ padding: "6px 10px" }}>{fmt(averages.total_expenses)}</td>
           <td style={netStyle(averages.net_change)}>
             {averages.net_change >= 0 ? "+" : ""}{fmt(averages.net_change)}
           </td>
@@ -67,6 +69,7 @@ export default function MonthlySummaryTable({ rows, totals, averages }: Props) {
         <tr style={{ borderTop: "1px solid #ccc", fontWeight: "bold" }}>
           <td style={{ padding: "6px 10px" }}>Total</td>
           <td style={{ padding: "6px 10px" }}>{fmt(totals.total_incomes)}</td>
+          <td style={{ padding: "6px 10px" }}>{fmt(totals.total_expenses)}</td>
           <td style={netStyle(totals.net_change)}>
             {totals.net_change >= 0 ? "+" : ""}{fmt(totals.net_change)}
           </td>

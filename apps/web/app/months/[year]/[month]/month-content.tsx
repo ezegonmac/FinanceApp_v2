@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { formatYearMonthLong } from "@repo/utils";
 import IncomesTable from "@/components/incomes/IncomesTable";
 import TransactionsTable from "@/components/transactions/TransactionsTable";
+import ExpensesTable from "@/components/expenses/ExpensesTable";
 import MonthSnapshotsTable from "@/components/snapshots/MonthSnapshotsTable";
 
 type Props = {
@@ -16,6 +17,7 @@ type MonthSnapshot = {
   id: number;
   account_id: number;
   total_incomes: string;
+  total_expenses: string;
   total_transactions_in: string;
   total_transactions_out: string;
   account: { id: number; name: string };
@@ -33,12 +35,17 @@ export default function MonthContent({ year, month }: Props) {
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [transactionsError, setTransactionsError] = useState<string | null>(null);
 
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [expensesLoading, setExpensesLoading] = useState(false);
+  const [expensesError, setExpensesError] = useState<string | null>(null);
+
   const [snapshots, setSnapshots] = useState<MonthSnapshot[]>([]);
   const [snapshotsLoading, setSnapshotsLoading] = useState(false);
 
   useEffect(() => {
     fetchIncomes();
     fetchTransactions();
+    fetchExpenses();
     fetchSnapshots();
   }, [year, month]);
 
@@ -67,6 +74,20 @@ export default function MonthContent({ year, month }: Props) {
       setTransactionsError("Failed to fetch transactions");
     } finally {
       setTransactionsLoading(false);
+    }
+  }
+
+  async function fetchExpenses() {
+    setExpensesLoading(true);
+    setExpensesError(null);
+    try {
+      const res = await fetch(`/api/months/${year}/${month}/expenses`);
+      if (!res.ok) throw new Error("Failed to fetch expenses");
+      setExpenses(await res.json());
+    } catch {
+      setExpensesError("Failed to fetch expenses");
+    } finally {
+      setExpensesLoading(false);
     }
   }
 
@@ -141,6 +162,18 @@ export default function MonthContent({ year, month }: Props) {
             transactions={transactions}
             loading={transactionsLoading}
             error={transactionsError}
+            showMonth={false}
+            showAccount={true}
+          />
+
+          <br />
+          <br />
+
+          <h2>Expenses for this Month</h2>
+          <ExpensesTable
+            expenses={expenses}
+            loading={expensesLoading}
+            error={expensesError}
             showMonth={false}
             showAccount={true}
           />

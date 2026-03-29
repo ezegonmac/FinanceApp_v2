@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type AccountBalance = {
   id: number;
   name: string;
@@ -29,7 +31,11 @@ export default function AccountBalancesTable({ accounts, total }: Props) {
       <tbody>
         {accounts.map((a) => (
           <tr key={a.id} style={{ borderBottom: "1px solid #eee" }}>
-            <td style={{ padding: "6px 10px" }}>{a.name}</td>
+            <td style={{ padding: "6px 10px" }}>
+              <Link href={`/accounts/${a.id}`} style={{ color: "blue" }}>
+                {a.name}
+              </Link>
+            </td>
             <td style={{ padding: "6px 10px" }}>{fmt(Number(a.balance))}</td>
           </tr>
         ))}

@@ -47,7 +47,7 @@ export default function TransactionsTable({
         {transactions.map((transaction) => (
           <tr key={transaction.id} style={{ borderBottom: "1px solid #ccc" }}>
             <td>
-              <Link href={`/transactions/${transaction.id}`} style={{ color: "blue", textDecoration: "underline" }}>
+              <Link href={`/transactions/${transaction.id}`} style={{ color: "blue" }}>
                 {transaction.id}
               </Link>
             </td>
@@ -56,8 +56,20 @@ export default function TransactionsTable({
             {showMonth && (
               <td>{transaction.month ? formatYearMonth(transaction.month.year, transaction.month.month) : "N/A"}</td>
             )}
-            {displayFrom && <td>{transaction.from_account?.name ?? transaction.from_account_id}</td>}
-            {displayTo && <td>{transaction.to_account?.name ?? transaction.to_account_id}</td>}
+            {displayFrom && (
+              <td>
+                <Link href={`/accounts/${transaction.from_account_id}`} style={{ color: "blue" }}>
+                  {transaction.from_account?.name ?? transaction.from_account_id}
+                </Link>
+              </td>
+            )}
+            {displayTo && (
+              <td>
+                <Link href={`/accounts/${transaction.to_account_id}`} style={{ color: "blue" }}>
+                  {transaction.to_account?.name ?? transaction.to_account_id}
+                </Link>
+              </td>
+            )}
             <td>{transaction.status}</td>
             <td>{new Date(transaction.created_at).toLocaleString()}</td>
           </tr>

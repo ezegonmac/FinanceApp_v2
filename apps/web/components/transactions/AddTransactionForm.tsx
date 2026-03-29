@@ -102,55 +102,69 @@ export default function AddTransactionForm({ accountId, onAdded }: Props) {
   };
 
   return (
-    <>
+    <div 
+      style={
+        { 
+          marginTop: "1rem", 
+          padding: "1rem", 
+          border: "1px solid #ccc", 
+          borderRadius: "5px",
+          gap: "0.5rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }
+      }>
       {error && <ErrorMessage message={error} />}
       <p style={{ fontWeight: "bold" }}>Send Transaction to other Account:</p>
-      <input
-        type="text"
-        style={{ width: "30em" }}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Enter Transaction description"
-        disabled={adding}
-      /> &nbsp;
-      <input
-        type="number"
-        style={{ width: "15em" }}
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        placeholder="Amount"
-        disabled={adding}
-      /> &nbsp;
-      <select
-        style={{ width: "15em" }}
-        value={toAccountId}
-        onChange={(e) => setToAccountId(e.target.value)}
-        disabled={adding || accounts.length === 0}
-      >
-        <option value="">Select destination account</option>
-        {accounts
-          .filter((account) => account.id !== accountId)
-          .map((account) => (
-            <option key={account.id} value={String(account.id)}>
-              {account.name}
-            </option>
-          ))}
-      </select>
-      &nbsp;
-      <input
-        type="month"
-        style={{ width: "20em" }}
-        value={formatYearMonth(year, month)}
-        onChange={(e) => {
-          const [y, m] = e.target.value.split("-");
-          setYear(Number(y));
-          setMonth(Number(m));
-        }}
-        disabled={adding}
-      /> &nbsp;
+      <div>
+        <input
+          type="text"
+          style={{ width: "20em" }}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Enter Transaction description"
+          disabled={adding}
+        /> &nbsp;
+        <input
+          type="number"
+          style={{ width: "10em" }}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="Amount"
+          disabled={adding}
+        /> &nbsp;
+        <select
+          style={{ width: "10em" }}
+          value={toAccountId}
+          onChange={(e) => setToAccountId(e.target.value)}
+          disabled={adding || accounts.length === 0}
+        >
+          <option value="">Select destination account</option>
+          {accounts
+            .filter((account) => account.id !== accountId)
+            .map((account) => (
+              <option key={account.id} value={String(account.id)}>
+                {account.name}
+              </option>
+            ))}
+        </select>
+        &nbsp;
+        <input
+          type="month"
+          style={{ width: "10em" }}
+          value={formatYearMonth(year, month)}
+          onChange={(e) => {
+            const [y, m] = e.target.value.split("-");
+            setYear(Number(y));
+            setMonth(Number(m));
+          }}
+          disabled={adding}
+        /> &nbsp;
+      </div>
       <button onClick={handleAdd} disabled={adding}>
         {adding ? "Adding..." : "Add Transaction"}
       </button>
-    </>
+    </div>
   );
 }
