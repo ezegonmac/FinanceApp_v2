@@ -50,8 +50,8 @@ Time Tracker: https://track.toggl.com/timer
   - Select account instead of account id when creating transactions and incomes ✅
   - Pause and resume recurrent incomes 🟨
   - Pause and resume recurrent expenses 🟨
-  - Delete recurrent incomes 🟨
-  - Delete recurrent expenses 🟨
+  - Delete recurrent incomes (with its associated incomes) ✅
+  - Delete recurrent expenses (with its associated expenses) 🟨
   - Enable/Disable account 🟨
   - Edit account details 🟨
 - Scheduled job to apply pending incomes, expenses and transactions at the end of the day 

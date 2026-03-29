@@ -23,6 +23,7 @@ export default function RecurrentIncomesView() {
   const [recurrentIncomes, setRecurrentIncomes] = useState<RecurrentIncome[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -50,12 +51,43 @@ export default function RecurrentIncomesView() {
 
   const refresh = () => setRefreshKey((k) => k + 1);
 
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      "Delete this recurrent income and all generated child incomes?"
+    );
+
+    if (!confirmed) return;
+
+    setDeletingId(id);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/recurrent-incomes/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        const details = payload?.details ? ` (${payload.details})` : "";
+        throw new Error(`Failed to delete recurrent income${details}`);
+      }
+
+      refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete recurrent income");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <>
       <RecurrentIncomesTable
         recurrentIncomes={recurrentIncomes}
         loading={loading}
         error={error}
+        onDelete={handleDelete}
+        deletingId={deletingId}
       />
 
       <br />

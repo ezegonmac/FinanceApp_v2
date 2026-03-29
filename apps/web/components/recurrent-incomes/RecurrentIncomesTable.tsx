@@ -22,12 +22,16 @@ type Props = {
   recurrentIncomes: RecurrentIncome[];
   loading?: boolean;
   error?: string | null;
+  onDelete?: (id: number) => void;
+  deletingId?: number | null;
 };
 
 export default function RecurrentIncomesTable({
   recurrentIncomes,
   loading,
   error,
+  onDelete,
+  deletingId,
 }: Props) {
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
@@ -49,6 +53,7 @@ export default function RecurrentIncomesTable({
           <th style={{ textAlign: "left" }}>Next Run</th>
           <th style={{ textAlign: "left" }}>Last Applied Month Id</th>
           <th style={{ textAlign: "left" }}>Created At</th>
+          <th style={{ textAlign: "left" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -72,6 +77,14 @@ export default function RecurrentIncomesTable({
             </td>
             <td>{item.last_applied_month_id ?? "-"}</td>
             <td>{new Date(item.created_at).toLocaleString()}</td>
+            <td>
+              <button
+                onClick={() => onDelete?.(item.id)}
+                disabled={deletingId === item.id}
+              >
+                {deletingId === item.id ? "Deleting..." : "Delete"}
+              </button>
+            </td>
           </tr>
         ))}
       </tbody>
