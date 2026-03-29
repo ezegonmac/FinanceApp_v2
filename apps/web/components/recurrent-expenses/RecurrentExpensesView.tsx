@@ -9,6 +9,7 @@ type RecurrentExpense = {
   account_id: number;
   amount: string;
   description: string | null;
+  kind: "FIXED" | "VARIABLE";
   status: "ACTIVE" | "PAUSED" | "CANCELLED";
   start_month: string | null;
   end_month: string | null;

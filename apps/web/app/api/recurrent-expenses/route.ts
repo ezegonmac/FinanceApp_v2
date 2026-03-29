@@ -22,6 +22,7 @@ export async function GET() {
       account_id: row.account_id,
       amount: row.amount,
       description: row.description,
+      kind: row.kind,
       status: row.status,
       start_month: row.start_month,
       end_month: row.end_month,

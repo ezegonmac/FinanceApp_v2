@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 const recurrentExpenseSchema = z.object({
   amount: z.number().positive(),
   description: z.string().optional(),
+  kind: z.enum(["FIXED", "VARIABLE"]).optional(),
   status: z.enum(["ACTIVE", "PAUSED", "CANCELLED"]).optional(),
   start_month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
   end_month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
@@ -96,6 +97,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         account_id: accountId,
         amount: parsed.amount,
         description: parsed.description,
+        kind: parsed.kind ?? "FIXED",
         status: parsed.status ?? "ACTIVE",
         start_month: startMonthDate ?? undefined,
         end_month: endMonthDate ?? undefined,
@@ -181,6 +183,7 @@ export async function POST(request: Request, { params }: RouteContext) {
                 month_id: monthRecord.id,
                 amount: recurrentExpense.amount,
                 description: recurrentExpense.description,
+                kind: recurrentExpense.kind,
                 status: "COMPLETED",
                 processed_at: new Date(),
               },

@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `Expense` ADD COLUMN `kind` ENUM('FIXED', 'VARIABLE') NOT NULL DEFAULT 'FIXED';
+
+-- AlterTable
+ALTER TABLE `RecurrentExpense` ADD COLUMN `kind` ENUM('FIXED', 'VARIABLE') NOT NULL DEFAULT 'FIXED';

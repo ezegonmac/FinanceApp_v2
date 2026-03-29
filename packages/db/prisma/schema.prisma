@@ -82,6 +82,7 @@ model Expense {
   job_run_id       Int?
   amount           Decimal  @db.Decimal(18,2)
   description      String?
+  kind             ExpenseKind @default(FIXED)
   created_at       DateTime @default(now())
   processed_at     DateTime?
   processing_error String?
@@ -147,6 +148,7 @@ model RecurrentExpense {
   account_id            Int
   amount                Decimal  @db.Decimal(18,2)
   description           String?
+  kind                  ExpenseKind @default(FIXED)
   start_month           DateTime?
   end_month             DateTime?
   next_run_year         Int?
@@ -202,6 +204,11 @@ enum ExpenseStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+enum ExpenseKind {
+  FIXED
+  VARIABLE
 }
 
 enum RecurrentIncomeRunStatus {

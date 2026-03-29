@@ -12,6 +12,7 @@ type Props = {
 export default function AddExpenseForm({ accountId, onAdded }: Props) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [kind, setKind] = useState<"FIXED" | "VARIABLE">("FIXED");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [adding, setAdding] = useState(false);
@@ -46,6 +47,7 @@ export default function AddExpenseForm({ accountId, onAdded }: Props) {
         body: JSON.stringify({
           description,
           amount: parseFloat(amount),
+          kind,
           year,
           month,
         }),
@@ -96,6 +98,15 @@ export default function AddExpenseForm({ accountId, onAdded }: Props) {
           placeholder="Amount"
           disabled={adding}
         />
+        &nbsp;
+        <select
+          value={kind}
+          onChange={(e) => setKind(e.target.value as "FIXED" | "VARIABLE")}
+          disabled={adding}
+        >
+          <option value="FIXED">Fixed</option>
+          <option value="VARIABLE">Variable</option>
+        </select>
         &nbsp;
         <input
           type="month"

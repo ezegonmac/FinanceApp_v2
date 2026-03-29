@@ -8,6 +8,7 @@ type RecurrentExpense = {
   account_id: number;
   amount: string;
   description: string | null;
+  kind: "FIXED" | "VARIABLE";
   status: "ACTIVE" | "PAUSED" | "CANCELLED";
   start_month: string | null;
   end_month: string | null;
@@ -47,6 +48,7 @@ export default function RecurrentExpensesTable({
           <th style={{ textAlign: "left" }}>Account</th>
           <th style={{ textAlign: "left" }}>Description</th>
           <th style={{ textAlign: "left" }}>Amount</th>
+          <th style={{ textAlign: "left" }}>Type</th>
           <th style={{ textAlign: "left" }}>Status</th>
           <th style={{ textAlign: "left" }}>Start</th>
           <th style={{ textAlign: "left" }}>End</th>
@@ -67,6 +69,7 @@ export default function RecurrentExpensesTable({
             </td>
             <td>{item.description ?? "-"}</td>
             <td>{item.amount}</td>
+            <td>{item.kind}</td>
             <td>{item.status}</td>
             <td>{item.start_month ? new Date(item.start_month).toISOString().slice(0, 7) : "-"}</td>
             <td>{item.end_month ? new Date(item.end_month).toISOString().slice(0, 7) : "-"}</td>

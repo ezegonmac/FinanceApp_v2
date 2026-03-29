@@ -18,6 +18,7 @@ export default function AddRecurrentExpenseForm({ onAdded }: Props) {
   const [accountId, setAccountId] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [kind, setKind] = useState<"FIXED" | "VARIABLE">("FIXED");
   const [startMonth, setStartMonth] = useState("");
   const [endMonth, setEndMonth] = useState("");
   const [adding, setAdding] = useState(false);
@@ -68,6 +69,7 @@ export default function AddRecurrentExpenseForm({ onAdded }: Props) {
         body: JSON.stringify({
           description: description.trim() || undefined,
           amount: parseFloat(amount),
+          kind,
           start_month: startMonth || undefined,
           end_month: endMonth || undefined,
         }),
@@ -138,6 +140,14 @@ export default function AddRecurrentExpenseForm({ onAdded }: Props) {
       </div>
 
       <div>
+        <label>
+          Type:&nbsp;
+          <select value={kind} onChange={(e) => setKind(e.target.value as "FIXED" | "VARIABLE")} disabled={adding}>
+            <option value="FIXED">Fixed</option>
+            <option value="VARIABLE">Variable</option>
+          </select>
+        </label>
+        &nbsp;&nbsp;
         <label>
           Start month:&nbsp;
           <input type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} disabled={adding} />

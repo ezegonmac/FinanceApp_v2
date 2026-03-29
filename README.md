@@ -32,7 +32,7 @@ Time Tracker: https://track.toggl.com/timer
   - Disabled accounts 🟨
   - Incomes to these accounts ✅
   - Expenses from these accounts ✅
-  - Recurrent expenses (fixed and variable) 🟨
+  - Recurrent expenses (fixed and variable) ✅
   - Recurrent incomes (start-of-month auto-apply) ✅
   - Recurrent transactions 🟨
   - Transactions between accounts ✅
@@ -47,12 +47,13 @@ Time Tracker: https://track.toggl.com/timer
   - Metrics page with basic data ✅
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
+  - Todo tab with pending todo expenses and transactions that are not marked as automated (bool attribute) 🟨
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
   - Pause and resume recurrent incomes 🟨
   - Pause and resume recurrent expenses 🟨
   - Delete recurrent incomes (with its associated incomes) ✅
-  - Delete recurrent expenses (with its associated expenses) 🟨
+  - Delete recurrent expenses (with its associated expenses) ✅
   - Modify recurrent incomes start and end dates 🟨
   - Modify recurrent expenses start and end dates 🟨
   - Allow recurrent incomes with no end date 🟨
@@ -61,6 +62,7 @@ Time Tracker: https://track.toggl.com/timer
   - Edit account details 🟨
   - Edit income and expense details 🟨
   - Edit transaction details 🟨
+  - Modify recurrent income, expense and transaction frequency 🟨
 - Scheduled job to apply pending incomes, expenses and transactions at the end of the day 
   - API endpoint ✅
   - Automate with server cron 🟨

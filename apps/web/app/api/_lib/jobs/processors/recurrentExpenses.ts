@@ -86,6 +86,7 @@ export async function applyRecurrentExpensesForMonth(
           data: {
             description: recurrentExpense.description,
             amount: recurrentExpense.amount,
+            kind: recurrentExpense.kind,
             month_id: monthId,
             account_id: recurrentExpense.account_id,
             status: "COMPLETED",

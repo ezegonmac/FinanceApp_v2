@@ -30,6 +30,7 @@ export default function ExpensesTable({
           <th style={{ textAlign: "left" }}>Id</th>
           <th style={{ textAlign: "left" }}>Description</th>
           <th style={{ textAlign: "left" }}>Amount</th>
+          <th style={{ textAlign: "left" }}>Type</th>
           {showMonth && <th style={{ textAlign: "left" }}>Month</th>}
           {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
           <th style={{ textAlign: "left" }}>Status</th>
@@ -46,6 +47,7 @@ export default function ExpensesTable({
             </td>
             <td>{expense.description}</td>
             <td>{expense.amount}</td>
+            <td>{expense.kind ?? "FIXED"}</td>
             {showMonth && (
               <td>{expense.month ? formatYearMonth(expense.month.year, expense.month.month) : "N/A"}</td>
             )}
