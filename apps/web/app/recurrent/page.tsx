@@ -1,3 +1,4 @@
+import RecurrentExpensesView from "@/components/recurrent-expenses/RecurrentExpensesView";
 import RecurrentIncomesView from "@/components/recurrent-incomes/RecurrentIncomesView";
 
 export default function RecurrentPage() {
@@ -7,6 +8,12 @@ export default function RecurrentPage() {
 
       <h2>Recurrent Incomes</h2>
       <RecurrentIncomesView />
+
+      <br />
+      <br />
+
+      <h2>Recurrent Expenses</h2>
+      <RecurrentExpensesView />
     </div>
   );
 }

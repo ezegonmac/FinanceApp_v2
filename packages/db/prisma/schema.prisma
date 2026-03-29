@@ -23,6 +23,7 @@ model Account {
   Incomes  Income[]
   recurrentIncomes RecurrentIncome[]
   expenses Expense[]
+  recurrentExpenses RecurrentExpense[]
   fromTransactions Transaction[] @relation("FromAccount")
   toTransactions   Transaction[] @relation("ToAccount")
   monthSnapshots   MonthSnapshot[]
@@ -91,6 +92,7 @@ model Expense {
 
   account Account @relation(fields: [account_id], references: [id])
   status  ExpenseStatus @default(PENDING)
+  recurrentExpenseRuns RecurrentExpenseRun[]
 
   @@index([job_run_id])
   @@index([month_id, status])
@@ -140,6 +142,50 @@ model RecurrentIncomeRun {
   @@index([status])
 }
 
+model RecurrentExpense {
+  id                    Int      @id @default(autoincrement())
+  account_id            Int
+  amount                Decimal  @db.Decimal(18,2)
+  description           String?
+  start_month           DateTime?
+  end_month             DateTime?
+  next_run_year         Int?
+  next_run_month        Int?
+  last_applied_month_id Int?
+  status                RecurrentExpenseStatus @default(ACTIVE)
+  created_at            DateTime @default(now())
+
+  account            Account @relation(fields: [account_id], references: [id])
+  last_applied_month Month?  @relation("RecurrentExpenseLastAppliedMonth", fields: [last_applied_month_id], references: [id])
+  runs               RecurrentExpenseRun[]
+
+  @@index([account_id, status])
+  @@index([next_run_year, next_run_month])
+  @@index([last_applied_month_id])
+}
+
+model RecurrentExpenseRun {
+  id                   Int      @id @default(autoincrement())
+  recurrent_expense_id Int
+  month_id             Int
+  expense_id           Int?
+  job_run_id           Int?
+  status               RecurrentExpenseRunStatus
+  processing_error     String?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  recurrent_expense RecurrentExpense @relation(fields: [recurrent_expense_id], references: [id])
+  month            Month            @relation(fields: [month_id], references: [id])
+  expense          Expense?         @relation(fields: [expense_id], references: [id])
+  job_run          JobRun?          @relation(fields: [job_run_id], references: [id])
+
+  @@unique([recurrent_expense_id, month_id], name: "recurrent_expense_month")
+  @@index([month_id])
+  @@index([job_run_id])
+  @@index([status])
+}
+
 enum TransactionStatus {
   PENDING
   COMPLETED
@@ -163,7 +209,18 @@ enum RecurrentIncomeRunStatus {
   FAILED
 }
 
+enum RecurrentExpenseRunStatus {
+  APPLIED
+  FAILED
+}
+
 enum RecurrentIncomeStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum RecurrentExpenseStatus {
   ACTIVE
   PAUSED
   CANCELLED
@@ -188,6 +245,8 @@ model Month {
   lastAppliedRecurrentIncomes RecurrentIncome[] @relation("RecurrentIncomeLastAppliedMonth")
   recurrentIncomeRuns RecurrentIncomeRun[]
   expenses Expense[]
+  lastAppliedRecurrentExpenses RecurrentExpense[] @relation("RecurrentExpenseLastAppliedMonth")
+  recurrentExpenseRuns RecurrentExpenseRun[]
   transactions Transaction[]
   monthSnapshots MonthSnapshot[]
 }
@@ -226,6 +285,7 @@ model JobRun {
   incomes        Income[]
   recurrentIncomeRuns RecurrentIncomeRun[]
   expenses       Expense[]
+  recurrentExpenseRuns RecurrentExpenseRun[]
   transactions   Transaction[]
 
   @@unique([job_name, madrid_date], name: "job_name_madrid_date")
