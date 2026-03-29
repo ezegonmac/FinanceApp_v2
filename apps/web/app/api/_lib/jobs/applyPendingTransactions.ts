@@ -1,130 +1,30 @@
-import { Prisma, prisma } from "@repo/db";
+import { prisma } from "@repo/db";
 import { getEuropeMadridDateKey, getEuropeMadridDateParts } from "@repo/utils";
 import {
   finalizeMonthSnapshots,
   recalculateAllSnapshotsForMonth,
 } from "../snapshots/recalculateMonthSnapshot";
-
-const APPLY_PENDING_JOB_NAME = "apply-pending-transactions";
-
-type ApplyPendingTransactionsResult = {
-  alreadyRun: boolean;
-  status: "completed" | "failed" | "running";
-  madridDate: string;
-  processed: number;
-  failed: number;
-  skipped: number;
-};
-
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Unknown error";
-}
-
-function isUniqueConstraintError(error: unknown) {
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
-}
-
-function getPreviousYearMonth(year: number, month: number) {
-  if (month === 1) {
-    return { year: year - 1, month: 12 };
-  }
-
-  return { year, month: month - 1 };
-}
+import { completeJobRun, failJobRun, prepareDailyJobRun } from "./jobRun";
+import {
+  applyPendingExpensesForMonth,
+  applyPendingIncomesForMonth,
+  applyPendingTransactionsForMonth,
+} from "./processors/pendingItems";
+import { applyRecurrentIncomesForMonth } from "./processors/recurrentIncomes";
+import type { ApplyPendingTransactionsResult, ProcessCounts } from "./types";
+import { addCounts, getPreviousYearMonth } from "./utils";
 
 export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<ApplyPendingTransactionsResult> {
   const madridDate = getEuropeMadridDateKey();
   const { year, month } = getEuropeMadridDateParts();
 
-  let jobRun = await prisma.jobRun.findUnique({
-    where: {
-      job_name_madrid_date: {
-        job_name: APPLY_PENDING_JOB_NAME,
-        madrid_date: madridDate,
-      },
-    },
-  });
-
-  if (jobRun?.status === "COMPLETED") {
-    return {
-      alreadyRun: true,
-      status: "completed",
-      madridDate,
-      processed: jobRun.processed_count,
-      failed: jobRun.failed_count,
-      skipped: jobRun.skipped_count,
-    };
+  const prepared = await prepareDailyJobRun(madridDate);
+  if (prepared.shouldExit) {
+    return prepared.result;
   }
 
-  if (jobRun?.status === "RUNNING") {
-    return {
-      alreadyRun: true,
-      status: "running",
-      madridDate,
-      processed: jobRun.processed_count,
-      failed: jobRun.failed_count,
-      skipped: jobRun.skipped_count,
-    };
-  }
-
-  if (jobRun?.status === "FAILED") {
-    jobRun = await prisma.jobRun.update({
-      where: { id: jobRun.id },
-      data: {
-        status: "RUNNING",
-        started_at: new Date(),
-        finished_at: null,
-        processed_count: 0,
-        failed_count: 0,
-        skipped_count: 0,
-        error_message: null,
-      },
-    });
-  }
-
-  if (!jobRun) {
-    try {
-      jobRun = await prisma.jobRun.create({
-        data: {
-          job_name: APPLY_PENDING_JOB_NAME,
-          madrid_date: madridDate,
-          status: "RUNNING",
-        },
-      });
-    } catch (error) {
-      if (isUniqueConstraintError(error)) {
-        const existingJobRun = await prisma.jobRun.findUnique({
-          where: {
-            job_name_madrid_date: {
-              job_name: APPLY_PENDING_JOB_NAME,
-              madrid_date: madridDate,
-            },
-          },
-        });
-
-        if (existingJobRun) {
-          return {
-            alreadyRun: true,
-            status: existingJobRun.status === "COMPLETED" ? "completed" : "running",
-            madridDate,
-            processed: existingJobRun.processed_count,
-            failed: existingJobRun.failed_count,
-            skipped: existingJobRun.skipped_count,
-          };
-        }
-      }
-
-      throw error;
-    }
-  }
-
-  let processed = 0;
-  let failed = 0;
-  let skipped = 0;
+  const jobRun = prepared.jobRun;
+  const counts: ProcessCounts = { processed: 0, failed: 0, skipped: 0 };
 
   try {
     const monthRecord = await prisma.month.upsert({
@@ -141,178 +41,26 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
       },
     });
 
-    const pendingTransactions = await prisma.transaction.findMany({
-      where: {
-        month_id: monthRecord.id,
-        status: "PENDING",
-      },
-      orderBy: { id: "asc" },
-    });
+    const recurrentResult = await applyRecurrentIncomesForMonth(
+      year,
+      month,
+      monthRecord.id,
+      jobRun.id
+    );
+    addCounts(counts, recurrentResult);
 
-    for (const pendingTransaction of pendingTransactions) {
-      try {
-        const result = await prisma.$transaction(async (tx) => {
-          const claimResult = await tx.transaction.updateMany({
-            where: {
-              id: pendingTransaction.id,
-              status: "PENDING",
-            },
-            data: {
-              status: "COMPLETED",
-              processed_at: new Date(),
-              processing_error: null,
-              job_run_id: jobRun.id,
-            },
-          });
-
-          if (claimResult.count === 0) {
-            return "skipped" as const;
-          }
-
-          await tx.account.update({
-            where: { id: pendingTransaction.from_account_id },
-            data: { balance: { decrement: pendingTransaction.amount } },
-          });
-
-          await tx.account.update({
-            where: { id: pendingTransaction.to_account_id },
-            data: { balance: { increment: pendingTransaction.amount } },
-          });
-
-          return "processed" as const;
-        });
-
-        if (result === "processed") {
-          processed += 1;
-        } else {
-          skipped += 1;
-        }
-      } catch (error) {
-        failed += 1;
-
-        await prisma.transaction.updateMany({
-          where: {
-            id: pendingTransaction.id,
-            status: "PENDING",
-          },
-          data: {
-            processing_error: getErrorMessage(error),
-          },
-        });
-      }
-    }
-
-    const pendingIncomes = await prisma.income.findMany({
-      where: {
-        month_id: monthRecord.id,
-        status: "PENDING",
-      },
-      orderBy: { id: "asc" },
-    });
-
-    for (const pendingIncome of pendingIncomes) {
-      try {
-        const result = await prisma.$transaction(async (tx) => {
-          const claimResult = await tx.income.updateMany({
-            where: {
-              id: pendingIncome.id,
-              status: "PENDING",
-            },
-            data: {
-              status: "COMPLETED",
-              processed_at: new Date(),
-              processing_error: null,
-              job_run_id: jobRun.id,
-            },
-          });
-
-          if (claimResult.count === 0) {
-            return "skipped" as const;
-          }
-
-          await tx.account.update({
-            where: { id: pendingIncome.account_id },
-            data: { balance: { increment: pendingIncome.amount } },
-          });
-
-          return "processed" as const;
-        });
-
-        if (result === "processed") {
-          processed += 1;
-        } else {
-          skipped += 1;
-        }
-      } catch (error) {
-        failed += 1;
-
-        await prisma.income.updateMany({
-          where: {
-            id: pendingIncome.id,
-            status: "PENDING",
-          },
-          data: {
-            processing_error: getErrorMessage(error),
-          },
-        });
-      }
-    }
-
-    const pendingExpenses = await prisma.expense.findMany({
-      where: {
-        month_id: monthRecord.id,
-        status: "PENDING",
-      },
-      orderBy: { id: "asc" },
-    });
-
-    for (const pendingExpense of pendingExpenses) {
-      try {
-        const result = await prisma.$transaction(async (tx) => {
-          const claimResult = await tx.expense.updateMany({
-            where: {
-              id: pendingExpense.id,
-              status: "PENDING",
-            },
-            data: {
-              status: "COMPLETED",
-              processed_at: new Date(),
-              processing_error: null,
-              job_run_id: jobRun.id,
-            },
-          });
-
-          if (claimResult.count === 0) {
-            return "skipped" as const;
-          }
-
-          await tx.account.update({
-            where: { id: pendingExpense.account_id },
-            data: { balance: { decrement: pendingExpense.amount } },
-          });
-
-          return "processed" as const;
-        });
-
-        if (result === "processed") {
-          processed += 1;
-        } else {
-          skipped += 1;
-        }
-      } catch (error) {
-        failed += 1;
-
-        await prisma.expense.updateMany({
-          where: {
-            id: pendingExpense.id,
-            status: "PENDING",
-          },
-          data: {
-            processing_error: getErrorMessage(error),
-          },
-        });
-      }
-    }
+    addCounts(
+      counts,
+      await applyPendingTransactionsForMonth(monthRecord.id, jobRun.id)
+    );
+    addCounts(
+      counts,
+      await applyPendingIncomesForMonth(monthRecord.id, jobRun.id)
+    );
+    addCounts(
+      counts,
+      await applyPendingExpensesForMonth(monthRecord.id, jobRun.id)
+    );
 
     // Recalculate current month snapshots for all active accounts (provisional/live)
     await recalculateAllSnapshotsForMonth(monthRecord.id, {
@@ -324,37 +72,18 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
     const previous = getPreviousYearMonth(year, month);
     await finalizeMonthSnapshots(previous.year, previous.month);
 
-    await prisma.jobRun.update({
-      where: { id: jobRun.id },
-      data: {
-        status: "COMPLETED",
-        finished_at: new Date(),
-        processed_count: processed,
-        failed_count: failed,
-        skipped_count: skipped,
-      },
-    });
+    await completeJobRun(jobRun.id, counts);
 
     return {
       alreadyRun: false,
       status: "completed",
       madridDate,
-      processed,
-      failed,
-      skipped,
+      processed: counts.processed,
+      failed: counts.failed,
+      skipped: counts.skipped,
     };
   } catch (error) {
-    await prisma.jobRun.update({
-      where: { id: jobRun.id },
-      data: {
-        status: "FAILED",
-        finished_at: new Date(),
-        processed_count: processed,
-        failed_count: failed,
-        skipped_count: skipped,
-        error_message: getErrorMessage(error),
-      },
-    });
+    await failJobRun(jobRun.id, counts, error);
 
     throw error;
   }

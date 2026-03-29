@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/accounts">Accounts</Link> |{" "}
             <Link href="/months">Months</Link> |{" "}
             <Link href="/months/current">Current Month</Link> |{" "}
+            <Link href="/recurrent">Recurrent</Link> |{" "}
               <Link href="/metrics">Metrics</Link> |{" "}
               <Link href="/admin">Admin</Link>
           </nav>

@@ -33,9 +33,9 @@ Time Tracker: https://track.toggl.com/timer
   - Incomes to these accounts ✅
   - Expenses from these accounts ✅
   - Recurrent expenses (fixed and variable) 🟨
-  - Recurrent incomes 🟨
+  - Recurrent incomes (start-of-month auto-apply) ✅
   - Transactions between accounts ✅
-  - Monthly Splits across accounts (The splits planned at the beginning of the month) 🟨
+  - Monthly Splits across accounts (The splits planned at the beginning of the month) (recurrent transactions) 🟨
   - Investments in different products in these accounts 🟨
 - View
   - Account details ✅
@@ -48,6 +48,10 @@ Time Tracker: https://track.toggl.com/timer
   - Performance of these investments 🟨
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
+  - Pause and resume recurrent incomes 🟨
+  - Pause and resume recurrent expenses 🟨
+  - Delete recurrent incomes 🟨
+  - Delete recurrent expenses 🟨
   - Enable/Disable account 🟨
   - Edit account details 🟨
 - Scheduled job to apply pending incomes, expenses and transactions at the end of the day 
@@ -142,6 +146,7 @@ npx prisma studio
 
 # Scheduled job: apply pending month items
 The endpoint below processes PENDING incomes, expenses and transactions for the current month using Europe/Madrid timezone.
+It also applies active recurrent incomes once per month (idempotent run-log by month).
 ```
 POST /api/internal/jobs/apply-pending-transactions
 Authorization: Bearer <CRON_SECRET>
