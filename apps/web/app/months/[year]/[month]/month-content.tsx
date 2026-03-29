@@ -7,6 +7,9 @@ import IncomesTable from "@/components/incomes/IncomesTable";
 import TransactionsTable from "@/components/transactions/TransactionsTable";
 import ExpensesTable from "@/components/expenses/ExpensesTable";
 import MonthSnapshotsTable from "@/components/snapshots/MonthSnapshotsTable";
+import AccountMonthBreakdownTable from "@/components/snapshots/AccountMonthBreakdownTable";
+import AccountMovementsBreakdownTable from "@/components/snapshots/AccountMovementsBreakdownTable";
+import AccountSpentLeftTable from "@/components/snapshots/AccountSpentLeftTable";
 
 type Props = {
   year: number;
@@ -42,11 +45,14 @@ export default function MonthContent({ year, month }: Props) {
   const [snapshots, setSnapshots] = useState<MonthSnapshot[]>([]);
   const [snapshotsLoading, setSnapshotsLoading] = useState(false);
 
+  const [allAccounts, setAllAccounts] = useState<{ id: number; name: string }[]>([]);
+
   useEffect(() => {
     fetchIncomes();
     fetchTransactions();
     fetchExpenses();
     fetchSnapshots();
+    fetchAllAccounts();
   }, [year, month]);
 
   async function fetchIncomes() {
@@ -101,6 +107,18 @@ export default function MonthContent({ year, month }: Props) {
     }
   }
 
+  async function fetchAllAccounts() {
+    try {
+      const res = await fetch("/api/accounts");
+      if (res.ok) {
+        const data = await res.json();
+        setAllAccounts(data.map((a: { id: number; name: string }) => ({ id: a.id, name: a.name })));
+      }
+    } catch {
+      // silently ignore
+    }
+  }
+
   function handleNavigate(newYear: number, newMonth: number) {
     setIsLoading(true);
     router.push(`/months/${newYear}/${newMonth}`);
@@ -144,6 +162,31 @@ export default function MonthContent({ year, month }: Props) {
         <>
           <h2>Monthly Summary</h2>
           <MonthSnapshotsTable snapshots={snapshots} loading={snapshotsLoading} />
+
+          <h2>Account Breakdown</h2>
+          <AccountMonthBreakdownTable
+            snapshots={snapshots}
+            allAccounts={allAccounts}
+            loading={snapshotsLoading}
+          />
+
+          <h2>Account Movements Breakdown</h2>
+          <AccountMovementsBreakdownTable
+            allAccounts={allAccounts}
+            incomes={incomes}
+            expenses={expenses}
+            transactions={transactions}
+            loading={incomesLoading || expensesLoading || transactionsLoading}
+          />
+
+          <h2>Account Spent / Left Summary</h2>
+          <AccountSpentLeftTable
+            snapshots={snapshots}
+            allAccounts={allAccounts}
+            expenses={expenses}
+            transactions={transactions}
+            loading={snapshotsLoading}
+          />
 
           <h2>Incomes for this Month</h2>
           <IncomesTable
