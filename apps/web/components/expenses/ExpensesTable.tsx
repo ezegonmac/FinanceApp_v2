@@ -102,18 +102,6 @@ export default function ExpensesTable({
       id: "amount",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</span>,
       cell: ({ row }) => formatBalance(showAnalytics ? row.original.analytics_amount ?? row.original.amount : row.original.amount),
-    },
-    {
-      id: "type",
-      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</span>,
-      cell: ({ row }) => {
-        const kind = row.original.kind ?? "FIXED";
-        return (
-          <Badge variant={kind === "FIXED" ? "info" : "warning"}>
-            {kind.charAt(0) + kind.slice(1).toLowerCase()}
-          </Badge>
-        );
-      },
     }
   );
 
@@ -132,6 +120,19 @@ export default function ExpensesTable({
       },
     });
   }
+
+  columns.push({
+    id: "type",
+    header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</span>,
+    cell: ({ row }) => {
+      const kind = row.original.kind ?? "FIXED";
+      return (
+        <Badge variant={kind === "FIXED" ? "info" : "warning"}>
+          {kind.charAt(0) + kind.slice(1).toLowerCase()}
+        </Badge>
+      );
+    },
+  });
 
   if (showAccount) {
     columns.push({

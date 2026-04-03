@@ -17,7 +17,7 @@ export default function MetricsMonthlySummary() {
   }, []);
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
   if (!data) return null;
 
   return (

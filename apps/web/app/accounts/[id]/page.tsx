@@ -29,16 +29,17 @@ export default async function AccountPage({
         />
       </section>
 
-      <section className="rounded-md border bg-card p-6 text-card-foreground">
-        <AccountIncomesView accountId={accountId} />
-      </section>
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+        <section className="rounded-md border bg-card p-6 text-card-foreground">
+          <AccountIncomesView accountId={accountId} />
+        </section>
+        <section className="rounded-md border bg-card p-6 text-card-foreground">
+          <AccountExpensesView accountId={accountId} />
+        </section>
+      </div>
 
       <section className="rounded-md border bg-card p-6 text-card-foreground">
         <AccountTransactionsView accountId={accountId} />
-      </section>
-
-      <section className="rounded-md border bg-card p-6 text-card-foreground">
-        <AccountExpensesView accountId={accountId} />
       </section>
     </div>
   );

@@ -1,6 +1,8 @@
 'use client';
 
 import Link from "next/link";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 
 type MonthSnapshot = {
   id: number;
@@ -10,6 +12,18 @@ type MonthSnapshot = {
   total_transactions_in: string;
   total_transactions_out: string;
   account: { id: number; name: string };
+};
+
+type Account = {
+  id: number;
+  name: string;
+};
+
+type BreakdownRow = {
+  account: Account;
+  totalIn: number;
+  totalOut: number;
+  net: number;
 };
 
 type Props = {
@@ -23,16 +37,6 @@ const fmt = (n: number) => {
   return `€${n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
-const cell: React.CSSProperties = { padding: "6px 10px" };
-const hCell: React.CSSProperties = {
-  ...cell,
-  textAlign: "left",
-  borderBottom: "1px solid #ccc",
-  fontWeight: 600,
-};
-const numCell: React.CSSProperties = { ...cell, textAlign: "right" };
-const numHCell: React.CSSProperties = { ...hCell, textAlign: "right" };
-
 export default function AccountMonthBreakdownTable({
   snapshots,
   allAccounts,
@@ -41,39 +45,45 @@ export default function AccountMonthBreakdownTable({
   if (loading) return <p>Loading breakdown…</p>;
   if (!allAccounts || allAccounts.length === 0) return null;
 
-  return (
-    <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: "1rem" }}>
-      <thead>
-        <tr>
-          <th style={hCell}>Account</th>
-          <th style={numHCell}>In</th>
-          <th style={numHCell}>Out</th>
-          <th style={numHCell}>Net</th>
-        </tr>
-      </thead>
-      <tbody>
-        {allAccounts.map((account) => {
-          const snap = snapshots.find((s) => s.account_id === account.id);
-          const totalIn = snap ? Number(snap.total_incomes) + Number(snap.total_transactions_in) : 0;
-          const totalOut = snap ? Number(snap.total_transactions_out) + Number(snap.total_expenses) : 0;
-          const net = totalIn - totalOut;
+  const data: BreakdownRow[] = allAccounts.map((account) => {
+    const snap = snapshots.find((s) => s.account_id === account.id);
+    const totalIn = snap ? Number(snap.total_incomes) + Number(snap.total_transactions_in) : 0;
+    const totalOut = snap ? Number(snap.total_transactions_out) + Number(snap.total_expenses) : 0;
+    const net = totalIn - totalOut;
 
-          return (
-            <tr key={account.id} style={{ borderBottom: "1px solid #eee" }}>
-              <td style={cell}>
-                <Link href={`/accounts/${account.id}`} style={{ color: "blue" }}>
-                  {account.name}
-                </Link>
-              </td>
-              <td style={numCell}>{fmt(totalIn)}</td>
-              <td style={numCell}>{fmt(totalOut)}</td>
-              <td style={{ ...numCell, fontWeight: 700, color: net >= 0 ? "green" : "crimson" }}>
-                {net === 0 ? "-" : `${net >= 0 ? "+" : ""}${fmt(net)}`}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  );
+    return { account, totalIn, totalOut, net };
+  });
+
+  const columns: ColumnDef<BreakdownRow>[] = [
+    {
+      id: "account",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</span>,
+      cell: ({ row }) => (
+        <Link href={`/accounts/${row.original.account.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+          {row.original.account.name}
+        </Link>
+      ),
+    },
+    {
+      id: "totalIn",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">In</span>,
+      cell: ({ row }) => <span className="text-right">{fmt(row.original.totalIn)}</span>,
+    },
+    {
+      id: "totalOut",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Out</span>,
+      cell: ({ row }) => <span className="text-right">{fmt(row.original.totalOut)}</span>,
+    },
+    {
+      id: "net",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Net</span>,
+      cell: ({ row }) => (
+        <span className={`font-bold text-right ${row.original.net >= 0 ? "text-green-600" : "text-red-600"}`}>
+          {row.original.net === 0 ? "-" : `${row.original.net >= 0 ? "+" : ""}${fmt(row.original.net)}`}
+        </span>
+      ),
+    },
+  ];
+
+  return <DataTable columns={columns} data={data} headerClassName="bg-muted/50" />;
 }

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 
 type AccountBalance = {
   id: number;
@@ -15,35 +17,36 @@ const fmt = (val: number) =>
   val.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 
 export default function AccountBalancesTable({ accounts, total }: Props) {
-  if (!accounts || accounts.length === 0) return <p>No accounts found.</p>;
+  if (!accounts || accounts.length === 0) {
+    return <p className="text-muted-foreground">No accounts found.</p>;
+  }
+
+  const columns: ColumnDef<AccountBalance>[] = [
+    {
+      accessorKey: "name",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</span>,
+      cell: ({ row }) => (
+        <Link href={`/accounts/${row.original.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+          {row.original.name}
+        </Link>
+      ),
+    },
+    {
+      id: "balance",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balance</span>,
+      cell: ({ row }) => fmt(Number(row.original.balance)),
+    },
+  ];
 
   return (
-    <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: "1rem" }}>
-      <thead>
-        <tr>
-          {["Account", "Balance"].map((h) => (
-            <th key={h} style={{ textAlign: "left", padding: "6px 10px", borderBottom: "1px solid #ccc" }}>
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {accounts.map((a) => (
-          <tr key={a.id} style={{ borderBottom: "1px solid #eee" }}>
-            <td style={{ padding: "6px 10px" }}>
-              <Link href={`/accounts/${a.id}`} style={{ color: "blue" }}>
-                {a.name}
-              </Link>
-            </td>
-            <td style={{ padding: "6px 10px" }}>{fmt(Number(a.balance))}</td>
-          </tr>
-        ))}
-        <tr style={{ borderTop: "2px solid #ccc", fontWeight: "bold" }}>
-          <td style={{ padding: "6px 10px" }}>Total</td>
-          <td style={{ padding: "6px 10px" }}>{fmt(total)}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div className="space-y-3">
+      <DataTable columns={columns} data={accounts} headerClassName="bg-muted/50" />
+      <div className="rounded-md border bg-muted/30 px-4 py-3 font-semibold">
+        <div className="flex items-center justify-between">
+          <span>Total</span>
+          <span>{fmt(total)}</span>
+        </div>
+      </div>
+    </div>
   );
 }

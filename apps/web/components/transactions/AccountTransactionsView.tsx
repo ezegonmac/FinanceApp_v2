@@ -84,27 +84,27 @@ export default function AccountTransactionsView({ accountId }: Props) {
       ) : error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : (
-        <div className="space-y-6">
-          <div className="space-y-3">
-          <h3 className="text-lg font-medium">Outgoing transactions</h3>
-          <TransactionsTable
-            transactions={outgoingTransactions}
-            showMonth={true}
-            showFromAccount={false}
-            showToAccount={true}
-            onDeleted={refresh}
-          />
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+          <div className="space-y-3 overflow-hidden">
+            <h3 className="text-lg font-medium">Incoming</h3>
+            <TransactionsTable
+              transactions={incomingTransactions}
+              showMonth={true}
+              showFromAccount={true}
+              showToAccount={false}
+              onDeleted={refresh}
+            />
           </div>
 
-          <div className="space-y-3">
-          <h3 className="text-lg font-medium">Incoming transactions</h3>
-          <TransactionsTable
-            transactions={incomingTransactions}
-            showMonth={true}
-            showFromAccount={true}
-            showToAccount={false}
-            onDeleted={refresh}
-          />
+          <div className="space-y-3 overflow-hidden">
+            <h3 className="text-lg font-medium">Outgoing</h3>
+            <TransactionsTable
+              transactions={outgoingTransactions}
+              showMonth={true}
+              showFromAccount={false}
+              showToAccount={true}
+              onDeleted={refresh}
+            />
           </div>
         </div>
       )}

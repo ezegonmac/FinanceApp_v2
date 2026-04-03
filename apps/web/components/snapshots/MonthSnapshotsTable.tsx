@@ -1,6 +1,8 @@
 'use client';
 
 import Link from "next/link";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 
 type MonthSnapshot = {
   id: number;
@@ -23,45 +25,56 @@ const fmt = (val: string) =>
 export default function MonthSnapshotsTable({ snapshots, loading }: Props) {
   if (loading) return <p>Loading summary…</p>;
   if (!snapshots || snapshots.length === 0)
-    return <p style={{ color: "#888" }}>No snapshot data yet for this month.</p>;
+    return <p className="text-muted-foreground">No snapshot data yet for this month.</p>;
 
-  return (
-    <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: "1rem" }}>
-      <thead>
-        <tr>
-          {["Account", "Incomes", "Expenses", "Transfers In", "Transfers Out", "Net Change"].map((h) => (
-            <th key={h} style={{ textAlign: "left", padding: "6px 10px", borderBottom: "1px solid #ccc" }}>
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {snapshots.map((s) => {
-          const net =
-            Number(s.total_incomes) +
-            Number(s.total_transactions_in) -
-            Number(s.total_transactions_out) -
-            Number(s.total_expenses);
-          return (
-            <tr key={s.id}>
-              <td style={{ padding: "6px 10px" }}>
-                <Link href={`/accounts/${s.account_id}`} style={{ color: "blue" }}>
-                  {s.account.name}
-                </Link>
-              </td>
-              <td style={{ padding: "6px 10px" }}>{fmt(s.total_incomes)}</td>
-              <td style={{ padding: "6px 10px" }}>{fmt(s.total_expenses)}</td>
-              <td style={{ padding: "6px 10px" }}>{fmt(s.total_transactions_in)}</td>
-              <td style={{ padding: "6px 10px" }}>{fmt(s.total_transactions_out)}</td>
-              <td style={{ padding: "6px 10px", color: net >= 0 ? "green" : "red" }}>
-                {net >= 0 ? "+" : ""}
-                {net.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  );
+  const columns: ColumnDef<MonthSnapshot>[] = [
+    {
+      accessorKey: "account.name",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</span>,
+      cell: ({ row }) => (
+        <Link href={`/accounts/${row.original.account_id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+          {row.original.account.name}
+        </Link>
+      ),
+    },
+    {
+      id: "incomes",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Incomes</span>,
+      cell: ({ row }) => fmt(row.original.total_incomes),
+    },
+    {
+      id: "expenses",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expenses</span>,
+      cell: ({ row }) => fmt(row.original.total_expenses),
+    },
+    {
+      id: "transfers_in",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Transfers In</span>,
+      cell: ({ row }) => fmt(row.original.total_transactions_in),
+    },
+    {
+      id: "transfers_out",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Transfers Out</span>,
+      cell: ({ row }) => fmt(row.original.total_transactions_out),
+    },
+    {
+      id: "net_change",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Net Change</span>,
+      cell: ({ row }) => {
+        const net =
+          Number(row.original.total_incomes) +
+          Number(row.original.total_transactions_in) -
+          Number(row.original.total_transactions_out) -
+          Number(row.original.total_expenses);
+        return (
+          <span className={net >= 0 ? "text-green-600" : "text-red-600"}>
+            {net >= 0 ? "+" : ""}
+            {net.toLocaleString("es-ES", { style: "currency", currency: "EUR" })}
+          </span>
+        );
+      },
+    },
+  ];
+
+  return <DataTable columns={columns} data={snapshots} headerClassName="bg-muted/50" />;
 }

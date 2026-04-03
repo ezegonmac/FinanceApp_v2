@@ -1,4 +1,6 @@
 import { formatYearMonthLong } from "@repo/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 import type { MonthlySummaryRow } from "@/app/api/metrics/monthly-summary/route";
 
 type Aggregation = {
@@ -16,66 +18,73 @@ type Props = {
 const fmt = (val: number) =>
   val.toLocaleString("es-ES", { style: "currency", currency: "EUR" });
 
-const netStyle = (val: number): React.CSSProperties => ({
-  padding: "6px 10px",
-  color: val >= 0 ? "green" : "red",
-});
-
 export default function MonthlySummaryTable({ rows, totals, averages }: Props) {
   if (!rows || rows.length === 0)
-    return <p style={{ color: "#888" }}>No monthly data yet.</p>;
+    return <p className="text-muted-foreground">No monthly data yet.</p>;
 
-  const headers = ["Month", "Incomes", "Expenses", "Net Change", "Running Total"];
+  const columns: ColumnDef<MonthlySummaryRow>[] = [
+    {
+      id: "month",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Month</span>,
+      cell: ({ row }) => formatYearMonthLong(row.original.year, row.original.month),
+    },
+    {
+      id: "incomes",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Incomes</span>,
+      cell: ({ row }) => fmt(row.original.total_incomes),
+    },
+    {
+      id: "expenses",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Expenses</span>,
+      cell: ({ row }) => fmt(row.original.total_expenses),
+    },
+    {
+      id: "net",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Net Change</span>,
+      cell: ({ row }) => {
+        const net = row.original.net_change;
+        return (
+          <span className={net >= 0 ? "text-green-600" : "text-red-600"}>
+            {net >= 0 ? "+" : ""}
+            {fmt(net)}
+          </span>
+        );
+      },
+    },
+    {
+      id: "running",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Running Total</span>,
+      cell: ({ row }) => fmt(row.original.running_total),
+    },
+  ];
 
   return (
-    <table style={{ borderCollapse: "collapse", width: "100%", marginBottom: "1rem" }}>
-      <thead>
-        <tr>
-          {headers.map((h) => (
-            <th key={h} style={{ textAlign: "left", padding: "6px 10px", borderBottom: "1px solid #ccc" }}>
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r) => {
-          const net = r.net_change;
-          return (
-            <tr key={`${r.year}-${r.month}`} style={{ borderBottom: "1px solid #eee" }}>
-              <td style={{ padding: "6px 10px" }}>{formatYearMonthLong(r.year, r.month)}</td>
-              <td style={{ padding: "6px 10px" }}>{fmt(r.total_incomes)}</td>
-              <td style={{ padding: "6px 10px" }}>{fmt(r.total_expenses)}</td>
-              <td style={netStyle(net)}>
-                {net >= 0 ? "+" : ""}{fmt(net)}
-              </td>
-              <td style={{ padding: "6px 10px" }}>{fmt(r.running_total)}</td>
-            </tr>
-          );
-        })}
+    <div className="space-y-3">
+      <DataTable columns={columns} data={rows} headerClassName="bg-muted/50" />
 
-        {/* Average row */}
-        <tr style={{ borderTop: "2px solid #ccc", fontStyle: "italic", color: "#555" }}>
-          <td style={{ padding: "6px 10px" }}>Average</td>
-          <td style={{ padding: "6px 10px" }}>{fmt(averages.total_incomes)}</td>
-          <td style={{ padding: "6px 10px" }}>{fmt(averages.total_expenses)}</td>
-          <td style={netStyle(averages.net_change)}>
-            {averages.net_change >= 0 ? "+" : ""}{fmt(averages.net_change)}
-          </td>
-          <td style={{ padding: "6px 10px" }}>—</td>
-        </tr>
+      <div className="rounded-md border bg-muted/30 px-4 py-3">
+        <div className="mb-2 grid grid-cols-5 gap-4 text-sm italic text-muted-foreground">
+          <span>Average</span>
+          <span>{fmt(averages.total_incomes)}</span>
+          <span>{fmt(averages.total_expenses)}</span>
+          <span className={averages.net_change >= 0 ? "text-green-600" : "text-red-600"}>
+            {averages.net_change >= 0 ? "+" : ""}
+            {fmt(averages.net_change)}
+          </span>
+          <span>—</span>
+        </div>
 
-        {/* Total row */}
-        <tr style={{ borderTop: "1px solid #ccc", fontWeight: "bold" }}>
-          <td style={{ padding: "6px 10px" }}>Total</td>
-          <td style={{ padding: "6px 10px" }}>{fmt(totals.total_incomes)}</td>
-          <td style={{ padding: "6px 10px" }}>{fmt(totals.total_expenses)}</td>
-          <td style={netStyle(totals.net_change)}>
-            {totals.net_change >= 0 ? "+" : ""}{fmt(totals.net_change)}
-          </td>
-          <td style={{ padding: "6px 10px" }}>—</td>
-        </tr>
-      </tbody>
-    </table>
+        <div className="grid grid-cols-5 gap-4 text-sm font-semibold">
+          <span>Total</span>
+          <span>{fmt(totals.total_incomes)}</span>
+          <span>{fmt(totals.total_expenses)}</span>
+          <span className={totals.net_change >= 0 ? "text-green-600" : "text-red-600"}>
+            {totals.net_change >= 0 ? "+" : ""}
+            {fmt(totals.net_change)}
+          </span>
+          <span>—</span>
+        </div>
+      </div>
+    </div>
   );
 }

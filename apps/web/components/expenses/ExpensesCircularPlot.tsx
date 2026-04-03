@@ -64,8 +64,8 @@ export default function ExpensesCircularPlot({ expenses }: Props) {
     }));
 
   const ringStyle: React.CSSProperties = {
-    width: 120,
-    height: 120,
+    width: 280,
+    height: 280,
     borderRadius: "50%",
     background: buildConic(slices),
     position: "relative",
@@ -73,15 +73,15 @@ export default function ExpensesCircularPlot({ expenses }: Props) {
   };
 
   return (
-    <div style={{ marginTop: "0.75rem", border: "1px solid #eee", borderRadius: 8, padding: "10px" }}>
-      <div style={{ fontWeight: 600, marginBottom: 8 }}>Expenses Distribution by Individual Expense</div>
-      <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", alignItems: "center" }}>
+      <div style={{ fontWeight: 600, fontSize: 14 }}>Expenses Distribution</div>
+      <div style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "center", width: "100%" }}>
         <div style={ringStyle}>
           <div style={donutHole} />
         </div>
-        <div style={{ fontSize: 12 }}>
+        <div style={{ fontSize: 13, flex: 1, maxWidth: 200 }}>
           {slices.map((slice) => (
-            <div key={slice.label}>
+            <div key={slice.label} style={{ marginBottom: 4 }}>
               <span style={{ color: slice.color }}>■</span> {slice.label} {slice.pct === 0 ? "-" : `${slice.pct.toFixed(1)}%`}
             </div>
           ))}

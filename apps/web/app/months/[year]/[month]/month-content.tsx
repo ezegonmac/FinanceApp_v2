@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatYearMonthLong } from "@repo/utils";
+import { Button } from "@/components/ui/button";
 import IncomesTable from "@/components/incomes/IncomesTable";
 import TransactionsTable from "@/components/transactions/TransactionsTable";
 import ExpensesTable from "@/components/expenses/ExpensesTable";
+import ExpensesCircularPlot from "@/components/expenses/ExpensesCircularPlot";
 import MonthSnapshotsTable from "@/components/snapshots/MonthSnapshotsTable";
 import AccountMonthBreakdownTable from "@/components/snapshots/AccountMonthBreakdownTable";
-import AccountMovementsBreakdownTable from "@/components/snapshots/AccountMovementsBreakdownTable";
-import AccountSpentLeftTable from "@/components/snapshots/AccountSpentLeftTable";
+import AccountMovementsBreakdownTable from "@/components/snapshots/AccountMovementsBreakdownTableRefactored";
+import AccountSpentLeftTable from "@/components/snapshots/AccountSpentLeftTableRefactored";
 
 type Props = {
   year: number;
@@ -145,86 +147,101 @@ export default function MonthContent({ year, month }: Props) {
   }
 
   return (
-    <div>
-      <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
-        <button onClick={goToPreviousMonth} disabled={isLoading}>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between gap-4">
+        <Button variant="outline" onClick={goToPreviousMonth} disabled={isLoading}>
           ← Previous
-        </button>
-        <h1 style={{ margin: 0 }}>{formatYearMonthLong(year, month)}</h1>
-        <button onClick={goToNextMonth} disabled={isLoading}>
+        </Button>
+        <h1 className="text-3xl font-bold tracking-tight">{formatYearMonthLong(year, month)}</h1>
+        <Button variant="outline" onClick={goToNextMonth} disabled={isLoading}>
           Next →
-        </button>
+        </Button>
       </div>
 
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <>
-          <h2>Monthly Summary</h2>
-          <MonthSnapshotsTable snapshots={snapshots} loading={snapshotsLoading} />
+          <section className="rounded-md border bg-card p-6 text-card-foreground">
+            <h2 className="mb-4 text-xl font-semibold tracking-tight">Monthly Summary</h2>
+            <MonthSnapshotsTable snapshots={snapshots} loading={snapshotsLoading} />
+          </section>
 
-          <h2>Account Breakdown</h2>
-          <AccountMonthBreakdownTable
-            snapshots={snapshots}
-            allAccounts={allAccounts}
-            loading={snapshotsLoading}
-          />
+          <section className="rounded-md border bg-card p-6 text-card-foreground">
+            <h2 className="mb-4 text-xl font-semibold tracking-tight">Account Breakdown</h2>
+            <AccountMonthBreakdownTable
+              snapshots={snapshots}
+              allAccounts={allAccounts}
+              loading={snapshotsLoading}
+            />
+          </section>
 
-          <h2>Account Movements Breakdown</h2>
-          <AccountMovementsBreakdownTable
-            allAccounts={allAccounts}
-            incomes={incomes}
-            expenses={expenses}
-            transactions={transactions}
-            loading={incomesLoading || expensesLoading || transactionsLoading}
-          />
+          <section className="rounded-md border bg-card p-6 text-card-foreground">
+            <h2 className="mb-4 text-xl font-semibold tracking-tight">Incomes for this Month</h2>
+            <IncomesTable
+              incomes={incomes}
+              loading={incomesLoading}
+              error={incomesError}
+              showMonth={false}
+              showAccount={true}
+              onDeleted={(id) => { setIncomes((prev) => prev.filter((i) => i.id !== id)); fetchSnapshots(); }}
+            />
+          </section>
 
-          <h2>Account Spent / Left Summary</h2>
-          <AccountSpentLeftTable
-            snapshots={snapshots}
-            allAccounts={allAccounts}
-            expenses={expenses}
-            transactions={transactions}
-            loading={snapshotsLoading}
-          />
+          <section className="rounded-md border bg-card p-6 text-card-foreground">
+            <h2 className="mb-4 text-xl font-semibold tracking-tight">Transactions for this Month</h2>
+            <TransactionsTable
+              transactions={transactions}
+              loading={transactionsLoading}
+              error={transactionsError}
+              showMonth={false}
+              showAccount={true}
+              onDeleted={(id) => { setTransactions((prev) => prev.filter((t) => t.id !== id)); fetchSnapshots(); }}
+            />
+          </section>
 
-          <h2>Incomes for this Month</h2>
-          <IncomesTable
-            incomes={incomes}
-            loading={incomesLoading}
-            error={incomesError}
-            showMonth={false}
-            showAccount={true}
-            onDeleted={(id) => { setIncomes((prev) => prev.filter((i) => i.id !== id)); fetchSnapshots(); }}
-          />
+          <section className="rounded-md border bg-card p-6 text-card-foreground">
+            <h2 className="mb-4 text-xl font-semibold tracking-tight">Expenses for this Month</h2>
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+              <div className="overflow-hidden">
+                <ExpensesTable
+                  expenses={expenses}
+                  loading={expensesLoading}
+                  error={expensesError}
+                  showMonth={false}
+                  showAccount={true}
+                  showCircularPlot={false}
+                  showAnalytics={true}
+                  onDeleted={(id) => { setExpenses((prev) => prev.filter((e) => e.id !== id)); fetchSnapshots(); }}
+                />
+              </div>
+              <div className="flex items-start justify-center">
+                <ExpensesCircularPlot expenses={expenses} />
+              </div>
+            </div>
+          </section>
 
-          <br />
-          <br />
+          <section className="rounded-md border bg-card p-6 text-card-foreground">
+            <h2 className="mb-4 text-xl font-semibold tracking-tight">Account Spent / Left Summary</h2>
+            <AccountSpentLeftTable
+              snapshots={snapshots}
+              allAccounts={allAccounts}
+              expenses={expenses}
+              transactions={transactions}
+              loading={snapshotsLoading}
+            />
+          </section>
 
-          <h2>Transactions for this Month</h2>
-          <TransactionsTable
-            transactions={transactions}
-            loading={transactionsLoading}
-            error={transactionsError}
-            showMonth={false}
-            showAccount={true}
-            onDeleted={(id) => { setTransactions((prev) => prev.filter((t) => t.id !== id)); fetchSnapshots(); }}
-          />
-
-          <br />
-          <br />
-
-          <h2>Expenses for this Month</h2>
-          <ExpensesTable
-            expenses={expenses}
-            loading={expensesLoading}
-            error={expensesError}
-            showMonth={false}
-            showAccount={true}
-            showCircularPlot={true}
-            showAnalytics={true}
-            onDeleted={(id) => { setExpenses((prev) => prev.filter((e) => e.id !== id)); fetchSnapshots(); }}
-          />
+          <section className="rounded-md border bg-card p-6 text-card-foreground">
+            <h2 className="mb-4 text-xl font-semibold tracking-tight">Account Movements Breakdown</h2>
+            <AccountMovementsBreakdownTable
+              allAccounts={allAccounts}
+              incomes={incomes}
+              expenses={expenses}
+              transactions={transactions}
+              loading={incomesLoading || expensesLoading || transactionsLoading}
+            />
+          </section>
         </>
       )}
     </div>

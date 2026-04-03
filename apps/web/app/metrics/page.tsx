@@ -3,14 +3,20 @@ import MetricsMonthlySummary from "./metrics-monthly-summary";
 
 export default function MetricsPage() {
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1>Metrics</h1>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold tracking-tight">Metrics</h1>
+      </div>
 
-      <h2>Account Balances</h2>
-      <MetricsBalances />
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <h2 className="mb-4 text-xl font-semibold tracking-tight">Account Balances</h2>
+        <MetricsBalances />
+      </section>
 
-      <h2>Monthly Summary</h2>
-      <MetricsMonthlySummary />
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <h2 className="mb-4 text-xl font-semibold tracking-tight">Monthly Summary</h2>
+        <MetricsMonthlySummary />
+      </section>
     </div>
   );
 }
