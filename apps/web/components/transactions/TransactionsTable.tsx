@@ -56,7 +56,7 @@ export default function TransactionsTable({
           {displayTo && <th style={{ textAlign: "left" }}>To</th>}
           <th style={{ textAlign: "left" }}>Status</th>
           {debug && <th style={{ textAlign: "left" }}>Created At</th>}
-          {onDeleted && <th />}
+          <th style={{ textAlign: "left" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -88,11 +88,18 @@ export default function TransactionsTable({
             )}
             <td>{transaction.status}</td>
             {debug && <td>{new Date(transaction.created_at).toLocaleString()}</td>}
-            {onDeleted && (
-              <td>
-                <button onClick={() => handleDelete(transaction.id)} style={{ color: "red", cursor: "pointer" }}>Delete</button>
-              </td>
-            )}
+            <td>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <Link href={`/transactions/${transaction.id}`} style={{ color: "blue" }}>
+                  Edit
+                </Link>
+                {onDeleted && (
+                  <button type="button" onClick={() => handleDelete(transaction.id)} style={{ color: "red", cursor: "pointer" }}>
+                    Delete
+                  </button>
+                )}
+              </div>
+            </td>
           </tr>
         ))}
       </tbody>
