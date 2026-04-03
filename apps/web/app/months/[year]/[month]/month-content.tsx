@@ -220,6 +220,7 @@ export default function MonthContent({ year, month }: Props) {
             showMonth={false}
             showAccount={true}
             showCircularPlot={true}
+            showAnalytics={true}
           />
         </>
       )}

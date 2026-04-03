@@ -18,12 +18,17 @@ export default function AddRecurrentExpenseForm({ onAdded }: Props) {
   const [accountId, setAccountId] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [analyticsAmount, setAnalyticsAmount] = useState("");
   const [kind, setKind] = useState<"FIXED" | "VARIABLE">("FIXED");
   const [startMonth, setStartMonth] = useState("");
   const [endMonth, setEndMonth] = useState("");
   const [adding, setAdding] = useState(false);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAnalyticsAmount(amount);
+  }, [amount]);
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -69,6 +74,7 @@ export default function AddRecurrentExpenseForm({ onAdded }: Props) {
         body: JSON.stringify({
           description: description.trim() || undefined,
           amount: parseFloat(amount),
+          analytics_amount: analyticsAmount && analyticsAmount !== amount ? parseFloat(analyticsAmount) : undefined,
           kind,
           start_month: startMonth || undefined,
           end_month: endMonth || undefined,
@@ -79,6 +85,7 @@ export default function AddRecurrentExpenseForm({ onAdded }: Props) {
 
       setDescription("");
       setAmount("");
+      setAnalyticsAmount("");
       onAdded();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -136,6 +143,16 @@ export default function AddRecurrentExpenseForm({ onAdded }: Props) {
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Amount"
           disabled={adding}
+        />
+        &nbsp;
+        <input
+          type="number"
+          style={{ width: "10em" }}
+          value={analyticsAmount}
+          onChange={(e) => setAnalyticsAmount(e.target.value)}
+          placeholder="Analytics Amt"
+          disabled={adding}
+          title="Analytics amount (used for expense metrics, defaults to amount)"
         />
       </div>
 

@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 const expenseSchema = z.object({
   description: z.string().min(1),
   amount: z.number().nonnegative(),
+  analytics_amount: z.number().nonnegative().optional(),
   kind: z.enum(["FIXED", "VARIABLE"]).optional(),
   year: z.number().int(),
   month: z.number().int().min(1).max(12),
@@ -92,6 +93,7 @@ export async function POST(request: Request, { params }: RouteContext) {
           data: {
             description: parsed.description,
             amount: parsed.amount,
+            analytics_amount: parsed.analytics_amount ?? parsed.amount,
             kind: parsed.kind ?? "FIXED",
             month_id: monthRecord.id,
             account_id: accountId,
@@ -114,6 +116,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         data: {
           description: parsed.description,
           amount: parsed.amount,
+          analytics_amount: parsed.analytics_amount ?? parsed.amount,
           kind: parsed.kind ?? "FIXED",
           month_id: monthRecord.id,
           account_id: accountId,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatYearMonth } from "@repo/utils";
 import ErrorMessage from "../ErrorMessage";
 
@@ -12,11 +12,16 @@ type Props = {
 export default function AddExpenseForm({ accountId, onAdded }: Props) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [analyticsAmount, setAnalyticsAmount] = useState("");
   const [kind, setKind] = useState<"FIXED" | "VARIABLE">("FIXED");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAnalyticsAmount(amount);
+  }, [amount]);
 
   const handleAdd = async () => {
     setAdding(true);
@@ -47,6 +52,7 @@ export default function AddExpenseForm({ accountId, onAdded }: Props) {
         body: JSON.stringify({
           description,
           amount: parseFloat(amount),
+          analytics_amount: analyticsAmount && analyticsAmount !== amount ? parseFloat(analyticsAmount) : undefined,
           kind,
           year,
           month,
@@ -57,6 +63,7 @@ export default function AddExpenseForm({ accountId, onAdded }: Props) {
 
       setDescription("");
       setAmount("");
+      setAnalyticsAmount("");
       onAdded();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -97,6 +104,16 @@ export default function AddExpenseForm({ accountId, onAdded }: Props) {
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Amount"
           disabled={adding}
+        />
+        &nbsp;
+        <input
+          type="number"
+          style={{ width: "10em" }}
+          value={analyticsAmount}
+          onChange={(e) => setAnalyticsAmount(e.target.value)}
+          placeholder="Analytics Amt"
+          disabled={adding}
+          title="Analytics amount (used for expense metrics, defaults to amount)"
         />
         &nbsp;
         <select

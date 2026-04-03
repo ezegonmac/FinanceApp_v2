@@ -84,6 +84,7 @@ model Expense {
   account_id       Int
   job_run_id       Int?
   amount           Decimal  @db.Decimal(18,2)
+  analytics_amount Decimal? @db.Decimal(18,2)
   description      String?
   kind             ExpenseKind @default(FIXED)
   created_at       DateTime @default(now())
@@ -150,6 +151,7 @@ model RecurrentExpense {
   id                    Int      @id @default(autoincrement())
   account_id            Int
   amount                Decimal  @db.Decimal(18,2)
+  analytics_amount      Decimal? @db.Decimal(18,2)
   description           String?
   kind                  ExpenseKind @default(FIXED)
   start_month           DateTime?

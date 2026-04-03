@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const recurrentExpenseSchema = z.object({
   amount: z.number().positive(),
+  analytics_amount: z.number().nonnegative().optional(),
   description: z.string().optional(),
   kind: z.enum(["FIXED", "VARIABLE"]).optional(),
   status: z.enum(["ACTIVE", "PAUSED", "CANCELLED"]).optional(),
@@ -96,6 +97,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       data: {
         account_id: accountId,
         amount: parsed.amount,
+        analytics_amount: parsed.analytics_amount ?? parsed.amount,
         description: parsed.description,
         kind: parsed.kind ?? "FIXED",
         status: parsed.status ?? "ACTIVE",
@@ -182,6 +184,7 @@ export async function POST(request: Request, { params }: RouteContext) {
                 account_id: accountId,
                 month_id: monthRecord.id,
                 amount: recurrentExpense.amount,
+                analytics_amount: recurrentExpense.analytics_amount ?? recurrentExpense.amount,
                 description: recurrentExpense.description,
                 kind: recurrentExpense.kind,
                 status: "COMPLETED",

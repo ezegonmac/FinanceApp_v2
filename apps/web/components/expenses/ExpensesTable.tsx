@@ -13,6 +13,7 @@ type Props = {
   showMonth?: boolean;
   showAccount?: boolean;
   showCircularPlot?: boolean;
+  showAnalytics?: boolean;
 };
 
 export default function ExpensesTable({
@@ -22,6 +23,7 @@ export default function ExpensesTable({
   showMonth = true,
   showAccount = false,
   showCircularPlot = false,
+  showAnalytics = false,
 }: Props) {
   const { debug } = useDebug();
   if (loading) return <p>Loading...</p>;
@@ -52,7 +54,7 @@ export default function ExpensesTable({
                   {expense.description}
                 </Link>
               </td>
-              <td>{expense.amount}</td>
+              <td>{showAnalytics ? (expense.analytics_amount ?? expense.amount) : expense.amount}</td>
               <td>{expense.kind ?? "FIXED"}</td>
               {showMonth && (
                 <td>{expense.month ? formatYearMonth(expense.month.year, expense.month.month) : "N/A"}</td>
