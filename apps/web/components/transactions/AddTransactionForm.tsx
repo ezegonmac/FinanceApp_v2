@@ -1,12 +1,18 @@
 'use client';
 
 import { useEffect, useState } from "react";
+
 import { formatYearMonth } from "@repo/utils";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import ErrorMessage from "../ErrorMessage";
 
 type Props = {
   accountId: number;
   onAdded: () => void;
+  onCancel?: () => void;
 };
 
 type AccountOption = {
@@ -15,7 +21,7 @@ type AccountOption = {
   active: boolean;
 };
 
-export default function AddTransactionForm({ accountId, onAdded }: Props) {
+export default function AddTransactionForm({ accountId, onAdded, onCancel }: Props) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [toAccountId, setToAccountId] = useState("");
@@ -94,6 +100,7 @@ export default function AddTransactionForm({ accountId, onAdded }: Props) {
       setAmount("");
       setToAccountId("");
       onAdded();
+      onCancel?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
@@ -102,57 +109,75 @@ export default function AddTransactionForm({ accountId, onAdded }: Props) {
   };
 
   return (
-    <div 
-      style={
-        { 
-          marginTop: "1rem", 
-          padding: "1rem", 
-          border: "1px solid #ccc", 
-          borderRadius: "5px",
-          gap: "0.5rem",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-        }
-      }>
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleAdd();
+      }}
+    >
       {error && <ErrorMessage message={error} />}
-      <p style={{ fontWeight: "bold" }}>Send Transaction to other Account:</p>
-      <div>
-        <input
+
+      <div className="grid gap-2">
+        <label htmlFor="transaction-description" className="text-sm font-medium">
+          Description
+        </label>
+        <Input
+          id="transaction-description"
           type="text"
-          style={{ width: "20em" }}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter Transaction description"
+          placeholder="Transfer to savings, move to broker..."
           disabled={adding}
-        /> &nbsp;
-        <input
-          type="number"
-          style={{ width: "10em" }}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Amount"
-          disabled={adding}
-        /> &nbsp;
-        <select
-          style={{ width: "10em" }}
-          value={toAccountId}
-          onChange={(e) => setToAccountId(e.target.value)}
-          disabled={adding || accounts.length === 0}
-        >
-          <option value="">Select destination account</option>
-          {accounts
-            .filter((account) => account.id !== accountId)
-            .map((account) => (
-              <option key={account.id} value={String(account.id)}>
-                {account.name}
-              </option>
-            ))}
-        </select>
-        &nbsp;
-        <input
+        />
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <label htmlFor="transaction-amount" className="text-sm font-medium">
+            Amount (EUR)
+          </label>
+          <Input
+            id="transaction-amount"
+            type="number"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0 EUR"
+            disabled={adding}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="transaction-to-account" className="text-sm font-medium">
+            Destination account
+          </label>
+          <select
+            id="transaction-to-account"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            value={toAccountId}
+            onChange={(e) => setToAccountId(e.target.value)}
+            disabled={adding || accounts.length === 0}
+          >
+            <option value="">Select destination account</option>
+            {accounts
+              .filter((account) => account.id !== accountId)
+              .map((account) => (
+                <option key={account.id} value={String(account.id)}>
+                  {account.name}
+                </option>
+              ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="transaction-month" className="text-sm font-medium">
+          Month
+        </label>
+        <Input
+          id="transaction-month"
           type="month"
-          style={{ width: "10em" }}
           value={formatYearMonth(year, month)}
           onChange={(e) => {
             const [y, m] = e.target.value.split("-");
@@ -160,11 +185,19 @@ export default function AddTransactionForm({ accountId, onAdded }: Props) {
             setMonth(Number(m));
           }}
           disabled={adding}
-        /> &nbsp;
+        />
       </div>
-      <button onClick={handleAdd} disabled={adding}>
-        {adding ? "Adding..." : "Add Transaction"}
-      </button>
-    </div>
+
+      <div className="flex justify-end gap-2">
+        {onCancel ? (
+          <Button type="button" variant="outline" onClick={onCancel} disabled={adding}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={adding}>
+          {adding ? "Adding..." : "Add transaction"}
+        </Button>
+      </div>
+    </form>
   );
 }

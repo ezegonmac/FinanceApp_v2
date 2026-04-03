@@ -1,5 +1,5 @@
 function formatYearMonth(year: number, month: number) {
-  return `${year}-${String(month).padStart(2, "0")}`;
+  return new Date(year, month - 1).toLocaleString("default", { month: "short", year: "numeric" });
 }
 
 function formatYearMonthLong(year: number, month: number) {

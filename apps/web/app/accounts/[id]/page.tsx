@@ -9,38 +9,37 @@ export default async function AccountPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-    const { id } = await params;
+  const { id } = await params;
 
-    if (!id) return <p>Invalid ID</p>;
-    const accountId = Number(id);
-    if (Number.isNaN(accountId)) return <p>ID must be a number</p>;
+  if (!id) return <p>Invalid ID</p>;
+  const accountId = Number(id);
+  if (Number.isNaN(accountId)) return <p>ID must be a number</p>;
 
-    const account = await prisma.account.findUnique({ where: { id: accountId } });
-    if (!account) return <p>Account not found</p>;
+  const account = await prisma.account.findUnique({ where: { id: accountId } });
+  if (!account) return <p>Account not found</p>;
 
-    return (
-        <div>
-            <AccountSummary
-              name={account.name}
-              balance={account.balance?.toString() ?? "N/A"}
-              createdAtIso={account.created_at.toISOString()}
-              active={account.active}
-            />
+  return (
+    <div className="space-y-8">
+      <section className="px-2 py-4 text-card-foreground">
+        <AccountSummary
+          name={account.name}
+          balance={account.balance?.toString() ?? "N/A"}
+          createdAtIso={account.created_at.toISOString()}
+          active={account.active}
+        />
+      </section>
 
-            <h2>Incomes for this Account</h2>
-            <AccountIncomesView accountId={accountId} />
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <AccountIncomesView accountId={accountId} />
+      </section>
 
-            <br />
-            <br />
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <AccountTransactionsView accountId={accountId} />
+      </section>
 
-            <h2>Transactions for this Account</h2>
-            <AccountTransactionsView accountId={accountId} />
-
-            <br />
-            <br />
-
-            <h2>Expenses for this Account</h2>
-            <AccountExpensesView accountId={accountId} />
-        </div>
-    );
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <AccountExpensesView accountId={accountId} />
+      </section>
+    </div>
+  );
 }

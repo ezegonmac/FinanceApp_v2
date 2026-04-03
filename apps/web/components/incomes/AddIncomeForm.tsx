@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from "react";
-import { formatYearMonth } from "@repo/utils";
 import ErrorMessage from "../ErrorMessage";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   accountId: number;
   onAdded: () => void;
+  onCancel?: () => void;
 };
 
-export default function AddIncomeForm({ accountId, onAdded }: Props) {
+export default function AddIncomeForm({ accountId, onAdded, onCancel }: Props) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -47,6 +49,7 @@ export default function AddIncomeForm({ accountId, onAdded }: Props) {
       setDescription("");
       setAmount("");
       onAdded();
+      onCancel?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
@@ -55,53 +58,67 @@ export default function AddIncomeForm({ accountId, onAdded }: Props) {
   };
 
   return (
-    <div 
-      style={
-        { 
-          marginTop: "1rem", 
-          padding: "1rem", 
-          border: "1px solid #ccc", 
-          borderRadius: "5px",
-          gap: "0.5rem",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-        }
-      }>
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleAdd();
+      }}
+    >
       {error && <ErrorMessage message={error} />}
-      <p style={{ fontWeight: "bold" }}>Add income:</p>
-      <div>
-        <input
+      <div className="grid gap-2">
+        <label htmlFor="income-description" className="text-sm font-medium">
+          Description
+        </label>
+        <Input
+          id="income-description"
           type="text"
-          style={{ width: "20em" }}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter Income description"
+          placeholder="Salary, bonus, interest..."
           disabled={adding}
-        /> &nbsp;
-        <input
+        />
+      </div>
+      <div className="grid gap-2">
+        <label htmlFor="income-amount" className="text-sm font-medium">
+          Amount (EUR)
+        </label>
+        <Input
+          id="income-amount"
           type="number"
-          style={{ width: "10em" }}
+          inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="Amount"
+          placeholder="0 EUR"
           disabled={adding}
-        /> &nbsp;
-        <input
+        />
+      </div>
+      <div className="grid gap-2">
+        <label htmlFor="income-month" className="text-sm font-medium">
+          Month
+        </label>
+        <Input
+          id="income-month"
           type="month"
-          style={{ width: "10em" }}
-          value={formatYearMonth(year, month)}
+          value={`${year}-${String(month).padStart(2, "0")}`}
           onChange={(e) => {
             const [y, m] = e.target.value.split("-");
             setYear(Number(y));
             setMonth(Number(m));
           }}
           disabled={adding}
-        /> &nbsp;
+        />
       </div>
-      <button onClick={handleAdd} disabled={adding}>
-        {adding ? "Adding..." : "Add Income"}
-      </button>
-    </div>
+      <div className="flex justify-end gap-2">
+        {onCancel ? (
+          <Button type="button" variant="outline" onClick={onCancel} disabled={adding}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={adding}>
+          {adding ? "Adding..." : "Add income"}
+        </Button>
+      </div>
+    </form>
   );
 }

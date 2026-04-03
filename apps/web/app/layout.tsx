@@ -1,48 +1,75 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import React from "react";
 import Link from "next/link";
+import { Geist } from "next/font/google";
 import { DebugProvider } from "@/components/debug/DebugContext";
 import DebugIndicator from "@/components/debug/DebugIndicator";
-import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Finance App",
   description: "A simple finance management app built with Next.js, Prisma, and MariaDB.",
 };
 
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/accounts", label: "Accounts" },
+  { href: "/months/current", label: "Current Month" },
+  { href: "/recurrent", label: "Recurrent" },
+  { href: "/metrics", label: "Metrics" },
+];
+
+const devLinks = [
+  { href: "/admin", label: "Admin" },
+  { href: "/playground", label: "Playground" },
+  { href: "/months", label: "Months" },
+];
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body style={{ fontFamily: "sans-serif" }}>
+      <body>
         <DebugProvider>
-          <header style={{ padding: "1rem", borderBottom: "1px solid #ccc" }}>
-            <nav>
-              <Link href="/">Home</Link> |{" "}
-              <Link href="/accounts">Accounts</Link> |{" "}
-              <Link href="/months">Months</Link> |{" "}
-              <Link href="/months/current">Current Month</Link> |{" "}
-              <Link href="/recurrent">Recurrent</Link> |{" "}
-              <Link href="/metrics">Metrics</Link> |{" "}
-              <Link href="/playground">Playground</Link> |{" "}
-              <Link href="/admin">Admin</Link>
-              <DebugIndicator />
-            </nav>
+          <header className="border-b">
+            <NavigationMenu viewport={false} className="px-4 py-2">
+              <NavigationMenuList>
+                {navLinks.map(({ href, label }) => (
+                  <NavigationMenuItem key={href}>
+                    <NavigationMenuLink asChild>
+                      <Link href={href}>{label}</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ))}
+
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>
+                    Dev
+                    <DebugIndicator />
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="flex flex-col p-1 w-36">
+                    {devLinks.map(({ href, label }) => (
+                      <NavigationMenuLink key={href} asChild>
+                        <Link href={href}>{label}</Link>
+                      </NavigationMenuLink>
+                    ))}
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
           </header>
-          <main style={{ padding: "1rem" }}>{children}</main>
+
+          <main className="p-4">{children}</main>
         </DebugProvider>
       </body>
     </html>

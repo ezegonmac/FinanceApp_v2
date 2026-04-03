@@ -1,15 +1,19 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { formatYearMonth } from "@repo/utils";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
 import ErrorMessage from "../ErrorMessage";
 
 type Props = {
   accountId: number;
   onAdded: () => void;
+  onCancel?: () => void;
 };
 
-export default function AddExpenseForm({ accountId, onAdded }: Props) {
+export default function AddExpenseForm({ accountId, onAdded, onCancel }: Props) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [analyticsAmount, setAnalyticsAmount] = useState("");
@@ -65,6 +69,7 @@ export default function AddExpenseForm({ accountId, onAdded }: Props) {
       setAmount("");
       setAnalyticsAmount("");
       onAdded();
+      onCancel?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
@@ -73,73 +78,107 @@ export default function AddExpenseForm({ accountId, onAdded }: Props) {
   };
 
   return (
-    <div
-      style={{
-        marginTop: "1rem",
-        padding: "1rem",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-        gap: "0.5rem",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleAdd();
       }}
     >
       {error && <ErrorMessage message={error} />}
-      <p style={{ fontWeight: "bold" }}>Add expense:</p>
-      <div>
-        <input
+
+      <div className="grid gap-2">
+        <label htmlFor="expense-description" className="text-sm font-medium">
+          Description
+        </label>
+        <Input
+          id="expense-description"
           type="text"
-          style={{ width: "20em" }}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter Expense description"
-          disabled={adding}
-        />
-        &nbsp;
-        <input
-          type="number"
-          style={{ width: "10em" }}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Amount"
-          disabled={adding}
-        />
-        &nbsp;
-        <input
-          type="number"
-          style={{ width: "10em" }}
-          value={analyticsAmount}
-          onChange={(e) => setAnalyticsAmount(e.target.value)}
-          placeholder="Analytics Amt"
-          disabled={adding}
-          title="Analytics amount (used for expense metrics, defaults to amount)"
-        />
-        &nbsp;
-        <select
-          value={kind}
-          onChange={(e) => setKind(e.target.value as "FIXED" | "VARIABLE")}
-          disabled={adding}
-        >
-          <option value="FIXED">Fixed</option>
-          <option value="VARIABLE">Variable</option>
-        </select>
-        &nbsp;
-        <input
-          type="month"
-          style={{ width: "10em" }}
-          value={formatYearMonth(year, month)}
-          onChange={(e) => {
-            const [y, m] = e.target.value.split("-");
-            setYear(Number(y));
-            setMonth(Number(m));
-          }}
+          placeholder="Rent, groceries, transport..."
           disabled={adding}
         />
       </div>
-      <button onClick={handleAdd} disabled={adding}>
-        {adding ? "Adding..." : "Add Expense"}
-      </button>
-    </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <label htmlFor="expense-amount" className="text-sm font-medium">
+            Amount (EUR)
+          </label>
+          <Input
+            id="expense-amount"
+            type="number"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0 EUR"
+            disabled={adding}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="expense-analytics-amount" className="text-sm font-medium">
+            Analytics amount (EUR)
+          </label>
+          <Input
+            id="expense-analytics-amount"
+            type="number"
+            inputMode="decimal"
+            value={analyticsAmount}
+            onChange={(e) => setAnalyticsAmount(e.target.value)}
+            placeholder="Optional"
+            disabled={adding}
+            title="Analytics amount (used for expense metrics, defaults to amount)"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <label htmlFor="expense-kind" className="text-sm font-medium">
+            Type
+          </label>
+          <select
+            id="expense-kind"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            value={kind}
+            onChange={(e) => setKind(e.target.value as "FIXED" | "VARIABLE")}
+            disabled={adding}
+          >
+            <option value="FIXED">Fixed</option>
+            <option value="VARIABLE">Variable</option>
+          </select>
+        </div>
+
+        <div className="grid gap-2">
+          <label htmlFor="expense-month" className="text-sm font-medium">
+            Month
+          </label>
+          <Input
+            id="expense-month"
+            type="month"
+            value={`${year}-${String(month).padStart(2, "0")}`}
+            onChange={(e) => {
+              const [y, m] = e.target.value.split("-");
+              setYear(Number(y));
+              setMonth(Number(m));
+            }}
+            disabled={adding}
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        {onCancel ? (
+          <Button type="button" variant="outline" onClick={onCancel} disabled={adding}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={adding}>
+          {adding ? "Adding..." : "Add expense"}
+        </Button>
+      </div>
+    </form>
   );
 }
