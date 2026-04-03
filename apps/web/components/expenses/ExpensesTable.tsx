@@ -56,7 +56,7 @@ export default function ExpensesTable({
             {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
             <th style={{ textAlign: "left" }}>Status</th>
             {debug && <th style={{ textAlign: "left" }}>Created At</th>}
-            {onDeleted && <th />}
+            <th style={{ textAlign: "left" }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -82,11 +82,18 @@ export default function ExpensesTable({
               )}
               <td>{expense.status ?? "COMPLETED"}</td>
               {debug && <td>{new Date(expense.created_at).toLocaleString()}</td>}
-              {onDeleted && (
-                <td>
-                  <button onClick={() => handleDelete(expense.id)} style={{ color: "red", cursor: "pointer" }}>Delete</button>
-                </td>
-              )}
+              <td>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <Link href={`/expenses/${expense.id}`} style={{ color: "blue" }}>
+                    Edit
+                  </Link>
+                  {onDeleted && (
+                    <button type="button" onClick={() => handleDelete(expense.id)} style={{ color: "red", cursor: "pointer" }}>
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

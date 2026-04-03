@@ -49,7 +49,7 @@ export default function IncomesTable({
           {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
           <th style={{ textAlign: "left" }}>Status</th>
           {debug && <th style={{ textAlign: "left" }}>Created At</th>}
-          {onDeleted && <th />}
+          <th style={{ textAlign: "left" }}>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -74,11 +74,18 @@ export default function IncomesTable({
             )}
             <td>{income.status ?? "COMPLETED"}</td>
             {debug && <td>{new Date(income.created_at).toLocaleString()}</td>}
-            {onDeleted && (
-              <td>
-                <button onClick={() => handleDelete(income.id)} style={{ color: "red", cursor: "pointer" }}>Delete</button>
-              </td>
-            )}
+            <td>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <Link href={`/incomes/${income.id}`} style={{ color: "blue" }}>
+                  Edit
+                </Link>
+                {onDeleted && (
+                  <button type="button" onClick={() => handleDelete(income.id)} style={{ color: "red", cursor: "pointer" }}>
+                    Delete
+                  </button>
+                )}
+              </div>
+            </td>
           </tr>
         ))}
       </tbody>

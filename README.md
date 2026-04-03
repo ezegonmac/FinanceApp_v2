@@ -62,7 +62,7 @@ Time Tracker: https://track.toggl.com/timer
   - Allow recurrent transactions with no end date ✅
   - Enable/Disable account 🟨
   - Edit account details 🟨
-  - Edit income and expense details 🟨
+  - Edit income and expense details ✅
   - Edit transaction details 🟨
   - Delete individual transactions, incomes and expenses ✅
   - Modify recurrent income, expense and transaction frequency 🟨
