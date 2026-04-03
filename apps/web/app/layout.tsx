@@ -5,6 +5,10 @@ import React from "react";
 import Link from "next/link";
 import { DebugProvider } from "@/components/debug/DebugContext";
 import DebugIndicator from "@/components/debug/DebugIndicator";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -22,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body style={{ fontFamily: "sans-serif" }}>
         <DebugProvider>
           <header style={{ padding: "1rem", borderBottom: "1px solid #ccc" }}>
@@ -33,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/months/current">Current Month</Link> |{" "}
               <Link href="/recurrent">Recurrent</Link> |{" "}
               <Link href="/metrics">Metrics</Link> |{" "}
+              <Link href="/playground">Playground</Link> |{" "}
               <Link href="/admin">Admin</Link>
               <DebugIndicator />
             </nav>
