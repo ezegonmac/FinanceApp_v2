@@ -41,7 +41,7 @@ export default function AccountIncomesView({ accountId }: Props) {
 
   return (
     <>
-      <IncomesTable incomes={incomes} loading={loading} error={error} showMonth={true} showAccount={false} />
+      <IncomesTable incomes={incomes} loading={loading} error={error} showMonth={true} showAccount={false} onDeleted={refresh} />
       <br />
       <AddIncomeForm accountId={accountId} onAdded={refresh} />
       &nbsp;

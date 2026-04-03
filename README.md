@@ -64,7 +64,7 @@ Time Tracker: https://track.toggl.com/timer
   - Edit account details 🟨
   - Edit income and expense details 🟨
   - Edit transaction details 🟨
-  - Delete individual transactions, incomes and expenses 🟨
+  - Delete individual transactions, incomes and expenses ✅
   - Modify recurrent income, expense and transaction frequency 🟨
 - Scheduled job to apply pending incomes, expenses and transactions at the end of the day 
   - API endpoint ✅

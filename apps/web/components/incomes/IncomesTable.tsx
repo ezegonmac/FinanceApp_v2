@@ -11,6 +11,7 @@ type Props = {
   error?: string | null;
   showMonth?: boolean;
   showAccount?: boolean;
+  onDeleted?: (id: number) => void;
 };
 
 export default function IncomesTable({
@@ -19,8 +20,20 @@ export default function IncomesTable({
   error,
   showMonth = true,
   showAccount = false,
+  onDeleted,
 }: Props) {
   const { debug } = useDebug();
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this income? The account balance will be reverted if it was already applied.")) return;
+    try {
+      const res = await fetch(`/api/incomes/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete income");
+      onDeleted?.(id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete income");
+    }
+  };
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!incomes || incomes.length === 0) return <p>No incomes available.</p>;
@@ -36,6 +49,7 @@ export default function IncomesTable({
           {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
           <th style={{ textAlign: "left" }}>Status</th>
           {debug && <th style={{ textAlign: "left" }}>Created At</th>}
+          {onDeleted && <th />}
         </tr>
       </thead>
       <tbody>
@@ -60,6 +74,11 @@ export default function IncomesTable({
             )}
             <td>{income.status ?? "COMPLETED"}</td>
             {debug && <td>{new Date(income.created_at).toLocaleString()}</td>}
+            {onDeleted && (
+              <td>
+                <button onClick={() => handleDelete(income.id)} style={{ color: "red", cursor: "pointer" }}>Delete</button>
+              </td>
+            )}
           </tr>
         ))}
       </tbody>

@@ -195,6 +195,7 @@ export default function MonthContent({ year, month }: Props) {
             error={incomesError}
             showMonth={false}
             showAccount={true}
+            onDeleted={(id) => { setIncomes((prev) => prev.filter((i) => i.id !== id)); fetchSnapshots(); }}
           />
 
           <br />
@@ -207,6 +208,7 @@ export default function MonthContent({ year, month }: Props) {
             error={transactionsError}
             showMonth={false}
             showAccount={true}
+            onDeleted={(id) => { setTransactions((prev) => prev.filter((t) => t.id !== id)); fetchSnapshots(); }}
           />
 
           <br />
@@ -221,6 +223,7 @@ export default function MonthContent({ year, month }: Props) {
             showAccount={true}
             showCircularPlot={true}
             showAnalytics={true}
+            onDeleted={(id) => { setExpenses((prev) => prev.filter((e) => e.id !== id)); fetchSnapshots(); }}
           />
         </>
       )}

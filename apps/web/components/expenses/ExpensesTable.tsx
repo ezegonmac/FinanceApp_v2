@@ -14,6 +14,7 @@ type Props = {
   showAccount?: boolean;
   showCircularPlot?: boolean;
   showAnalytics?: boolean;
+  onDeleted?: (id: number) => void;
 };
 
 export default function ExpensesTable({
@@ -24,8 +25,20 @@ export default function ExpensesTable({
   showAccount = false,
   showCircularPlot = false,
   showAnalytics = false,
+  onDeleted,
 }: Props) {
   const { debug } = useDebug();
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this expense? The account balance will be reverted if it was already applied.")) return;
+    try {
+      const res = await fetch(`/api/expenses/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete expense");
+      onDeleted?.(id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete expense");
+    }
+  };
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!expenses || expenses.length === 0) return <p>No expenses available.</p>;
@@ -43,6 +56,7 @@ export default function ExpensesTable({
             {showAccount && <th style={{ textAlign: "left" }}>Account</th>}
             <th style={{ textAlign: "left" }}>Status</th>
             {debug && <th style={{ textAlign: "left" }}>Created At</th>}
+            {onDeleted && <th />}
           </tr>
         </thead>
         <tbody>
@@ -68,6 +82,11 @@ export default function ExpensesTable({
               )}
               <td>{expense.status ?? "COMPLETED"}</td>
               {debug && <td>{new Date(expense.created_at).toLocaleString()}</td>}
+              {onDeleted && (
+                <td>
+                  <button onClick={() => handleDelete(expense.id)} style={{ color: "red", cursor: "pointer" }}>Delete</button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

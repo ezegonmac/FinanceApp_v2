@@ -41,7 +41,7 @@ export default function AccountExpensesView({ accountId }: Props) {
 
   return (
     <>
-      <ExpensesTable expenses={expenses} loading={loading} error={error} showMonth={true} showAccount={false} />
+      <ExpensesTable expenses={expenses} loading={loading} error={error} showMonth={true} showAccount={false} onDeleted={refresh} />
       <br />
       <AddExpenseForm accountId={accountId} onAdded={refresh} />
       &nbsp;

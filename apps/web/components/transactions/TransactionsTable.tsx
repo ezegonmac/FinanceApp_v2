@@ -13,6 +13,7 @@ type Props = {
   showAccount?: boolean;
   showFromAccount?: boolean;
   showToAccount?: boolean;
+  onDeleted?: (id: number) => void;
 };
 
 export default function TransactionsTable({
@@ -23,10 +24,22 @@ export default function TransactionsTable({
   showAccount = false,
   showFromAccount,
   showToAccount,
+  onDeleted,
 }: Props) {
   const displayFrom = showFromAccount ?? showAccount;
   const displayTo = showToAccount ?? showAccount;
   const { debug } = useDebug();
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this transaction? The account balances will be reverted if it was already applied.")) return;
+    try {
+      const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete transaction");
+      onDeleted?.(id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete transaction");
+    }
+  };
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!transactions || transactions.length === 0) return <p>No transactions available.</p>;
@@ -43,6 +56,7 @@ export default function TransactionsTable({
           {displayTo && <th style={{ textAlign: "left" }}>To</th>}
           <th style={{ textAlign: "left" }}>Status</th>
           {debug && <th style={{ textAlign: "left" }}>Created At</th>}
+          {onDeleted && <th />}
         </tr>
       </thead>
       <tbody>
@@ -74,6 +88,11 @@ export default function TransactionsTable({
             )}
             <td>{transaction.status}</td>
             {debug && <td>{new Date(transaction.created_at).toLocaleString()}</td>}
+            {onDeleted && (
+              <td>
+                <button onClick={() => handleDelete(transaction.id)} style={{ color: "red", cursor: "pointer" }}>Delete</button>
+              </td>
+            )}
           </tr>
         ))}
       </tbody>

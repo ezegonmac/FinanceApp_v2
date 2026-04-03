@@ -61,6 +61,7 @@ export default function AccountTransactionsView({ accountId }: Props) {
             showMonth={true}
             showFromAccount={false}
             showToAccount={true}
+            onDeleted={refresh}
           />
 
           <br />
@@ -71,6 +72,7 @@ export default function AccountTransactionsView({ accountId }: Props) {
             showMonth={true}
             showFromAccount={true}
             showToAccount={false}
+            onDeleted={refresh}
           />
         </>
       )}
