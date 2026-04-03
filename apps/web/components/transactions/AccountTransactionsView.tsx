@@ -39,9 +39,41 @@ export default function AccountTransactionsView({ accountId }: Props) {
     router.refresh();
   };
 
+  const outgoingTransactions = transactions.filter(
+    (transaction) => transaction.from_account_id === accountId
+  );
+
+  const incomingTransactions = transactions.filter(
+    (transaction) => transaction.to_account_id === accountId
+  );
+
   return (
     <>
-      <TransactionsTable transactions={transactions} loading={loading} error={error} showMonth={true} showFromAccount={false} showToAccount={true} />
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : (
+        <>
+          <h3>Outgoing Transactions</h3>
+          <TransactionsTable
+            transactions={outgoingTransactions}
+            showMonth={true}
+            showFromAccount={false}
+            showToAccount={true}
+          />
+
+          <br />
+
+          <h3>Incoming Transactions</h3>
+          <TransactionsTable
+            transactions={incomingTransactions}
+            showMonth={true}
+            showFromAccount={true}
+            showToAccount={false}
+          />
+        </>
+      )}
       <br />
       <AddTransactionForm accountId={accountId} onAdded={refresh} />
       &nbsp;

@@ -70,7 +70,7 @@ Time Tracker: https://track.toggl.com/timer
   - API endpoint ✅
   - Automate with server cron 🟨
 - I want to be able to differentiate the expense actual value and the one used for expense metrics. Adjust for analytics 🟨
-- The admin can enable and disable the debug mode. In debug mode, there will be additional columns shown in the tables 🟨
+- The admin can enable and disable the debug mode. In debug mode, there will be additional columns shown in the tables ✅
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
 
