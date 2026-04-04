@@ -19,7 +19,7 @@ export default async function AccountPage({
   if (!account) return <p>Account not found</p>;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <section className="px-2 py-4 text-card-foreground">
         <AccountSummary
           name={account.name}

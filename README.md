@@ -48,6 +48,9 @@ Time Tracker: https://track.toggl.com/timer
   - Monthly splits, planned and real 🟨
   - Performance of these investments 🟨
   - Todo tab with pending todo recurrent expenses and recurrent transactions that are not marked as automated (bool attribute) 🟨
+  - Sort, filter and search accounts, transactions, incomes and expenses 🟨
+  - Sort, filter and paginate incomes, expenses and transactions by month 🟨
+  - Prioritize icons and visual cues for better UX 🟨
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
   - Pause and resume recurrent incomes 🟨
@@ -71,6 +74,8 @@ Time Tracker: https://track.toggl.com/timer
   - Automate with server cron 🟨
 - I want to be able to differentiate the expense actual value and the one used for expense metrics. "Adjust for analytics" ✅
 - The admin can enable and disable the debug mode. In debug mode, there will be additional columns shown in the tables ✅
+- Improve cleanliness and usability of the UI (data-driven application) 🟨
+- Hide the analytics field if not needed 🟨
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
 

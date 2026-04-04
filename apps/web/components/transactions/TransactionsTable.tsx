@@ -37,7 +37,11 @@ type Props = {
   showAccount?: boolean;
   showFromAccount?: boolean;
   showToAccount?: boolean;
+  pageSize?: number;
   onDeleted?: (id: number) => void;
+  totalCount?: number;
+  resetKey?: unknown;
+  onPageChange?: (pageIndex: number) => void;
 };
 
 export default function TransactionsTable({
@@ -48,7 +52,11 @@ export default function TransactionsTable({
   showAccount = false,
   showFromAccount,
   showToAccount,
+  pageSize,
   onDeleted,
+  totalCount,
+  resetKey,
+  onPageChange,
 }: Props) {
   const displayFrom = showFromAccount ?? showAccount;
   const displayTo = showToAccount ?? showAccount;
@@ -195,6 +203,15 @@ export default function TransactionsTable({
   });
 
   return (
-    <DataTable columns={columns} data={transactions} headerClassName="bg-muted/50" />
+    <DataTable
+      columns={columns}
+      data={transactions}
+      headerClassName="bg-muted/50"
+      enablePagination={typeof pageSize === "number"}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      resetKey={resetKey}
+      onPageChange={onPageChange}
+    />
   );
 }

@@ -33,7 +33,11 @@ type Props = {
   error?: string | null;
   showMonth?: boolean;
   showAccount?: boolean;
+  pageSize?: number;
   onDeleted?: (id: number) => void;
+  totalCount?: number;
+  resetKey?: unknown;
+  onPageChange?: (pageIndex: number) => void;
 };
 
 export default function IncomesTable({
@@ -42,7 +46,11 @@ export default function IncomesTable({
   error,
   showMonth = true,
   showAccount = false,
+  pageSize,
   onDeleted,
+  totalCount,
+  resetKey,
+  onPageChange,
 }: Props) {
   const { debug } = useDebug();
 
@@ -175,6 +183,15 @@ export default function IncomesTable({
   });
 
   return (
-    <DataTable columns={columns} data={incomes} headerClassName="bg-muted/50" />
+    <DataTable
+      columns={columns}
+      data={incomes}
+      headerClassName="bg-muted/50"
+      enablePagination={typeof pageSize === "number"}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      resetKey={resetKey}
+      onPageChange={onPageChange}
+    />
   );
 }

@@ -38,7 +38,11 @@ type Props = {
   showAccount?: boolean;
   showCircularPlot?: boolean;
   showAnalytics?: boolean;
+  pageSize?: number;
   onDeleted?: (id: number) => void;
+  totalCount?: number;
+  resetKey?: unknown;
+  onPageChange?: (pageIndex: number) => void;
 };
 
 export default function ExpensesTable({
@@ -49,7 +53,11 @@ export default function ExpensesTable({
   showAccount = false,
   showCircularPlot = false,
   showAnalytics = false,
+  pageSize,
   onDeleted,
+  totalCount,
+  resetKey,
+  onPageChange,
 }: Props) {
   const { debug } = useDebug();
 
@@ -196,7 +204,16 @@ export default function ExpensesTable({
 
   return (
     <>
-      <DataTable columns={columns} data={expenses} headerClassName="bg-muted/50" />
+      <DataTable
+        columns={columns}
+        data={expenses}
+        headerClassName="bg-muted/50"
+        enablePagination={typeof pageSize === "number"}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        resetKey={resetKey}
+        onPageChange={onPageChange}
+      />
 
       {showCircularPlot && <ExpensesCircularPlot expenses={expenses} />}
     </>

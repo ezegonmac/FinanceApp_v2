@@ -29,20 +29,51 @@ export async function GET(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: "Invalid account id" }, { status: 400 });
     }
 
-    const incomes = await prisma.income.findMany({
-      where: { account_id: accountId },
-      include: {
-        month: true,
-        job_run: true,
-      },
-    });
+    const url = new URL(request.url);
+    const startMonth = url.searchParams.get("startMonth") ?? "1900-01";
+    const endMonth = url.searchParams.get("endMonth") ?? "9999-12";
+    const cursorParam = url.searchParams.get("cursor");
+    const cursor = cursorParam ? Number(cursorParam) : null;
+    const limit = Math.min(Number(url.searchParams.get("limit") ?? "30"), 100);
 
-    return NextResponse.json(incomes, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch incomes" },
-      { status: 500 }
-    );
+    const [startYear, startM] = startMonth.split("-").map(Number);
+    const [endYear, endM] = endMonth.split("-").map(Number);
+
+    const monthFilter = {
+      AND: [
+        { OR: [{ year: { gt: startYear } }, { year: startYear, month: { gte: startM } }] },
+        { OR: [{ year: { lt: endYear } }, { year: endYear, month: { lte: endM } }] },
+      ],
+    };
+
+    const where = { account_id: accountId, month: monthFilter };
+
+    const orderBy = [
+      { month: { year: "desc" as const } },
+      { month: { month: "desc" as const } },
+      { description: "asc" as const },
+      { amount: "asc" as const },
+      { id: "asc" as const },
+    ];
+
+    const [items, total] = await Promise.all([
+      prisma.income.findMany({
+        where,
+        orderBy,
+        include: { month: true, job_run: true },
+        take: limit + 1,
+        ...(cursor != null ? { cursor: { id: cursor }, skip: 1 } : {}),
+      }),
+      prisma.income.count({ where }),
+    ]);
+
+    const hasMore = items.length > limit;
+    const data = hasMore ? items.slice(0, limit) : items;
+    const nextCursor = hasMore ? data[data.length - 1].id : null;
+
+    return NextResponse.json({ data, total, nextCursor }, { status: 200 });
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch incomes" }, { status: 500 });
   }
 }
 
