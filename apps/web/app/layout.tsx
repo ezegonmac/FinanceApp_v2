@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { DebugProvider } from "@/components/debug/DebugContext";
 import DebugIndicator from "@/components/debug/DebugIndicator";
+import TodoNavBadge from "@/components/todos/TodoNavBadge";
 import { cn } from "@/lib/utils";
 import {
   NavigationMenu,
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                           <Icon className="h-3.5 w-3.5 text-foreground/70" aria-hidden="true" />
                         </span>
                         <span>{label}</span>
+                        {href === "/todos" ? <TodoNavBadge /> : null}
                       </Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
