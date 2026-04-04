@@ -20,6 +20,7 @@ type RecurrentTransaction = {
   to_account_id: number;
   amount: string;
   description: string | null;
+  automated: boolean;
   status: "ACTIVE" | "PAUSED" | "CANCELLED";
   start_month: string | null;
   end_month: string | null;

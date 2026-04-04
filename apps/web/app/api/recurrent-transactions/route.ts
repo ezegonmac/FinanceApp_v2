@@ -50,6 +50,7 @@ export async function GET(request: Request) {
       to_account_id: row.to_account_id,
       amount: row.amount,
       description: row.description,
+      automated: row.automated,
       status: row.status,
       start_month: row.start_month,
       end_month: row.end_month,

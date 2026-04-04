@@ -15,6 +15,7 @@ type RecurrentTransaction = {
   to_account_id: number;
   amount: string;
   description: string | null;
+  automated: boolean;
   status: "ACTIVE" | "PAUSED" | "CANCELLED";
   start_month: string | null;
   end_month: string | null;
@@ -122,6 +123,15 @@ export default function RecurrentTransactionsTable({
       accessorKey: "amount",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</span>,
       cell: ({ row }) => formatAmount(row.original.amount),
+    },
+    {
+      id: "mode",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mode</span>,
+      cell: ({ row }) => (
+        <Badge variant={row.original.automated ? "info" : "secondary"}>
+          {row.original.automated ? "Auto" : "Manual"}
+        </Badge>
+      ),
     },
     {
       accessorKey: "status",

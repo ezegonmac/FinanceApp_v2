@@ -15,6 +15,7 @@ export async function applyRecurrentExpensesForMonth(
   const recurrentExpenses = await prisma.recurrentExpense.findMany({
     where: {
       status: "ACTIVE",
+      automated: true,
       account: {
         active: true,
       },

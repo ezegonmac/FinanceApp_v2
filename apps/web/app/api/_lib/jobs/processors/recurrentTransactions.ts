@@ -15,6 +15,7 @@ export async function applyRecurrentTransactionsForMonth(
   const recurrentTransactions = await prisma.recurrentTransaction.findMany({
     where: {
       status: "ACTIVE",
+      automated: true,
       from_account: { active: true },
       to_account: { active: true },
       AND: [

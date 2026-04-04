@@ -28,6 +28,9 @@ model Account {
   toTransactions   Transaction[] @relation("ToAccount")
   recurrentFromTransactions RecurrentTransaction[] @relation("RecurrentFromAccount")
   recurrentToTransactions   RecurrentTransaction[] @relation("RecurrentToAccount")
+  todos                     Todo[]                 @relation("TodoAccount")
+  todosAsFrom              Todo[]                 @relation("TodoFromAccount")
+  todosAsTo                Todo[]                 @relation("TodoToAccount")
   monthSnapshots   MonthSnapshot[]
 }
 
@@ -154,6 +157,7 @@ model RecurrentExpense {
   analytics_amount      Decimal? @db.Decimal(18,2)
   description           String?
   kind                  ExpenseKind @default(FIXED)
+  automated             Boolean  @default(true)
   start_month           DateTime?
   end_month             DateTime?
   next_run_year         Int?
@@ -165,6 +169,7 @@ model RecurrentExpense {
   account            Account @relation(fields: [account_id], references: [id])
   last_applied_month Month?  @relation("RecurrentExpenseLastAppliedMonth", fields: [last_applied_month_id], references: [id])
   runs               RecurrentExpenseRun[]
+  todos              Todo[]
 
   @@index([account_id, status])
   @@index([next_run_year, next_run_month])
@@ -199,6 +204,7 @@ model RecurrentTransaction {
   to_account_id         Int
   amount                Decimal  @db.Decimal(18,2)
   description           String?
+  automated             Boolean  @default(true)
   start_month           DateTime?
   end_month             DateTime?
   next_run_year         Int?
@@ -211,6 +217,7 @@ model RecurrentTransaction {
   to_account         Account @relation("RecurrentToAccount", fields: [to_account_id], references: [id])
   last_applied_month Month?  @relation("RecurrentTransactionLastAppliedMonth", fields: [last_applied_month_id], references: [id])
   runs               RecurrentTransactionRun[]
+  todos              Todo[]
 
   @@index([from_account_id, status])
   @@index([to_account_id, status])
@@ -240,6 +247,45 @@ model RecurrentTransactionRun {
   @@index([status])
 }
 
+model Todo {
+  id                      Int        @id @default(autoincrement())
+  type                    TodoType
+  origin                  TodoOrigin
+  status                  TodoStatus @default(OPEN)
+  due_year                Int
+  due_month               Int
+  title                   String
+  description             String?
+  amount                  Decimal?   @db.Decimal(18,2)
+  skip_reason             String?
+  completed_at            DateTime?
+  action_error            String?
+  job_run_id              Int?
+
+  account_id              Int?
+  from_account_id         Int?
+  to_account_id           Int?
+  recurrent_expense_id    Int?
+  recurrent_transaction_id Int?
+
+  created_at              DateTime   @default(now())
+  updated_at              DateTime   @updatedAt
+
+  account                 Account?   @relation("TodoAccount", fields: [account_id], references: [id])
+  from_account            Account?   @relation("TodoFromAccount", fields: [from_account_id], references: [id])
+  to_account              Account?   @relation("TodoToAccount", fields: [to_account_id], references: [id])
+  recurrent_expense       RecurrentExpense? @relation(fields: [recurrent_expense_id], references: [id])
+  recurrent_transaction   RecurrentTransaction? @relation(fields: [recurrent_transaction_id], references: [id])
+  job_run                 JobRun?    @relation(fields: [job_run_id], references: [id])
+
+  @@index([status, due_year, due_month])
+  @@index([origin, status])
+  @@index([recurrent_expense_id, due_year, due_month])
+  @@index([recurrent_transaction_id, due_year, due_month])
+  @@unique([recurrent_expense_id, due_year, due_month], name: "todo_recurrent_expense_due")
+  @@unique([recurrent_transaction_id, due_year, due_month], name: "todo_recurrent_transaction_due")
+}
+
 enum TransactionStatus {
   PENDING
   COMPLETED
@@ -256,6 +302,22 @@ enum ExpenseStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+enum TodoType {
+  EXPENSE
+  TRANSACTION
+}
+
+enum TodoOrigin {
+  MANUAL
+  RECURRENT
+}
+
+enum TodoStatus {
+  OPEN
+  DONE
+  SKIPPED
 }
 
 enum ExpenseKind {
@@ -360,6 +422,7 @@ model JobRun {
   recurrentExpenseRuns RecurrentExpenseRun[]
   transactions   Transaction[]
   recurrentTransactionRuns RecurrentTransactionRun[]
+  todos          Todo[]
 
   @@unique([job_name, madrid_date], name: "job_name_madrid_date")
 }

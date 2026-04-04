@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic"; // recommended with Prisma
 const transactionSchema = z.object({
     amount: z.number().nonnegative(),
     description: z.string().optional(),
+  automated: z.boolean().optional(),
   year: z.number().int(),
   month: z.number().int().min(1).max(12),
     from_account_id: z.number(),
@@ -36,6 +37,27 @@ export async function POST(request: Request) {
 
     // Validate incoming request
     const parsed = transactionSchema.parse(body);
+
+    const automated = parsed.automated ?? true;
+
+    if (!automated) {
+      const todo = await prisma.todo.create({
+        data: {
+          type: "TRANSACTION",
+          origin: "MANUAL",
+          status: "OPEN",
+          due_year: parsed.year,
+          due_month: parsed.month,
+          title: parsed.description ?? "Manual transfer",
+          description: parsed.description ?? null,
+          amount: parsed.amount,
+          from_account_id: parsed.from_account_id,
+          to_account_id: parsed.to_account_id,
+        },
+      });
+
+      return NextResponse.json(todo, { status: 201 });
+    }
 
     const monthRecord = await prisma.month.upsert({
       where: {

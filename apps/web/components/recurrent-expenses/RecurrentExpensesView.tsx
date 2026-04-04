@@ -20,6 +20,7 @@ type RecurrentExpense = {
   amount: string;
   description: string | null;
   kind: "FIXED" | "VARIABLE";
+  automated: boolean;
   status: "ACTIVE" | "PAUSED" | "CANCELLED";
   start_month: string | null;
   end_month: string | null;

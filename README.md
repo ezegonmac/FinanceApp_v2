@@ -22,10 +22,13 @@ Time Tracker: https://track.toggl.com/timer
   - Next.js for frontend and backend ✅
   - Prisma ORM for database management ✅
   - MariaDB as the database ✅
-  - Tailwind CSS for styling 🟨
-  - TypeScript for type safety 🟨
+  - Tailwind CSS for styling (+shadcn/ui) ✅
+  - TypeScript for type safety ✅
   - Setup Docker for containerization 🟨
   - Fix Prisma console not working 🟨
+  - New package: mobile 🟨
+  - New package: shared (for shared types and utils) 🟨
+  - New package: api 🟨
 
 - Create & List
   - Accounts ✅
@@ -49,7 +52,7 @@ Time Tracker: https://track.toggl.com/timer
   - Performance of these investments 🟨
   - Todo tab with pending todo recurrent expenses and recurrent transactions that are not marked as automated (bool attribute) 🟨
   - Sort, filter and search accounts, transactions, incomes and expenses 🟨
-  - Sort, filter and paginate incomes, expenses and transactions by month 🟨
+  - Sort, filter and paginate incomes, expenses and transactions by month ✅
   - Prioritize icons and visual cues for better UX 🟨
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
@@ -75,7 +78,8 @@ Time Tracker: https://track.toggl.com/timer
 - I want to be able to differentiate the expense actual value and the one used for expense metrics. "Adjust for analytics" ✅
 - The admin can enable and disable the debug mode. In debug mode, there will be additional columns shown in the tables ✅
 - Improve cleanliness and usability of the UI (data-driven application) 🟨
-- Hide the analytics field if not needed 🟨
+- Hide the "Adjust for analytics" field if not needed 🟨
+- Year analytics with the total amount of incomes, expenses and transactions for the year 🟨
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
 

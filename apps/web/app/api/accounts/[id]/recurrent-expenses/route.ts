@@ -11,6 +11,7 @@ const recurrentExpenseSchema = z.object({
   analytics_amount: z.number().nonnegative().optional(),
   description: z.string().optional(),
   kind: z.enum(["FIXED", "VARIABLE"]).optional(),
+  automated: z.boolean().optional(),
   status: z.enum(["ACTIVE", "PAUSED", "CANCELLED"]).optional(),
   start_month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
   end_month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
@@ -34,6 +35,21 @@ function compareYearMonth(aYear: number, aMonth: number, bYear: number, bMonth: 
 function getNextYearMonth(year: number, month: number) {
   if (month === 12) return { year: year + 1, month: 1 };
   return { year, month: month + 1 };
+}
+
+function getYearMonthRange(startYear: number, startMonth: number, endYear: number, endMonth: number) {
+  const result: Array<{ year: number; month: number }> = [];
+  let cursorYear = startYear;
+  let cursorMonth = startMonth;
+
+  while (compareYearMonth(cursorYear, cursorMonth, endYear, endMonth) <= 0) {
+    result.push({ year: cursorYear, month: cursorMonth });
+    const next = getNextYearMonth(cursorYear, cursorMonth);
+    cursorYear = next.year;
+    cursorMonth = next.month;
+  }
+
+  return result;
 }
 
 interface RouteContext {
@@ -100,6 +116,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         analytics_amount: parsed.analytics_amount ?? parsed.amount,
         description: parsed.description,
         kind: parsed.kind ?? "FIXED",
+        automated: parsed.automated ?? true,
         status: parsed.status ?? "ACTIVE",
         start_month: startMonthDate ?? undefined,
         end_month: endMonthDate ?? undefined,
@@ -111,7 +128,42 @@ export async function POST(request: Request, { params }: RouteContext) {
     const affectedMonthIds = new Set<number>();
     let appliedCount = 0;
 
-    if (recurrentExpense.status === "ACTIVE" && startMonthDate) {
+    if (recurrentExpense.status === "ACTIVE" && !recurrentExpense.automated) {
+      const startYear = startMonthDate ? startMonthDate.getUTCFullYear() : currentYear;
+      const startMonth = startMonthDate ? startMonthDate.getUTCMonth() + 1 : currentMonth;
+      let endYear = currentYear;
+      let endMonth = currentMonth;
+
+      if (endMonthDate) {
+        const candidateYear = endMonthDate.getUTCFullYear();
+        const candidateMonth = endMonthDate.getUTCMonth() + 1;
+        if (compareYearMonth(candidateYear, candidateMonth, endYear, endMonth) < 0) {
+          endYear = candidateYear;
+          endMonth = candidateMonth;
+        }
+      }
+
+      if (compareYearMonth(startYear, startMonth, endYear, endMonth) <= 0) {
+        const dueMonths = getYearMonthRange(startYear, startMonth, endYear, endMonth);
+        await prisma.todo.createMany({
+          data: dueMonths.map(({ year, month }) => ({
+            type: "EXPENSE",
+            origin: "RECURRENT",
+            status: "OPEN",
+            due_year: year,
+            due_month: month,
+            title: recurrentExpense.description?.trim() || "Manual recurrent expense",
+            description: recurrentExpense.description,
+            amount: recurrentExpense.amount,
+            account_id: accountId,
+            recurrent_expense_id: recurrentExpense.id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+    }
+
+    if (recurrentExpense.status === "ACTIVE" && recurrentExpense.automated && startMonthDate) {
       const startYear = startMonthDate.getUTCFullYear();
       const startMonth = startMonthDate.getUTCMonth() + 1;
 

@@ -25,6 +25,7 @@ export default function AddTransactionForm({ accountId, onAdded, onCancel }: Pro
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [toAccountId, setToAccountId] = useState("");
+  const [automated, setAutomated] = useState(true);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [adding, setAdding] = useState(false);
@@ -89,6 +90,7 @@ export default function AddTransactionForm({ accountId, onAdded, onCancel }: Pro
         body: JSON.stringify({
           description,
           amount: parseFloat(amount),
+          automated,
           year,
           month,
           from_account_id: accountId,
@@ -99,6 +101,7 @@ export default function AddTransactionForm({ accountId, onAdded, onCancel }: Pro
       setDescription("");
       setAmount("");
       setToAccountId("");
+      setAutomated(true);
       onAdded();
       onCancel?.();
     } catch (err) {
@@ -186,6 +189,45 @@ export default function AddTransactionForm({ accountId, onAdded, onCancel }: Pro
           }}
           disabled={adding}
         />
+      </div>
+
+      <div className="grid gap-2">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-medium">Mode</span>
+          <span className="group relative inline-flex items-center">
+            <button
+              type="button"
+              aria-label="Mode info"
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-muted-foreground/40 text-[10px] font-semibold text-muted-foreground"
+            >
+              i
+            </button>
+            <span className="pointer-events-none absolute left-1/2 top-6 z-20 w-72 -translate-x-1/2 rounded-md border bg-popover px-3 py-2 text-xs text-popover-foreground opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+              <p className="font-medium">How to choose:</p>
+              <ul className="mt-1 list-disc pl-4 text-[11px] leading-relaxed">
+                <li>Automatic: used when the movement happens automatically every month.</li>
+                <li>Manual: used when the movement requires your action each month, then you mark it as done in Todos.</li>
+              </ul>
+            </span>
+          </span>
+        </div>
+        <div className="flex gap-2">
+          {([{ value: true, label: "Automatic" }, { value: false, label: "Manual" }] as const).map(({ value, label }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setAutomated(value)}
+              disabled={adding}
+              className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                automated === value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-input bg-background text-foreground hover:bg-muted"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex justify-end gap-2">

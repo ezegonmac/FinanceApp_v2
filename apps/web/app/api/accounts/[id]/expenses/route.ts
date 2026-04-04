@@ -11,6 +11,7 @@ const expenseSchema = z.object({
   amount: z.number().nonnegative(),
   analytics_amount: z.number().nonnegative().optional(),
   kind: z.enum(["FIXED", "VARIABLE"]).optional(),
+  automated: z.boolean().optional(),
   year: z.number().int(),
   month: z.number().int().min(1).max(12),
 });
@@ -91,6 +92,35 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     const body = await request.json();
     const parsed = expenseSchema.parse(body);
+
+    const automated = parsed.automated ?? true;
+
+    if (!automated) {
+      const account = await prisma.account.findUnique({
+        where: { id: accountId },
+        select: { name: true },
+      });
+
+      if (!account) {
+        return NextResponse.json({ error: "Account not found" }, { status: 404 });
+      }
+
+      const todo = await prisma.todo.create({
+        data: {
+          type: "EXPENSE",
+          origin: "MANUAL",
+          status: "OPEN",
+          due_year: parsed.year,
+          due_month: parsed.month,
+          title: parsed.description,
+          description: parsed.description,
+          amount: parsed.amount,
+          account_id: accountId,
+        },
+      });
+
+      return NextResponse.json(todo, { status: 201 });
+    }
 
     const monthRecord = await prisma.month.upsert({
       where: {

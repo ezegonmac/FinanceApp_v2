@@ -45,6 +45,7 @@ export async function GET(request: Request) {
       amount: row.amount,
       description: row.description,
       kind: row.kind,
+      automated: row.automated,
       status: row.status,
       start_month: row.start_month,
       end_month: row.end_month,

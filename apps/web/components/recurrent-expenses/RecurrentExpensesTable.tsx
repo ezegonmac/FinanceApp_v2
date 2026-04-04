@@ -15,6 +15,7 @@ type RecurrentExpense = {
   amount: string;
   description: string | null;
   kind: "FIXED" | "VARIABLE";
+  automated: boolean;
   status: "ACTIVE" | "PAUSED" | "CANCELLED";
   start_month: string | null;
   end_month: string | null;
@@ -119,6 +120,15 @@ export default function RecurrentExpensesTable({
       cell: ({ row }) => (
         <Badge variant={row.original.kind === "FIXED" ? "info" : "secondary"}>
           {row.original.kind.charAt(0) + row.original.kind.slice(1).toLowerCase()}
+        </Badge>
+      ),
+    },
+    {
+      id: "mode",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mode</span>,
+      cell: ({ row }) => (
+        <Badge variant={row.original.automated ? "info" : "secondary"}>
+          {row.original.automated ? "Auto" : "Manual"}
         </Badge>
       ),
     },

@@ -108,6 +108,8 @@ export default function AccountIncomesView({ accountId }: Props) {
     setEndMonth(range.endMonth);
   };
 
+  const refresh = () => setRefreshKey(k => k + 1);
+
   return (
     <section className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

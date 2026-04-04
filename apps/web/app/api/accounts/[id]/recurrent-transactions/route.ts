@@ -10,6 +10,7 @@ const recurrentTransactionSchema = z.object({
   to_account_id: z.number().int().positive(),
   amount: z.number().positive(),
   description: z.string().optional(),
+  automated: z.boolean().optional(),
   status: z.enum(["ACTIVE", "PAUSED", "CANCELLED"]).optional(),
   start_month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
   end_month: z.string().regex(/^\d{4}-\d{2}$/).optional(),
@@ -33,6 +34,21 @@ function compareYearMonth(aYear: number, aMonth: number, bYear: number, bMonth: 
 function getNextYearMonth(year: number, month: number) {
   if (month === 12) return { year: year + 1, month: 1 };
   return { year, month: month + 1 };
+}
+
+function getYearMonthRange(startYear: number, startMonth: number, endYear: number, endMonth: number) {
+  const result: Array<{ year: number; month: number }> = [];
+  let cursorYear = startYear;
+  let cursorMonth = startMonth;
+
+  while (compareYearMonth(cursorYear, cursorMonth, endYear, endMonth) <= 0) {
+    result.push({ year: cursorYear, month: cursorMonth });
+    const next = getNextYearMonth(cursorYear, cursorMonth);
+    cursorYear = next.year;
+    cursorMonth = next.month;
+  }
+
+  return result;
 }
 
 interface RouteContext {
@@ -118,6 +134,7 @@ export async function POST(request: Request, { params }: RouteContext) {
         to_account_id: parsed.to_account_id,
         amount: parsed.amount,
         description: parsed.description,
+        automated: parsed.automated ?? true,
         status: parsed.status ?? "ACTIVE",
         start_month: startMonthDate ?? undefined,
         end_month: endMonthDate ?? undefined,
@@ -129,7 +146,43 @@ export async function POST(request: Request, { params }: RouteContext) {
     const affectedByMonth = new Map<number, Set<number>>();
     let appliedCount = 0;
 
-    if (recurrentTransaction.status === "ACTIVE" && startMonthDate) {
+    if (recurrentTransaction.status === "ACTIVE" && !recurrentTransaction.automated) {
+      const startYear = startMonthDate ? startMonthDate.getUTCFullYear() : currentYear;
+      const startMonth = startMonthDate ? startMonthDate.getUTCMonth() + 1 : currentMonth;
+      let endYear = currentYear;
+      let endMonth = currentMonth;
+
+      if (endMonthDate) {
+        const candidateYear = endMonthDate.getUTCFullYear();
+        const candidateMonth = endMonthDate.getUTCMonth() + 1;
+        if (compareYearMonth(candidateYear, candidateMonth, endYear, endMonth) < 0) {
+          endYear = candidateYear;
+          endMonth = candidateMonth;
+        }
+      }
+
+      if (compareYearMonth(startYear, startMonth, endYear, endMonth) <= 0) {
+        const dueMonths = getYearMonthRange(startYear, startMonth, endYear, endMonth);
+        await prisma.todo.createMany({
+          data: dueMonths.map(({ year, month }) => ({
+            type: "TRANSACTION",
+            origin: "RECURRENT",
+            status: "OPEN",
+            due_year: year,
+            due_month: month,
+            title: recurrentTransaction.description?.trim() || "Manual recurrent transaction",
+            description: recurrentTransaction.description,
+            amount: recurrentTransaction.amount,
+            from_account_id: fromAccountId,
+            to_account_id: parsed.to_account_id,
+            recurrent_transaction_id: recurrentTransaction.id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+    }
+
+    if (recurrentTransaction.status === "ACTIVE" && recurrentTransaction.automated && startMonthDate) {
       const startYear = startMonthDate.getUTCFullYear();
       const startMonth = startMonthDate.getUTCMonth() + 1;
 
