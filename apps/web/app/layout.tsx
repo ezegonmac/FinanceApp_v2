@@ -25,8 +25,8 @@ export const metadata: Metadata = {
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/accounts", label: "Accounts" },
-  { href: "/months/current", label: "Current Month" },
   { href: "/recurrent", label: "Recurrent" },
+  { href: "/months/current", label: "Current Month" },
   { href: "/metrics", label: "Metrics" },
 ];
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
+import { formatYearMonth } from "@repo/utils";
 import ErrorMessage from "../ErrorMessage";
 import { useDebug } from "../debug/DebugContext";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,10 @@ type Props = {
   error?: string | null;
   onDelete?: (id: number) => void;
   deletingId?: number | null;
+  pageSize?: number;
+  totalCount?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
 };
 
 export default function RecurrentExpensesTable({
@@ -38,6 +43,10 @@ export default function RecurrentExpensesTable({
   error,
   onDelete,
   deletingId,
+  pageSize,
+  totalCount,
+  currentPage,
+  onPageChange,
 }: Props) {
   const { debug } = useDebug();
 
@@ -49,7 +58,13 @@ export default function RecurrentExpensesTable({
 
   const formatMonth = (value: string | null) => {
     if (!value) return "-";
-    return new Date(value).toISOString().slice(0, 7);
+    const date = new Date(value);
+    return formatYearMonth(date.getUTCFullYear(), date.getUTCMonth() + 1);
+  };
+
+  const formatYearMonthValue = (year: number | null, month: number | null) => {
+    if (!year || !month) return "-";
+    return formatYearMonth(year, month);
   };
 
   const formatAmount = (value: string) => {
@@ -129,19 +144,16 @@ export default function RecurrentExpensesTable({
     {
       id: "nextRun",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Next Run</span>,
-      cell: ({ row }) =>
-        row.original.next_run_year && row.original.next_run_month
-          ? `${row.original.next_run_year}-${String(row.original.next_run_month).padStart(2, "0")}`
-          : "-",
-    },
-    {
-      id: "lastApplied",
-      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Last Applied</span>,
-      cell: ({ row }) => row.original.last_applied_month_id ?? "-",
+      cell: ({ row }) => formatYearMonthValue(row.original.next_run_year, row.original.next_run_month),
     }
   );
 
   if (debug) {
+    columns.push({
+      id: "lastApplied",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Last Applied</span>,
+      cell: ({ row }) => row.original.last_applied_month_id ?? "-",
+    });
     columns.push({
       accessorKey: "created_at",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Created At</span>,
@@ -166,6 +178,14 @@ export default function RecurrentExpensesTable({
   });
 
   return (
-    <DataTable columns={columns} data={recurrentExpenses} headerClassName="bg-muted/50" pageSize={10} enablePagination={true} />
+    <DataTable 
+      columns={columns} 
+      data={recurrentExpenses} 
+      headerClassName="bg-muted/50" 
+      pageSize={pageSize}
+      enablePagination={typeof pageSize === "number"}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
+    />
   );
 }

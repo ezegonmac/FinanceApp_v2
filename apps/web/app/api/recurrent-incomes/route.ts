@@ -3,20 +3,41 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/recurrent-incomes
-export async function GET() {
+// GET /api/recurrent-incomes?status=ACTIVE&limit=15&skip=0
+export async function GET(request: Request) {
   try {
-    const recurrentIncomes = await prisma.recurrentIncome.findMany({
-      include: {
-        account: {
-          select: {
-            name: true,
+    const url = new URL(request.url);
+    const statusParam = url.searchParams.get("status") ?? "ALL";
+    const limitParam = url.searchParams.get("limit") ?? "15";
+    const skipParam = url.searchParams.get("skip") ?? "0";
+
+    const limit = Math.min(Math.max(1, parseInt(limitParam, 10) || 15), 100);
+    const skip = Math.max(0, parseInt(skipParam, 10) || 0);
+
+    // Build where clause
+    const where: any = {};
+    if (statusParam !== "ALL") {
+      where.status = statusParam;
+    }
+
+    // Fetch total count and paginated results in parallel
+    const [total, recurrentIncomes] = await Promise.all([
+      prisma.recurrentIncome.count({ where }),
+      prisma.recurrentIncome.findMany({
+        where,
+        include: {
+          account: {
+            select: {
+              name: true,
+            },
           },
+          last_applied_month: true,
         },
-        last_applied_month: true,
-      },
-      orderBy: { id: "desc" },
-    });
+        orderBy: { id: "desc" },
+        take: limit,
+        skip,
+      }),
+    ]);
 
     const response = recurrentIncomes.map((row) => ({
       id: row.id,
@@ -33,7 +54,7 @@ export async function GET() {
       account_name: row.account.name,
     }));
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json({ data: response, total }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       {
