@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import ErrorMessage from "../ErrorMessage";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Account = {
   id: number;
@@ -11,9 +13,10 @@ type Account = {
 
 type Props = {
   onAdded: () => void;
+  onCancel?: () => void;
 };
 
-export default function AddRecurrentTransactionForm({ onAdded }: Props) {
+export default function AddRecurrentTransactionForm({ onAdded, onCancel }: Props) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [fromAccountId, setFromAccountId] = useState("");
   const [toAccountId, setToAccountId] = useState("");
@@ -93,6 +96,7 @@ export default function AddRecurrentTransactionForm({ onAdded }: Props) {
       setStartMonth("");
       setEndMonth("");
       onAdded();
+      onCancel?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
@@ -101,72 +105,83 @@ export default function AddRecurrentTransactionForm({ onAdded }: Props) {
   };
 
   return (
-    <div
-      style={{
-        marginTop: "1rem",
-        padding: "1rem",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-        gap: "0.5rem",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleAdd();
       }}
     >
       {error && <ErrorMessage message={error} />}
-      <p style={{ fontWeight: "bold" }}>Add recurrent transaction:</p>
 
-      <div>
-        <label>
-          From:&nbsp;
-          <select
-            value={fromAccountId}
-            onChange={(e) => setFromAccountId(e.target.value)}
-            disabled={adding || loadingAccounts || accounts.length === 0}
-          >
-            {accounts.length === 0 ? (
-              <option value="">No active accounts</option>
-            ) : (
-              accounts.map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.name}
-                </option>
-              ))
-            )}
-          </select>
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-transaction-from" className="text-sm font-medium">
+          From account
         </label>
-        &nbsp;&nbsp;
-        <label>
-          To:&nbsp;
-          <select
-            value={toAccountId}
-            onChange={(e) => setToAccountId(e.target.value)}
-            disabled={adding || loadingAccounts || accounts.length === 0}
-          >
-            {accounts.length === 0 ? (
-              <option value="">No active accounts</option>
-            ) : (
-              accounts.map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.name}
-                </option>
-              ))
-            )}
-          </select>
+        <select
+          id="recurrent-transaction-from"
+          className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+          value={fromAccountId}
+          onChange={(e) => setFromAccountId(e.target.value)}
+          disabled={adding || loadingAccounts || accounts.length === 0}
+        >
+          {accounts.length === 0 ? (
+            <option value="">No active accounts</option>
+          ) : (
+            accounts.map((acc) => (
+              <option key={acc.id} value={acc.id}>
+                {acc.name}
+              </option>
+            ))
+          )}
+        </select>
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-transaction-to" className="text-sm font-medium">
+          To account
         </label>
-        &nbsp;&nbsp;
-        <input
+        <select
+          id="recurrent-transaction-to"
+          className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+          value={toAccountId}
+          onChange={(e) => setToAccountId(e.target.value)}
+          disabled={adding || loadingAccounts || accounts.length === 0}
+        >
+          {accounts.length === 0 ? (
+            <option value="">No active accounts</option>
+          ) : (
+            accounts.map((acc) => (
+              <option key={acc.id} value={acc.id}>
+                {acc.name}
+              </option>
+            ))
+          )}
+        </select>
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-transaction-description" className="text-sm font-medium">
+          Description
+        </label>
+        <Input
+          id="recurrent-transaction-description"
           type="text"
-          style={{ width: "20em" }}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description (optional)"
           disabled={adding}
         />
-        &nbsp;
-        <input
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-transaction-amount" className="text-sm font-medium">
+          Amount (EUR)
+        </label>
+        <Input
+          id="recurrent-transaction-amount"
           type="number"
-          style={{ width: "10em" }}
+          inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Amount"
@@ -174,31 +189,42 @@ export default function AddRecurrentTransactionForm({ onAdded }: Props) {
         />
       </div>
 
-      <div>
-        <label>
-          Start month:&nbsp;
-          <input
-            type="month"
-            value={startMonth}
-            onChange={(e) => setStartMonth(e.target.value)}
-            disabled={adding}
-          />
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-transaction-start-month" className="text-sm font-medium">
+          Start month
         </label>
-        &nbsp;&nbsp;
-        <label>
-          End month (leave blank for no end):&nbsp;
-          <input
-            type="month"
-            value={endMonth}
-            onChange={(e) => setEndMonth(e.target.value)}
-            disabled={adding}
-          />
-        </label>
+        <Input
+          id="recurrent-transaction-start-month"
+          type="month"
+          value={startMonth}
+          onChange={(e) => setStartMonth(e.target.value)}
+          disabled={adding}
+        />
       </div>
 
-      <button onClick={handleAdd} disabled={adding || loadingAccounts || accounts.length === 0}>
-        {adding ? "Adding..." : "Add Recurrent Transaction"}
-      </button>
-    </div>
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-transaction-end-month" className="text-sm font-medium">
+          End month (optional)
+        </label>
+        <Input
+          id="recurrent-transaction-end-month"
+          type="month"
+          value={endMonth}
+          onChange={(e) => setEndMonth(e.target.value)}
+          disabled={adding}
+        />
+      </div>
+
+      <div className="flex justify-end gap-2">
+        {onCancel ? (
+          <Button type="button" variant="outline" onClick={onCancel} disabled={adding}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={adding || loadingAccounts || accounts.length === 0}>
+          {adding ? "Adding..." : "Add recurrent transaction"}
+        </Button>
+      </div>
+    </form>
   );
 }

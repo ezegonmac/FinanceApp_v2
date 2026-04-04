@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import ErrorMessage from "../ErrorMessage";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Account = {
   id: number;
@@ -11,9 +13,10 @@ type Account = {
 
 type Props = {
   onAdded: () => void;
+  onCancel?: () => void;
 };
 
-export default function AddRecurrentIncomeForm({ onAdded }: Props) {
+export default function AddRecurrentIncomeForm({ onAdded, onCancel }: Props) {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [accountId, setAccountId] = useState("");
   const [description, setDescription] = useState("");
@@ -77,7 +80,10 @@ export default function AddRecurrentIncomeForm({ onAdded }: Props) {
 
       setDescription("");
       setAmount("");
+      setStartMonth("");
+      setEndMonth("");
       onAdded();
+      onCancel?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {
@@ -86,23 +92,22 @@ export default function AddRecurrentIncomeForm({ onAdded }: Props) {
   };
 
   return (
-    <div
-      style={{
-        marginTop: "1rem",
-        padding: "1rem",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-        gap: "0.5rem",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
+    <form
+      className="grid gap-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleAdd();
       }}
     >
       {error && <ErrorMessage message={error} />}
-      <p style={{ fontWeight: "bold" }}>Add recurrent income:</p>
 
-      <div>
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-income-account" className="text-sm font-medium">
+          Account
+        </label>
         <select
+          id="recurrent-income-account"
+          className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
           value={accountId}
           onChange={(e) => setAccountId(e.target.value)}
           disabled={adding || loadingAccounts || accounts.length === 0}
@@ -117,19 +122,30 @@ export default function AddRecurrentIncomeForm({ onAdded }: Props) {
             ))
           )}
         </select>
-        &nbsp;
-        <input
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-income-description" className="text-sm font-medium">
+          Description
+        </label>
+        <Input
+          id="recurrent-income-description"
           type="text"
-          style={{ width: "20em" }}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description (optional)"
+          placeholder="Salary, side income, interest..."
           disabled={adding}
         />
-        &nbsp;
-        <input
+      </div>
+
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-income-amount" className="text-sm font-medium">
+          Amount (EUR)
+        </label>
+        <Input
+          id="recurrent-income-amount"
           type="number"
-          style={{ width: "10em" }}
+          inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="Amount"
@@ -137,21 +153,42 @@ export default function AddRecurrentIncomeForm({ onAdded }: Props) {
         />
       </div>
 
-      <div>
-        <label>
-          Start month:&nbsp;
-          <input type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} disabled={adding} />
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-income-start-month" className="text-sm font-medium">
+          Start month
         </label>
-        &nbsp;&nbsp;
-        <label>
-          End month:&nbsp;
-          <input type="month" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} disabled={adding} />
-        </label>
+        <Input
+          id="recurrent-income-start-month"
+          type="month"
+          value={startMonth}
+          onChange={(e) => setStartMonth(e.target.value)}
+          disabled={adding}
+        />
       </div>
 
-      <button onClick={handleAdd} disabled={adding || loadingAccounts || accounts.length === 0}>
-        {adding ? "Adding..." : "Add Recurrent Income"}
-      </button>
-    </div>
+      <div className="grid gap-2">
+        <label htmlFor="recurrent-income-end-month" className="text-sm font-medium">
+          End month (optional)
+        </label>
+        <Input
+          id="recurrent-income-end-month"
+          type="month"
+          value={endMonth}
+          onChange={(e) => setEndMonth(e.target.value)}
+          disabled={adding}
+        />
+      </div>
+
+      <div className="flex justify-end gap-2">
+        {onCancel ? (
+          <Button type="button" variant="outline" onClick={onCancel} disabled={adding}>
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={adding || loadingAccounts || accounts.length === 0}>
+          {adding ? "Adding..." : "Add recurrent income"}
+        </Button>
+      </div>
+    </form>
   );
 }

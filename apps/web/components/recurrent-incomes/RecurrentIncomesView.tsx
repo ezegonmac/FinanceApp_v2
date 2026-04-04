@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import RecurrentIncomesTable from "./RecurrentIncomesTable";
 import AddRecurrentIncomeForm from "./AddRecurrentIncomeForm";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type RecurrentIncome = {
   id: number;
@@ -25,6 +34,7 @@ export default function RecurrentIncomesView() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchRecurrentIncomes();
@@ -81,7 +91,31 @@ export default function RecurrentIncomesView() {
   };
 
   return (
-    <>
+    <section className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Recurrent Incomes</h2>
+          <p className="text-sm text-muted-foreground">Manage recurring income rules for active accounts.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={refresh} disabled={loading}>
+            {loading ? "Refreshing..." : "Refresh"}
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>Add recurrent income</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add recurrent income</DialogTitle>
+                <DialogDescription>Create a recurring monthly income rule for an account.</DialogDescription>
+              </DialogHeader>
+              <AddRecurrentIncomeForm onAdded={refresh} onCancel={() => setIsDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
       <RecurrentIncomesTable
         recurrentIncomes={recurrentIncomes}
         loading={loading}
@@ -90,12 +124,6 @@ export default function RecurrentIncomesView() {
         deletingId={deletingId}
       />
 
-      <br />
-      <AddRecurrentIncomeForm onAdded={refresh} />
-      &nbsp;
-      <button onClick={refresh} disabled={loading}>
-        {loading ? "Refreshing..." : "Refresh"}
-      </button>
-    </>
+    </section>
   );
 }

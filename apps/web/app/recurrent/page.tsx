@@ -4,23 +4,22 @@ import RecurrentTransactionsView from "@/components/recurrent-transactions/Recur
 
 export default function RecurrentPage() {
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1>Recurrent Operations</h1>
+    <section className="space-y-6">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight">Recurrent Operations</h1>
+      </header>
 
-      <h2>Recurrent Incomes</h2>
-      <RecurrentIncomesView />
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <RecurrentIncomesView />
+      </section>
 
-      <br />
-      <br />
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <RecurrentExpensesView />
+      </section>
 
-      <h2>Recurrent Expenses</h2>
-      <RecurrentExpensesView />
-
-      <br />
-      <br />
-
-      <h2>Recurrent Transactions</h2>
-      <RecurrentTransactionsView />
-    </div>
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <RecurrentTransactionsView />
+      </section>
+    </section>
   );
 }

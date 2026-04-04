@@ -1,8 +1,12 @@
 'use client';
 
 import Link from "next/link";
+import { ColumnDef } from "@tanstack/react-table";
 import ErrorMessage from "../ErrorMessage";
 import { useDebug } from "../debug/DebugContext";
+import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
+import { Badge } from "@/components/ui/badge";
 
 type RecurrentIncome = {
   id: number;
@@ -42,52 +46,116 @@ export default function RecurrentIncomesTable({
     return <p>No recurrent incomes configured.</p>;
   }
 
+  const formatMonth = (value: string | null) => {
+    if (!value) return "-";
+    return new Date(value).toISOString().slice(0, 7);
+  };
+
+  const formatAmount = (value: string) => {
+    const numericValue = Number(value);
+    const hasDecimals = !Number.isInteger(numericValue);
+    return new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: hasDecimals ? 2 : 0,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  };
+
+  const getStatusVariant = (status: RecurrentIncome["status"]) => {
+    if (status === "ACTIVE") return "success" as const;
+    if (status === "PAUSED") return "warning" as const;
+    return "destructive" as const;
+  };
+
+  const columns: ColumnDef<RecurrentIncome>[] = [];
+
+  if (debug) {
+    columns.push({
+      accessorKey: "id",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Id</span>,
+    });
+  }
+
+  columns.push(
+    {
+      id: "account",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</span>,
+      cell: ({ row }) => (
+        <Link href={`/accounts/${row.original.account_id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+          {row.original.account_name ?? row.original.account_id}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "description",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Description</span>,
+      cell: ({ row }) => row.original.description ?? "-",
+    },
+    {
+      accessorKey: "amount",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</span>,
+      cell: ({ row }) => formatAmount(row.original.amount),
+    },
+    {
+      accessorKey: "status",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</span>,
+      cell: ({ row }) => (
+        <Badge variant={getStatusVariant(row.original.status)}>
+          {row.original.status.charAt(0) + row.original.status.slice(1).toLowerCase()}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "start_month",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Start</span>,
+      cell: ({ row }) => formatMonth(row.original.start_month),
+    },
+    {
+      accessorKey: "end_month",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">End</span>,
+      cell: ({ row }) => formatMonth(row.original.end_month),
+    },
+    {
+      id: "nextRun",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Next Run</span>,
+      cell: ({ row }) =>
+        row.original.next_run_year && row.original.next_run_month
+          ? `${row.original.next_run_year}-${String(row.original.next_run_month).padStart(2, "0")}`
+          : "-",
+    },
+    {
+      id: "lastApplied",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Last Applied</span>,
+      cell: ({ row }) => row.original.last_applied_month_id ?? "-",
+    }
+  );
+
+  if (debug) {
+    columns.push({
+      accessorKey: "created_at",
+      header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Created At</span>,
+      cell: ({ row }) => new Date(row.original.created_at).toLocaleString(),
+    });
+  }
+
+  columns.push({
+    id: "actions",
+    header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</span>,
+    cell: ({ row }) => (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => onDelete?.(row.original.id)}
+        disabled={deletingId === row.original.id}
+      >
+        {deletingId === row.original.id ? "Deleting..." : "Delete"}
+      </Button>
+    ),
+  });
+
   return (
-    <table style={{ borderCollapse: "collapse", width: "100%" }}>
-      <thead>
-        <tr style={{ borderBottom: "2px solid #000" }}>
-          {debug && <th style={{ textAlign: "left" }}>Id</th>}
-          <th style={{ textAlign: "left" }}>Account</th>
-          <th style={{ textAlign: "left" }}>Description</th>
-          <th style={{ textAlign: "left" }}>Amount</th>
-          <th style={{ textAlign: "left" }}>Status</th>
-          <th style={{ textAlign: "left" }}>Start</th>
-          <th style={{ textAlign: "left" }}>End</th>
-          <th style={{ textAlign: "left" }}>Next Run</th>
-          <th style={{ textAlign: "left" }}>Last Applied Month Id</th>
-          {debug && <th style={{ textAlign: "left" }}>Created At</th>}
-          <th style={{ textAlign: "left" }}>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {recurrentIncomes.map((item) => (
-          <tr key={item.id} style={{ borderBottom: "1px solid #ccc" }}>
-            {debug && <td>{item.id}</td>}
-            <td>
-              <Link href={`/accounts/${item.account_id}`} style={{ color: "blue" }}>
-                {item.account_name ?? item.account_id}
-              </Link>
-            </td>
-            <td>{item.description ?? "-"}</td>
-            <td>{item.amount}</td>
-            <td>{item.status}</td>
-            <td>{item.start_month ? new Date(item.start_month).toISOString().slice(0, 7) : "-"}</td>
-            <td>{item.end_month ? new Date(item.end_month).toISOString().slice(0, 7) : "-"}</td>
-            <td>
-              {item.next_run_year && item.next_run_month
-                ? `${item.next_run_year}-${String(item.next_run_month).padStart(2, "0")}`
-                : "-"}
-            </td>
-            <td>{item.last_applied_month_id ?? "-"}</td>
-            {debug && <td>{new Date(item.created_at).toLocaleString()}</td>}
-            <td>
-              <button onClick={() => onDelete?.(item.id)} disabled={deletingId === item.id}>
-                {deletingId === item.id ? "Deleting..." : "Delete"}
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <DataTable columns={columns} data={recurrentIncomes} headerClassName="bg-muted/50" pageSize={10} enablePagination={true} />
   );
 }

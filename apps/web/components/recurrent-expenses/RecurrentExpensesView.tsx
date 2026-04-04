@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import AddRecurrentExpenseForm from "./AddRecurrentExpenseForm";
 import RecurrentExpensesTable from "./RecurrentExpensesTable";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type RecurrentExpense = {
   id: number;
@@ -26,6 +35,7 @@ export default function RecurrentExpensesView() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchRecurrentExpenses();
@@ -82,7 +92,31 @@ export default function RecurrentExpensesView() {
   };
 
   return (
-    <>
+    <section className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Recurrent Expenses</h2>
+          <p className="text-sm text-muted-foreground">Manage recurring expense rules for active accounts.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={refresh} disabled={loading}>
+            {loading ? "Refreshing..." : "Refresh"}
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>Add recurrent expense</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add recurrent expense</DialogTitle>
+                <DialogDescription>Create a recurring monthly expense rule for an account.</DialogDescription>
+              </DialogHeader>
+              <AddRecurrentExpenseForm onAdded={refresh} onCancel={() => setIsDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
       <RecurrentExpensesTable
         recurrentExpenses={recurrentExpenses}
         loading={loading}
@@ -91,12 +125,6 @@ export default function RecurrentExpensesView() {
         deletingId={deletingId}
       />
 
-      <br />
-      <AddRecurrentExpenseForm onAdded={refresh} />
-      &nbsp;
-      <button onClick={refresh} disabled={loading}>
-        {loading ? "Refreshing..." : "Refresh"}
-      </button>
-    </>
+    </section>
   );
 }
