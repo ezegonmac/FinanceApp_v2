@@ -17,6 +17,7 @@ export default function AddExpenseForm({ accountId, onAdded, onCancel }: Props) 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [analyticsAmount, setAnalyticsAmount] = useState("");
+  const [adjustAnalytics, setAdjustAnalytics] = useState(false);
   const [kind, setKind] = useState<"FIXED" | "VARIABLE">("FIXED");
   const [automated, setAutomated] = useState(true);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -57,7 +58,7 @@ export default function AddExpenseForm({ accountId, onAdded, onCancel }: Props) 
         body: JSON.stringify({
           description,
           amount: parseFloat(amount),
-          analytics_amount: analyticsAmount && analyticsAmount !== amount ? parseFloat(analyticsAmount) : undefined,
+          analytics_amount: adjustAnalytics && analyticsAmount && analyticsAmount !== amount ? parseFloat(analyticsAmount) : undefined,
           kind,
           automated,
           year,
@@ -70,6 +71,7 @@ export default function AddExpenseForm({ accountId, onAdded, onCancel }: Props) 
       setDescription("");
       setAmount("");
       setAnalyticsAmount("");
+      setAdjustAnalytics(false);
       setAutomated(true);
       onAdded();
       onCancel?.();
@@ -119,22 +121,39 @@ export default function AddExpenseForm({ accountId, onAdded, onCancel }: Props) 
             disabled={adding}
           />
         </div>
+      </div>
 
-        <div className="grid gap-2">
-          <label htmlFor="expense-analytics-amount" className="text-sm font-medium">
-            Analytics amount (EUR)
-          </label>
-          <Input
-            id="expense-analytics-amount"
-            type="number"
-            inputMode="decimal"
-            value={analyticsAmount}
-            onChange={(e) => setAnalyticsAmount(e.target.value)}
-            placeholder="Optional"
+      <div className="grid gap-2">
+        <label className="inline-flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={adjustAnalytics}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setAdjustAnalytics(checked);
+              if (checked) setAnalyticsAmount(amount);
+            }}
             disabled={adding}
-            title="Analytics amount (used for expense metrics, defaults to amount)"
           />
-        </div>
+          Use a different amount for analytics
+        </label>
+        {adjustAnalytics ? (
+          <div className="grid gap-2 sm:max-w-xs">
+            <label htmlFor="expense-analytics-amount" className="text-sm font-medium">
+              Analytics amount (EUR)
+            </label>
+            <Input
+              id="expense-analytics-amount"
+              type="number"
+              inputMode="decimal"
+              value={analyticsAmount}
+              onChange={(e) => setAnalyticsAmount(e.target.value)}
+              placeholder="Optional"
+              disabled={adding}
+              title="Analytics amount (used for expense metrics, defaults to amount)"
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">

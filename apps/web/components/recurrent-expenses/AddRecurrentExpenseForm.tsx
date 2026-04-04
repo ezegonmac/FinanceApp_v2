@@ -22,6 +22,7 @@ export default function AddRecurrentExpenseForm({ onAdded, onCancel }: Props) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [analyticsAmount, setAnalyticsAmount] = useState("");
+  const [adjustAnalytics, setAdjustAnalytics] = useState(false);
   const [kind, setKind] = useState<"FIXED" | "VARIABLE">("FIXED");
   const [automated, setAutomated] = useState(true);
   const [startMonth, setStartMonth] = useState("");
@@ -78,7 +79,7 @@ export default function AddRecurrentExpenseForm({ onAdded, onCancel }: Props) {
         body: JSON.stringify({
           description: description.trim() || undefined,
           amount: parseFloat(amount),
-          analytics_amount: analyticsAmount && analyticsAmount !== amount ? parseFloat(analyticsAmount) : undefined,
+          analytics_amount: adjustAnalytics && analyticsAmount && analyticsAmount !== amount ? parseFloat(analyticsAmount) : undefined,
           kind,
           automated,
           start_month: startMonth || undefined,
@@ -91,6 +92,7 @@ export default function AddRecurrentExpenseForm({ onAdded, onCancel }: Props) {
       setDescription("");
       setAmount("");
       setAnalyticsAmount("");
+      setAdjustAnalytics(false);
       setStartMonth("");
       setEndMonth("");
       setKind("FIXED");
@@ -167,19 +169,36 @@ export default function AddRecurrentExpenseForm({ onAdded, onCancel }: Props) {
       </div>
 
       <div className="grid gap-2">
-        <label htmlFor="recurrent-expense-analytics" className="text-sm font-medium">
-          Analytics amount (optional)
+        <label className="inline-flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={adjustAnalytics}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setAdjustAnalytics(checked);
+              if (checked) setAnalyticsAmount(amount);
+            }}
+            disabled={adding}
+          />
+          Use a different amount for analytics
         </label>
-        <Input
-          id="recurrent-expense-analytics"
-          type="number"
-          inputMode="decimal"
-          value={analyticsAmount}
-          onChange={(e) => setAnalyticsAmount(e.target.value)}
-          placeholder="Analytics Amt"
-          disabled={adding}
-          title="Analytics amount (used for expense metrics, defaults to amount)"
-        />
+        {adjustAnalytics ? (
+          <div className="grid gap-2 sm:max-w-xs">
+            <label htmlFor="recurrent-expense-analytics" className="text-sm font-medium">
+              Analytics amount (optional)
+            </label>
+            <Input
+              id="recurrent-expense-analytics"
+              type="number"
+              inputMode="decimal"
+              value={analyticsAmount}
+              onChange={(e) => setAnalyticsAmount(e.target.value)}
+              placeholder="Analytics amount"
+              disabled={adding}
+              title="Analytics amount (used for expense metrics, defaults to amount)"
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className="grid gap-2">

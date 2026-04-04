@@ -57,7 +57,7 @@ export default function AccountMonthSummary({
     <section className="space-y-4 rounded-md border bg-card p-6 text-card-foreground">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight">This Month Summary</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Current Month Summary</h2>
           <p className="text-sm text-muted-foreground">{monthLabel}</p>
         </div>
         <p className="text-xs uppercase tracking-wide text-muted-foreground">Live account totals</p>

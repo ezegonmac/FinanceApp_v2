@@ -24,6 +24,9 @@ export default function EditExpenseForm({ expense }: Props) {
   const router = useRouter();
   const [description, setDescription] = useState(expense.description ?? "");
   const [amount, setAmount] = useState(String(expense.amount));
+  const [adjustAnalytics, setAdjustAnalytics] = useState(
+    expense.analytics_amount != null && String(expense.analytics_amount) !== String(expense.amount)
+  );
   const [analyticsAmount, setAnalyticsAmount] = useState(
     String(expense.analytics_amount ?? expense.amount)
   );
@@ -57,7 +60,7 @@ export default function EditExpenseForm({ expense }: Props) {
           description: description.trim(),
           amount: parseFloat(amount),
           analytics_amount:
-            analyticsAmount && analyticsAmount !== amount
+            adjustAnalytics && analyticsAmount && analyticsAmount !== amount
               ? parseFloat(analyticsAmount)
               : undefined,
           kind,
@@ -118,17 +121,31 @@ export default function EditExpenseForm({ expense }: Props) {
             disabled={saving}
           />
         </label>
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-          <span>Analytics Amount</span>
-          <input
-            type="number"
-            style={{ width: "10em" }}
-            value={analyticsAmount}
-            onChange={(e) => setAnalyticsAmount(e.target.value)}
-            placeholder="Analytics amount"
-            disabled={saving}
-          />
-        </label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+            <input
+              type="checkbox"
+              checked={adjustAnalytics}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setAdjustAnalytics(checked);
+                if (checked) setAnalyticsAmount(amount);
+              }}
+              disabled={saving}
+            />
+            Use a different amount for analytics
+          </label>
+          {adjustAnalytics ? (
+            <input
+              type="number"
+              style={{ width: "10em" }}
+              value={analyticsAmount}
+              onChange={(e) => setAnalyticsAmount(e.target.value)}
+              placeholder="Analytics amount"
+              disabled={saving}
+            />
+          ) : null}
+        </div>
         <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
           <span>Type</span>
           <select
