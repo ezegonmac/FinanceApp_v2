@@ -1,7 +1,7 @@
 import AccountIncomesView from "@/components/incomes/AccountIncomesView";
 import AccountTransactionsView from "@/components/transactions/AccountTransactionsView";
 import AccountExpensesView from "@/components/expenses/AccountExpensesView";
-import AccountSummary from "@/components/accounts/AccountSummary";
+import AccountHeader from "@/components/accounts/AccountHeader";
 import AccountMonthSummary from "@/components/accounts/AccountMonthSummary";
 import { prisma } from "@repo/db";
 import { formatYearMonth, getEuropeMadridDateParts } from "@repo/utils";
@@ -73,12 +73,15 @@ export default async function AccountPage({
   return (
     <div className="space-y-5">
       <section className="px-2 py-4 text-card-foreground">
-        <AccountSummary
-          name={account.name}
-          icon={account.icon}
-          balance={account.balance?.toString() ?? "N/A"}
-          createdAtIso={account.created_at.toISOString()}
-          active={account.active}
+        <AccountHeader
+          account={{
+            id: account.id,
+            name: account.name,
+            icon: account.icon,
+            balance: account.balance?.toString() ?? "N/A",
+            createdAtIso: account.created_at.toISOString(),
+            active: account.active,
+          }}
         />
       </section>
 

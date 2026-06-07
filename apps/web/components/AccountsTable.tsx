@@ -28,6 +28,7 @@ import { ListTable } from "@/components/ui/list-table";
 import Link from "next/link";
 import AccountIcon from "@/components/accounts/AccountIcon";
 import IconPicker from "@/components/accounts/IconPicker";
+import EditAccountForm from "@/components/accounts/EditAccountForm";
 
 type Account = {
     id: number;
@@ -64,6 +65,8 @@ export default function AccountsTable() {
     const [accountBalance, setAccountBalance] = useState("");
     const [accountIcon, setAccountIcon] = useState<string | null>(null);
     const [adding, setAdding] = useState(false);
+
+    const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
     const resetForm = () => {
         setAccountName("");
@@ -188,6 +191,9 @@ export default function AccountsTable() {
                     <DropdownMenuItem asChild>
                         <Link href={`/accounts/${row.original.id}`}>View account</Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setEditingAccount(row.original)}>
+                        Edit account
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         ),
@@ -287,6 +293,24 @@ export default function AccountsTable() {
                 <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                     No accounts available.
                 </div>
+            )}
+
+            {editingAccount && (
+                <EditAccountForm
+                    account={{
+                        id: editingAccount.id,
+                        name: editingAccount.name,
+                        icon: editingAccount.icon,
+                        active: editingAccount.active,
+                    }}
+                    open={!!editingAccount}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setEditingAccount(null);
+                            void fetchAccounts();
+                        }
+                    }}
+                />
             )}
         </div>
     );

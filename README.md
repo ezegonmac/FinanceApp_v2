@@ -65,7 +65,6 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Todo tab with pending todo recurrent expenses and recurrent transactions that are not marked as automated (bool attribute) 🟨
   - Sort, filter and search accounts, transactions, incomes and expenses 🟨
   - Sort, filter and paginate incomes, expenses and transactions by month ✅
-  - Prioritize icons and visual cues for better UX 🟨
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
   - Pause and resume recurrent incomes 🟨
@@ -79,7 +78,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Allow recurrent expenses with no end date ✅
   - Allow recurrent transactions with no end date ✅
   - Enable/Disable account 🟨
-  - Edit account details 🟨
+  - Edit account details 🔷
   - Edit income and expense details ✅
   - Edit transaction details ✅
   - Delete individual transactions, incomes and expenses ✅
@@ -89,7 +88,6 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Automate with server cron 🟨
 - I want to be able to differentiate the expense actual value and the one used for expense metrics. "Adjust for analytics" ✅
 - The admin can enable and disable the debug mode. In debug mode, there will be additional columns shown in the tables ✅
-- Improve cleanliness and usability of the UI (data-driven application) 🟨
 - Hide the "Adjust for analytics" field if not needed ✅
 - Year analytics with the total amount of incomes, expenses and transactions for the year 🟨
 - Bugs
@@ -97,12 +95,16 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
 - Design
   - Allow account icon ✅
+  - Prioritize icons and visual cues for better UX 🟨
+  - Improve cleanliness and usability of the UI (data-driven application) 🟨
 - Infrastructure
   - Deploy prod version 🟨
 - Misc
   - Migrate tables to two different components one more data-driven and one more list styled ✅
   - Create development workflow with integrated AI ✅
   - Upload erd dbdocs file and update erd.png 🟨
+  - Add native authentification layer with nextjs 🟨
+  - Create a covering test suite 🟨
 
 ### Status Legend
 🟨 Pending
