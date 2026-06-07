@@ -130,7 +130,8 @@ export function ListTable<TData, TValue>({
                   key={row.id}
                   onClick={isClickable ? () => router.push(href!) : undefined}
                   className={cn(
-                    "[&>td]:py-3",
+                    // 40px default row height per design system (py-2.5 = 10px + 20px line + 10px)
+                    "[&>td]:py-2.5",
                     isClickable && "cursor-pointer transition-colors hover:bg-accent/40"
                   )}
                 >

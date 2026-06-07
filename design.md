@@ -80,10 +80,10 @@ typography:
   mono-data:   { fontFamily: JetBrains Mono, fontSize: 13px, fontWeight: 500, lineHeight: 18px }
 
 radius:
-  sm:      0.125rem  # 2px  — status badges, chips
-  DEFAULT: 0.25rem   # 4px  — buttons, inputs (--radius base)
-  lg:      0.5rem    # 8px  — cards, containers
-  xl:      0.75rem   # 12px — modals, large overlays
+  sm:      0.0625rem # 1px  — status badges, chips
+  DEFAULT: 0.125rem  # 2px  — buttons, inputs (--radius base)
+  lg:      0.25rem   # 4px  — cards, containers
+  xl:      0.5rem    # 8px  — modals, large overlays
   full:    9999px    # pill shapes
 
 spacing:
@@ -172,14 +172,14 @@ Depth is expressed through **tonal layers** and **low-contrast outlines** — ne
 
 ## Shapes
 
-Base radius is **4px (0.25rem)**. The scale:
+Base radius is **2px (0.125rem)**. The scale:
 
 | Token      | Value   | Applied to                      |
 |------------|---------|---------------------------------|
-| `sm`       | 2px     | Status badges, chips            |
-| `DEFAULT`  | 4px     | Buttons, inputs, form elements  |
-| `lg`       | 8px     | Cards, containers, panels       |
-| `xl`       | 12px    | Modals, large overlays          |
+| `sm`       | 1px     | Status badges, chips            |
+| `DEFAULT`  | 2px     | Buttons, inputs, form elements  |
+| `lg`       | 4px     | Cards, containers, panels       |
+| `xl`       | 8px     | Modals, large overlays          |
 | `full`     | 9999px  | Pill shapes                     |
 
 ## Components
@@ -219,6 +219,7 @@ Use `bg-*-subtle` + `text-*-subtle-foreground` pairs for filled chips. Use `vari
 | Cancelled   | `muted`              | `muted-foreground`            |
 | Active      | `accent`             | `accent-foreground`           |
 | Manual      | `secondary`          | `secondary-foreground`        |
+| Overdue     | —                    | `destructive` (text only)     |
 
 Shape: `radius-sm` (2px) for a sharp, technical look.
 
@@ -234,7 +235,7 @@ Shape: `radius-sm` (2px) for a sharp, technical look.
 Every card is an "Information Module":
 
 - Background: `--card` (`#ffffff`)
-- Border: 1px `--border`, `radius-lg` (8px)
+- Border: 1px `--border`, `radius-lg` (4px)
 - Header: bottom border (`--border`), `headline-sm` title, `16px` padding
 - Body: `16px` padding, `stack-md` (12px) vertical gap between rows
 
@@ -246,7 +247,7 @@ Every card is an "Information Module":
 
 | Aspect | `DataTable` | `ListTable` |
 |---|---|---|
-| Row height | 32px compact / 40px default | 40px default (`[&>td]:py-3`) |
+| Row height | 32px compact / 40px default | 40px default (`[&>td]:py-2.5`) |
 | Row navigation | — | Optional `getRowHref` — entire row is a nav target |
 | Hover state | `hover:bg-muted/50` (table default) | `hover:bg-accent/40` on clickable rows |
 | Action columns | — | `meta: { isAction: true }` stops propagation |

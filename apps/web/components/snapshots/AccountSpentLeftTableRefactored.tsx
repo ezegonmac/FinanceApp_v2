@@ -103,11 +103,11 @@ export default function AccountSpentLeftTableRefactored({
             })),
         ];
 
-        const outMovements: OutMovement[] = outMovementsBase.map((movement, index) => ({
+        const outMovements: OutMovement[] = outMovementsBase.map((movement, idx) => ({
           ...movement,
           pctOfOut: totalOut > 0 ? (movement.amount / totalOut) * 100 : 0,
           pctOfIn: totalIn > 0 ? (movement.amount / totalIn) * 100 : 0,
-          color: colorFor(index, outMovementsBase.length),
+          color: colorFor(idx, outMovementsBase.length),
         }));
 
         const summaryColumns: ColumnDef<{ key: string; label: string; value: string }>[] = [
@@ -119,7 +119,8 @@ export default function AccountSpentLeftTableRefactored({
           {
             id: "value",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Value</span>,
-            cell: ({ row }) => <span className="text-right font-semibold">{row.original.value}</span>,
+            cell: ({ row }) => row.original.value,
+            meta: { numeric: true },
           },
         ];
 
@@ -139,22 +140,25 @@ export default function AccountSpentLeftTableRefactored({
           {
             id: "label",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Out Movement</span>,
-            cell: ({ row }) => <span>{cleanLabel(row.original.label)}</span>,
+            cell: ({ row }) => cleanLabel(row.original.label),
           },
           {
             id: "amount",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</span>,
-            cell: ({ row }) => <span className="text-right">{fmt(row.original.amount)}</span>,
+            cell: ({ row }) => fmt(row.original.amount),
+            meta: { numeric: true },
           },
           {
             id: "pctOfOut",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% of Out</span>,
-            cell: ({ row }) => <span className="text-right">{fmtPct(row.original.pctOfOut)}</span>,
+            cell: ({ row }) => fmtPct(row.original.pctOfOut),
+            meta: { numeric: true },
           },
           {
             id: "pctOfIn",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% of In</span>,
-            cell: ({ row }) => <span className="text-right">{fmtPct(row.original.pctOfIn)}</span>,
+            cell: ({ row }) => fmtPct(row.original.pctOfIn),
+            meta: { numeric: true },
           },
         ];
 
@@ -170,7 +174,7 @@ export default function AccountSpentLeftTableRefactored({
               <div className="space-y-4 overflow-hidden">
                 <div>
                   <div className="mb-2 bg-muted/50 px-4 py-2 text-sm font-semibold">Summary</div>
-                  <DataTable columns={summaryColumns} data={summaryData} headerClassName="bg-white" />
+                  <DataTable columns={summaryColumns} data={summaryData} />
                 </div>
 
                 <div>
@@ -178,7 +182,7 @@ export default function AccountSpentLeftTableRefactored({
                   {outMovements.length === 0 ? (
                     <div className="px-4 py-2 text-sm text-muted-foreground">No out movements</div>
                   ) : (
-                    <DataTable columns={outMovementColumns} data={outMovements} headerClassName="bg-white" />
+                    <DataTable columns={outMovementColumns} data={outMovements} />
                   )}
                 </div>
               </div>

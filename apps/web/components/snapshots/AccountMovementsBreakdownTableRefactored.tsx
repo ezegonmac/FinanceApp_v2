@@ -112,27 +112,31 @@ function SectionTableComponent({
     {
       id: "label",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</span>,
-      cell: ({ row }) => <span>{cleanLabel(row.original.label)}</span>,
+      cell: ({ row }) => cleanLabel(row.original.label),
     },
     {
       id: "inAmount",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">In</span>,
-      cell: ({ row }) => <span className="text-right">{fmt(row.original.inAmount)}</span>,
+      cell: ({ row }) => fmt(row.original.inAmount),
+      meta: { numeric: true },
     },
     {
       id: "outAmount",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Out</span>,
-      cell: ({ row }) => <span className="text-right">{fmt(row.original.outAmount)}</span>,
+      cell: ({ row }) => fmt(row.original.outAmount),
+      meta: { numeric: true },
     },
     {
       id: "pctIn",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% In</span>,
-      cell: ({ row }) => <span className="text-right">{pct(row.original.inAmount, totalIn)}</span>,
+      cell: ({ row }) => pct(row.original.inAmount, totalIn),
+      meta: { numeric: true },
     },
     {
       id: "pctOut",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">% Out</span>,
-      cell: ({ row }) => <span className="text-right">{pct(row.original.outAmount, totalOut)}</span>,
+      cell: ({ row }) => pct(row.original.outAmount, totalOut),
+      meta: { numeric: true },
     },
   ];
 
@@ -147,15 +151,15 @@ function SectionTableComponent({
 
   return (
     <div className="mb-4">
-      <div className="mb-2 bg-muted/50 px-4 py-2 font-semibold text-sm">{title}</div>
-      <DataTable columns={columns} data={rows} headerClassName="bg-white" />
+      <div className="mb-2 bg-muted/50 px-4 py-2 text-sm font-semibold">{title}</div>
+      <DataTable columns={columns} data={rows} />
       <div className="border-t px-4 py-2 text-sm font-semibold">
         <div className="flex gap-8">
           <div className="flex-1">Section Total</div>
-          <div className="w-24 text-right">{fmt(sectionIn)}</div>
-          <div className="w-24 text-right">{fmt(sectionOut)}</div>
-          <div className="w-20 text-right">{pct(sectionIn, totalIn)}</div>
-          <div className="w-20 text-right">{pct(sectionOut, totalOut)}</div>
+          <div className="w-24 text-right font-mono tabular-nums">{fmt(sectionIn)}</div>
+          <div className="w-24 text-right font-mono tabular-nums">{fmt(sectionOut)}</div>
+          <div className="w-20 text-right font-mono tabular-nums">{pct(sectionIn, totalIn)}</div>
+          <div className="w-20 text-right font-mono tabular-nums">{pct(sectionOut, totalOut)}</div>
         </div>
       </div>
     </div>
@@ -261,14 +265,16 @@ export default function AccountMovementsBreakdownTableRefactored({
                 <div className="border-t-2 bg-muted/30 px-4 py-3 font-bold">
                   <div className="mb-2 flex gap-8">
                     <div className="flex-1">TOTAL</div>
-                    <div className="w-24 text-right">{fmt(totalIn)}</div>
-                    <div className="w-24 text-right">{fmt(totalOut)}</div>
-                    <div className="w-20 text-right">{pct(totalIn, totalIn)}</div>
-                    <div className="w-20 text-right">{pct(totalOut, totalOut)}</div>
+                    <div className="w-24 text-right font-mono tabular-nums">{fmt(totalIn)}</div>
+                    <div className="w-24 text-right font-mono tabular-nums">{fmt(totalOut)}</div>
+                    <div className="w-20 text-right font-mono tabular-nums">{pct(totalIn, totalIn)}</div>
+                    <div className="w-20 text-right font-mono tabular-nums">{pct(totalOut, totalOut)}</div>
                   </div>
-                  <div className={`flex gap-8 ${net >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  <div className={`flex gap-8 ${net >= 0 ? "text-positive" : "text-negative"}`}>
                     <div className="flex-1">NET</div>
-                    <div className="w-48 text-right">{net === 0 ? "-" : `${net >= 0 ? "+" : ""}${fmt(net)}`}</div>
+                    <div className="w-48 text-right font-mono tabular-nums">
+                      {net === 0 ? "-" : `${net >= 0 ? "+" : ""}${fmt(net)}`}
+                    </div>
                   </div>
                 </div>
               </div>

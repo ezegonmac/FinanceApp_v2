@@ -94,8 +94,11 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
 - Year analytics with the total amount of incomes, expenses and transactions for the year 🟨
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
+  - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
+- Design
+  - Allow account icon 🟨
 - Misc
-  - Migrate tables to two different components one more data-driven and one more list styled 🔷
+  - Migrate tables to two different components one more data-driven and one more list styled ✅
   - Create development workflow with integrated AI ✅
   - Upload erd dbdocs file and update erd.png 🟨
 

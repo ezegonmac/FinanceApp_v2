@@ -1,26 +1,7 @@
 import { prisma } from "@repo/db";
 import { formatYearMonth, getEuropeMadridDateParts } from "@repo/utils";
-import TodoActions from "@/components/todos/TodoActions";
-import TodoReopenButton from "@/components/todos/TodoReopenButton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-const formatCurrency = (value: unknown) => {
-  const n = Number(value ?? 0);
-  const hasDecimals = !Number.isInteger(n);
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: hasDecimals ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(n);
-};
+import PendingTodosTable from "@/components/todos/PendingTodosTable";
+import CompletedTodosTable from "@/components/todos/CompletedTodosTable";
 
 export default async function TodosPage() {
   const { year: currentYear, month: currentMonth } = getEuropeMadridDateParts();
@@ -74,37 +55,12 @@ export default async function TodosPage() {
     loadError = error instanceof Error ? error.message : "Unknown error";
   }
 
-  const typeLabel = (type: "EXPENSE" | "TRANSACTION") =>
-    type === "EXPENSE" ? "Expense" : "Transfer";
-
-  const typeTone = (type: "EXPENSE" | "TRANSACTION") =>
-    type === "EXPENSE"
-      ? "bg-rose-50 text-rose-700 ring-1 ring-rose-200"
-      : "bg-sky-50 text-sky-700 ring-1 ring-sky-200";
-
-  const accountContext = (row: TodoRow) =>
-    row.type === "EXPENSE"
-      ? row.account?.name ?? "Unknown account"
-      : `${row.from_account?.name ?? "Unknown"} → ${row.to_account?.name ?? "Unknown"}`;
-
-  const actionText = (row: TodoRow) => {
-    const amount = formatCurrency(row.amount);
-    if (row.type === "TRANSACTION") {
-      const from = row.from_account?.name ?? "Unknown account";
-      const to = row.to_account?.name ?? "Unknown account";
-      return `Send ${amount} from ${from} to ${to}`;
-    }
-    const account = row.account?.name ?? "Unknown account";
-    return `Send ${amount} from ${account}`;
-  };
-
-  const statusTone = (status: TodoRow["status"]) => {
-    if (status === "DONE") return "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200";
-    if (status === "SKIPPED") return "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
-    return "bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200";
-  };
-
-  const pendingTone = "bg-blue-50 text-blue-700 ring-1 ring-blue-200";
+  // Serialize Date fields to strings for client component consumption
+  const serializeTodos = (rows: TodoRow[]) =>
+    rows.map((row) => ({
+      ...row,
+      completed_at: row.completed_at?.toISOString() ?? null,
+    }));
 
   return (
     <section className="space-y-6">
@@ -132,110 +88,18 @@ export default async function TodosPage() {
       {/* Pending */}
       <section className="rounded-md border bg-card p-6 text-card-foreground space-y-4">
         <h2 className="text-lg font-semibold tracking-tight">Pending</h2>
-        {todos.length === 0 ? (
-          <p className="py-4 text-sm text-center text-muted-foreground">
-            All caught up — no pending actions for this month.
-          </p>
-        ) : (
-          <Table className="[&_th]:h-8 [&_th]:py-1 [&_td]:py-1.5">
-            <TableHeader className="bg-muted/40">
-              <TableRow>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Action</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Due month</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {todos.map((row) => {
-                const isOverdue = row.due_year < currentYear || (row.due_year === currentYear && row.due_month < currentMonth);
-                return (
-                  <TableRow key={row.id}>
-                    <TableCell className="max-w-lg">
-                      <p className="truncate font-medium" title={actionText(row)}>{actionText(row)}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground truncate" title={row.description ?? row.title}>
-                        {row.description ?? row.title}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`text-sm ${isOverdue ? "font-medium text-amber-700" : "text-muted-foreground"}`}>
-                        {formatYearMonth(row.due_year, row.due_month)}
-                      </span>
-                      {isOverdue ? <p className="text-xs text-amber-600">Overdue</p> : null}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${pendingTone}`}>
-                        Pending
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${typeTone(row.type)}`}>
-                        {typeLabel(row.type)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <TodoActions todoId={row.id} />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
+        <PendingTodosTable
+          todos={serializeTodos(todos)}
+          currentYear={currentYear}
+          currentMonth={currentMonth}
+        />
       </section>
 
       {/* Completed */}
       <section className="rounded-md border bg-card p-6 text-card-foreground space-y-4">
         <h2 className="text-lg font-semibold tracking-tight">Completed</h2>
-        {closedTodos.length === 0 ? (
-          <p className="py-4 text-sm text-center text-muted-foreground">No completed todos yet.</p>
-        ) : (
-          <Table className="[&_th]:h-8 [&_th]:py-1 [&_td]:py-1.5">
-            <TableHeader className="bg-muted/40">
-              <TableRow>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Action</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Due month</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</TableHead>
-                <TableHead className="text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {closedTodos.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="max-w-lg">
-                    <p className="truncate font-medium text-muted-foreground line-through" title={actionText(row)}>{actionText(row)}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground truncate" title={row.description ?? row.title}>
-                      {row.description ?? row.title}
-                    </p>
-                    {row.status === "SKIPPED" && row.skip_reason ? (
-                      <p className="mt-0.5 text-xs italic text-muted-foreground">Reason: {row.skip_reason}</p>
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatYearMonth(row.due_year, row.due_month)}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusTone(row.status)}`}>
-                      {row.status === "DONE" ? "Done" : "Skipped"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium opacity-60 ${typeTone(row.type)}`}>
-                      {typeLabel(row.type)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <TodoReopenButton todoId={row.id} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+        <CompletedTodosTable todos={serializeTodos(closedTodos)} />
       </section>
     </section>
   );
 }
-
