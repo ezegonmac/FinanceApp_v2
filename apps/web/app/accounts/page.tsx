@@ -90,10 +90,10 @@ export default async function AccountsPage() {
   const scheduledRecurrentCount = recurrentIncomeCount + recurrentExpenseCount + recurrentTransactionCount;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-5">
       <header className="flex items-end justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Accounts</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Accounts</h1>
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total balance</p>
@@ -111,7 +111,7 @@ export default async function AccountsPage() {
         scheduledRecurrentCount={scheduledRecurrentCount}
       />
 
-      <section className="rounded-md border bg-card p-6 text-card-foreground">
+      <section className="rounded-lg border bg-card p-4 text-card-foreground">
         <AccountsTable />
       </section>
     </section>

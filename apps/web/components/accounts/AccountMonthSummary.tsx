@@ -29,9 +29,9 @@ type MetricCardProps = {
 function MetricCard({ label, value, tone, icon }: MetricCardProps) {
   const toneClass =
     tone === "positive"
-      ? "border-emerald-200/70 bg-emerald-50/80 text-emerald-700"
+      ? "border-[var(--positive-subtle)] bg-[var(--positive-subtle)] text-[var(--positive-subtle-foreground)]"
       : tone === "negative"
-        ? "border-rose-200/70 bg-rose-50/80 text-rose-700"
+        ? "border-[var(--negative-subtle)] bg-[var(--negative-subtle)] text-[var(--negative-subtle-foreground)]"
         : "border-border bg-muted/30 text-foreground";
 
   return (
@@ -54,7 +54,7 @@ export default function AccountMonthSummary({
   net,
 }: Props) {
   return (
-    <section className="space-y-4 rounded-md border bg-card p-6 text-card-foreground">
+    <section className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Current Month Summary</h2>
@@ -63,7 +63,7 @@ export default function AccountMonthSummary({
         <p className="text-xs uppercase tracking-wide text-muted-foreground">Live account totals</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard
           label="Income"
           value={formatCurrency(totalIncome)}

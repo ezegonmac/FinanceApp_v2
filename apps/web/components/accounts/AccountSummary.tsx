@@ -16,7 +16,7 @@ export default function AccountSummary({ name, balance, createdAtIso, active }: 
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <h1 className="text-4xl font-bold tracking-tight">{name}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
         <div className="mt-2">
           <Badge variant={active ? "success" : "outline"}>
             {active ? "Active" : "Inactive"}
@@ -28,7 +28,7 @@ export default function AccountSummary({ name, balance, createdAtIso, active }: 
       </div>
       <div className="text-right">
         <p className="text-sm text-muted-foreground">Balance</p>
-        <p className="text-3xl font-semibold tabular-nums">{balance} €</p>
+        <p className="text-2xl font-semibold tabular-nums font-mono">{balance} €</p>
       </div>
     </div>
   );

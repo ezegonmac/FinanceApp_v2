@@ -71,7 +71,7 @@ export default async function AccountPage({
   const monthNet = totalIncome + totalTransfersIn - totalExpenses - totalTransfersOut;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <section className="px-2 py-4 text-card-foreground">
         <AccountSummary
           name={account.name}
@@ -90,16 +90,16 @@ export default async function AccountPage({
         net={monthNet}
       />
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-        <section className="rounded-md border bg-card p-6 text-card-foreground">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <section className="rounded-lg border bg-card p-4 text-card-foreground">
           <AccountIncomesView accountId={accountId} />
         </section>
-        <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <section className="rounded-lg border bg-card p-4 text-card-foreground">
           <AccountExpensesView accountId={accountId} />
         </section>
       </div>
 
-      <section className="rounded-md border bg-card p-6 text-card-foreground">
+      <section className="rounded-lg border bg-card p-4 text-card-foreground">
         <AccountTransactionsView accountId={accountId} />
       </section>
     </div>

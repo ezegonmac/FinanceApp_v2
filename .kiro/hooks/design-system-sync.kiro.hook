@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Design System Sync",
+  "description": "After editing any frontend file (.tsx, .css), checks if the changes follow the design system defined in design.md, flags violations, and keeps design.md in sync with any new patterns introduced in code.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "apps/web/**/*.tsx",
+      "apps/web/**/*.css",
+      "packages/ui/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A frontend file was just edited. Do the following:\n\n1. Read the edited file and the design system reference at `design.md`.\n\n2. Check if the edited file follows the design system:\n   - Colors: only CSS variables from the token list are used (e.g. `text-positive`, `bg-negative-subtle`, `--primary`). No raw hex values or Tailwind color classes that bypass the token system (e.g. `text-green-500`, `bg-red-100`).\n   - Typography: Inter for UI text, JetBrains Mono (`font-mono`) for financial amounts and IDs. Font sizes match the defined scale.\n   - Spacing: uses the 4px baseline grid multiples. Card padding is 16px (`p-4`). Page margins are 24px.\n   - Elevation: cards use `rounded-lg border bg-card`, no arbitrary shadows. Modals/dropdowns may use the Level 2 shadow.\n   - Borders & radius: `rounded` (4px) for inputs/buttons, `rounded-lg` (8px) for cards, `rounded-sm` (2px) for badges/chips.\n   - Status badges: uses `bg-*-subtle` + `text-*-subtle-foreground` pairs as defined in design.md. Completed → positive-subtle, Failed → negative-subtle, Pending/Cancelled → muted, Active → accent.\n   - Financial amounts: right-aligned, `font-mono` class.\n   - Tables: header cells use `label-md` style (uppercase, tracking-wide, text-muted-foreground).\n   - No decorative shadows on cards (Level 0/1). Only dropdowns/modals get shadows.\n\n3. If there are violations, list them clearly with file + line reference and what rule they break. Then fix them if they are clear-cut. If ambiguous, ask the user before changing.\n\n4. If the edited file introduces a **new legitimate pattern** not currently documented in `design.md` (e.g. a new component variant, a new badge state, a new layout pattern), update `design.md` to document it — keeping the same style and format as the existing sections.\n\n5. If the edited file is `globals.css` and a CSS variable was added, renamed, or changed, update the token table in the `design.md` frontmatter to reflect it.\n\nBe concise. If everything is compliant, say so briefly. Only be verbose when there are issues or updates to make."
+  }
+}

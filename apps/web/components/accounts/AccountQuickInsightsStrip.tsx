@@ -29,7 +29,7 @@ type InsightCardProps = {
 
 function InsightCard({ title, value, subtitle, icon }: InsightCardProps) {
   return (
-    <article className="rounded-xl border border-border/70 bg-linear-to-b from-muted/40 to-transparent p-4">
+    <article className="rounded-lg border border-border bg-gradient-to-b from-muted/20 to-transparent p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
         <span className="text-muted-foreground">{icon}</span>
@@ -54,13 +54,13 @@ export default function AccountQuickInsightsStrip({
     : `${(expenseToIncomeRatio * 100).toFixed(0)}%`;
 
   return (
-    <section className="space-y-3 rounded-md border bg-card p-5 text-card-foreground">
+    <section className="space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Quick Insights</h3>
         <p className="text-xs text-muted-foreground">{monthLabel}</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <InsightCard
           title="Days Left"
           value={`${daysLeft}`}

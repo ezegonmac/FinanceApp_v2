@@ -151,7 +151,7 @@ export default function AccountsTable() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 className="text-lg font-semibold">Accounts list</h2>
@@ -250,7 +250,7 @@ export default function AccountsTable() {
                                         {account.name}
                                     </Link>
                                 </TableCell>
-                                <TableCell>{formatBalance(account.balance)}</TableCell>
+                                <TableCell className="font-mono tabular-nums">{formatBalance(account.balance)}</TableCell>
                                 <TableCell>
                                     <Badge variant={account.active ? "success" : "outline"}>
                                         {account.active ? "Active" : "Inactive"}
@@ -277,7 +277,7 @@ export default function AccountsTable() {
                     </TableBody>
                 </Table>
             ) : (
-                <div className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">
+                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                     No accounts available.
                 </div>
             )}
