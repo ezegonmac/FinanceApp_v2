@@ -26,10 +26,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ListTable } from "@/components/ui/list-table";
 import Link from "next/link";
+import AccountIcon from "@/components/accounts/AccountIcon";
+import IconPicker from "@/components/accounts/IconPicker";
 
 type Account = {
     id: number;
     name: string;
+    icon: string | null;
     balance: number | string;
     active: boolean;
     created_at: string;
@@ -59,11 +62,13 @@ export default function AccountsTable() {
     const [formError, setFormError] = useState<string | null>(null);
     const [accountName, setAccountName] = useState("");
     const [accountBalance, setAccountBalance] = useState("");
+    const [accountIcon, setAccountIcon] = useState<string | null>(null);
     const [adding, setAdding] = useState(false);
 
     const resetForm = () => {
         setAccountName("");
         setAccountBalance("");
+        setAccountIcon(null);
         setFormError(null);
     };
 
@@ -108,6 +113,7 @@ export default function AccountsTable() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: accountName.trim(),
+                    icon: accountIcon,
                     balance: accountBalance ? parseFloat(accountBalance) : 0,
                 }),
             });
@@ -135,7 +141,12 @@ export default function AccountsTable() {
         {
             accessorKey: "name",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</span>,
-            cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+            cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                    <AccountIcon icon={row.original.icon} name={row.original.name} size="sm" />
+                    <span className="font-medium">{row.original.name}</span>
+                </div>
+            ),
         },
         {
             accessorKey: "balance",
@@ -212,6 +223,12 @@ export default function AccountsTable() {
 
                             <div className="grid gap-4">
                                 {formError ? <ErrorMessage message={formError} /> : null}
+
+                                <IconPicker
+                                    value={accountIcon}
+                                    onChange={setAccountIcon}
+                                    disabled={adding}
+                                />
 
                                 <div className="grid gap-2">
                                     <label htmlFor="account-name" className="text-sm font-medium">

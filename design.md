@@ -262,6 +262,15 @@ Every card is an "Information Module":
 - Container: `rounded-lg border bg-card` — same as all card surfaces (no shadow at Level 1).
 - Pagination bar (when shown): `border-t px-3 py-2`, page label in `text-xs text-muted-foreground`.
 
+### Account Icons / Avatars
+
+Small square containers that display an account's custom icon image or a fallback glyph.
+
+- Shape: `rounded-md` (6px) — softer than cards but not fully rounded; differentiates from card containers.
+- Sizes: `sm` (24px), `md` (32px), `lg` (40px) — all multiples of 8, aligned to the 4px grid.
+- Fallback: `bg-muted` surface with a `text-muted-foreground` icon centered.
+- Image: `object-contain` to preserve aspect ratio within the square.
+
 ### KPI Sparklines
 
 Minimalist line charts embedded in cards. No axes, no labels — trend only.

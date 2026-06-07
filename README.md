@@ -96,7 +96,9 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
   - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
 - Design
-  - Allow account icon 🟨
+  - Allow account icon ✅
+- Infrastructure
+  - Deploy prod version 🟨
 - Misc
   - Migrate tables to two different components one more data-driven and one more list styled ✅
   - Create development workflow with integrated AI ✅

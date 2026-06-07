@@ -16,6 +16,7 @@ datasource db {
 model Account {
   id         Int      @id @default(autoincrement())
   name       String
+  icon       String?
   balance    Decimal  @default(0) @db.Decimal(18,2)
   created_at DateTime @default(now())
   active     Boolean  @default(true)

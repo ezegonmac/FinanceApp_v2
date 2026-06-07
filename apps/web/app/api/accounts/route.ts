@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic"; // recommended with Prisma
 
 const accountSchema = z.object({
   name: z.string().min(1),
+  icon: z.string().nullable().optional(),
   balance: z.number().nonnegative().optional(),
 });
 
@@ -31,12 +32,23 @@ export async function POST(request: Request) {
     // validation
     const parsed = accountSchema.parse(body);
     const newAccount = await prisma.account.create({
-      data: parsed,
+      data: {
+        name: parsed.name,
+        icon: parsed.icon ?? undefined,
+        balance: parsed.balance ?? 0,
+      },
     });
 
     return NextResponse.json(newAccount, { status: 201 });
 
   } catch (error) {
+    console.error("POST /api/accounts error:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Validation failed", details: error.errors },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { error: "Failed to create account" },
       { status: 500 }

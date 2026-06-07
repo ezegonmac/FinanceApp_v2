@@ -75,6 +75,7 @@ export default async function AccountPage({
       <section className="px-2 py-4 text-card-foreground">
         <AccountSummary
           name={account.name}
+          icon={account.icon}
           balance={account.balance?.toString() ?? "N/A"}
           createdAtIso={account.created_at.toISOString()}
           active={account.active}

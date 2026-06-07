@@ -55,10 +55,11 @@ export default async function TodosPage() {
     loadError = error instanceof Error ? error.message : "Unknown error";
   }
 
-  // Serialize Date fields to strings for client component consumption
+  // Serialize Date and Decimal fields for client component consumption
   const serializeTodos = (rows: TodoRow[]) =>
     rows.map((row) => ({
       ...row,
+      amount: row.amount != null ? Number(row.amount) : 0,
       completed_at: row.completed_at?.toISOString() ?? null,
     }));
 
