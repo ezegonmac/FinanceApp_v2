@@ -1,6 +1,5 @@
 'use client';
 
-import Link from "next/link";
 import { MoreHorizontal } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatYearMonth } from "@repo/utils";
@@ -14,8 +13,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTable } from "@/components/ui/data-table";
+import { ListTable } from "@/components/ui/list-table";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 type ExpenseRow = {
   id: number;
@@ -45,6 +45,17 @@ type Props = {
   onPageChange?: (pageIndex: number) => void;
 };
 
+const formatBalance = (value: number | string) => {
+  const numericValue = typeof value === "number" ? value : Number(value);
+  const hasDecimals = !Number.isInteger(numericValue);
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+};
+
 export default function ExpensesTable({
   expenses,
   loading,
@@ -61,18 +72,6 @@ export default function ExpensesTable({
 }: Props) {
   const { debug } = useDebug();
 
-  const formatBalance = (value: number | string) => {
-    const numericValue = typeof value === "number" ? value : Number(value);
-    const hasDecimals = !Number.isInteger(numericValue);
-
-    return new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: hasDecimals ? 2 : 0,
-      maximumFractionDigits: 2,
-    }).format(numericValue);
-  };
-
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this expense? The account balance will be reverted if it was already applied.")) return;
     try {
@@ -83,6 +82,7 @@ export default function ExpensesTable({
       alert(err instanceof Error ? err.message : "Failed to delete expense");
     }
   };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!expenses || expenses.length === 0) return <p>No expenses available.</p>;
@@ -100,16 +100,13 @@ export default function ExpensesTable({
     {
       accessorKey: "description",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Description</span>,
-      cell: ({ row }) => (
-        <Link href={`/expenses/${row.original.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
-          {row.original.description}
-        </Link>
-      ),
+      cell: ({ row }) => <span className="font-medium">{row.original.description}</span>,
     },
     {
       id: "amount",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</span>,
       cell: ({ row }) => formatBalance(showAnalytics ? row.original.analytics_amount ?? row.original.amount : row.original.amount),
+      meta: { numeric: true },
     }
   );
 
@@ -147,7 +144,12 @@ export default function ExpensesTable({
       id: "account",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</span>,
       cell: ({ row }) => (
-        <Link href={`/accounts/${row.original.account_id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+        // Account link stops row navigation — user may want to jump to account, not expense
+        <Link
+          href={`/accounts/${row.original.account_id}`}
+          className="font-medium text-primary underline-offset-4 hover:underline"
+          onClick={(e) => e.stopPropagation()}
+        >
           {row.original.account?.name ?? row.original.account_id}
         </Link>
       ),
@@ -179,35 +181,34 @@ export default function ExpensesTable({
     id: "actions",
     header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</span>,
     cell: ({ row }) => (
-      <div className="flex justify-end">
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="size-4" />
-              <span className="sr-only">Open actions</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/expenses/${row.original.id}`}>Edit</Link>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="size-4" />
+            <span className="sr-only">Open actions</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link href={`/expenses/${row.original.id}`}>Edit</Link>
+          </DropdownMenuItem>
+          {onDeleted ? (
+            <DropdownMenuItem variant="destructive" onClick={() => handleDelete(row.original.id)}>
+              Delete
             </DropdownMenuItem>
-            {onDeleted ? (
-              <DropdownMenuItem variant="destructive" onClick={() => handleDelete(row.original.id)}>
-                Delete
-              </DropdownMenuItem>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
     ),
+    meta: { isAction: true },
   });
 
   return (
     <>
-      <DataTable
+      <ListTable
         columns={columns}
         data={expenses}
-        headerClassName="bg-muted/50"
+        getRowHref={(expense) => `/expenses/${expense.id}`}
         enablePagination={typeof pageSize === "number"}
         pageSize={pageSize}
         totalCount={totalCount}

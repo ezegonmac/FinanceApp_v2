@@ -1,6 +1,5 @@
 'use client';
 
-import Link from "next/link";
 import { MoreHorizontal } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatYearMonth } from "@repo/utils";
@@ -13,8 +12,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DataTable } from "@/components/ui/data-table";
+import { ListTable } from "@/components/ui/list-table";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 type TransactionRow = {
   id: number;
@@ -44,6 +44,17 @@ type Props = {
   onPageChange?: (pageIndex: number) => void;
 };
 
+const formatBalance = (value: number | string) => {
+  const numericValue = typeof value === "number" ? value : Number(value);
+  const hasDecimals = !Number.isInteger(numericValue);
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+};
+
 export default function TransactionsTable({
   transactions,
   loading,
@@ -62,18 +73,6 @@ export default function TransactionsTable({
   const displayTo = showToAccount ?? showAccount;
   const { debug } = useDebug();
 
-  const formatBalance = (value: number | string) => {
-    const numericValue = typeof value === "number" ? value : Number(value);
-    const hasDecimals = !Number.isInteger(numericValue);
-
-    return new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
-      minimumFractionDigits: hasDecimals ? 2 : 0,
-      maximumFractionDigits: 2,
-    }).format(numericValue);
-  };
-
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this transaction? The account balances will be reverted if it was already applied.")) return;
     try {
@@ -84,6 +83,7 @@ export default function TransactionsTable({
       alert(err instanceof Error ? err.message : "Failed to delete transaction");
     }
   };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <ErrorMessage message={error} />;
   if (!transactions || transactions.length === 0) return <p>No transactions available.</p>;
@@ -101,16 +101,13 @@ export default function TransactionsTable({
     {
       accessorKey: "description",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Description</span>,
-      cell: ({ row }) => (
-        <Link href={`/transactions/${row.original.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
-          {row.original.description}
-        </Link>
-      ),
+      cell: ({ row }) => <span className="font-medium">{row.original.description}</span>,
     },
     {
       accessorKey: "amount",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</span>,
       cell: ({ row }) => formatBalance(row.original.amount),
+      meta: { numeric: true },
     }
   );
 
@@ -135,7 +132,11 @@ export default function TransactionsTable({
       id: "from",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">From</span>,
       cell: ({ row }) => (
-        <Link href={`/accounts/${row.original.from_account_id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link
+          href={`/accounts/${row.original.from_account_id}`}
+          className="font-medium text-primary underline-offset-4 hover:underline"
+          onClick={(e) => e.stopPropagation()}
+        >
           {row.original.from_account?.name ?? row.original.from_account_id}
         </Link>
       ),
@@ -147,7 +148,11 @@ export default function TransactionsTable({
       id: "to",
       header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">To</span>,
       cell: ({ row }) => (
-        <Link href={`/accounts/${row.original.to_account_id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link
+          href={`/accounts/${row.original.to_account_id}`}
+          className="font-medium text-primary underline-offset-4 hover:underline"
+          onClick={(e) => e.stopPropagation()}
+        >
           {row.original.to_account?.name ?? row.original.to_account_id}
         </Link>
       ),
@@ -179,34 +184,33 @@ export default function TransactionsTable({
     id: "actions",
     header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</span>,
     cell: ({ row }) => (
-      <div className="flex justify-end">
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="size-4" />
-              <span className="sr-only">Open actions</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/transactions/${row.original.id}`}>Edit</Link>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="size-4" />
+            <span className="sr-only">Open actions</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link href={`/transactions/${row.original.id}`}>Edit</Link>
+          </DropdownMenuItem>
+          {onDeleted ? (
+            <DropdownMenuItem variant="destructive" onClick={() => handleDelete(row.original.id)}>
+              Delete
             </DropdownMenuItem>
-            {onDeleted ? (
-              <DropdownMenuItem variant="destructive" onClick={() => handleDelete(row.original.id)}>
-                Delete
-              </DropdownMenuItem>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
     ),
+    meta: { isAction: true },
   });
 
   return (
-    <DataTable
+    <ListTable
       columns={columns}
       data={transactions}
-      headerClassName="bg-muted/50"
+      getRowHref={(transaction) => `/transactions/${transaction.id}`}
       enablePagination={typeof pageSize === "number"}
       pageSize={pageSize}
       totalCount={totalCount}

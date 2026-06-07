@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   flexRender,
@@ -21,24 +22,29 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * DataTable — for financial data, metrics, and dense multi-column views.
+ * ListTable — for entity browsing / listing pages.
  *
  * Design characteristics:
- * - Compact 32px rows, tight cell padding (py-1.5)
- * - Columns marked with `meta: { numeric: true }` get font-mono, tabular-nums,
- *   and right-aligned text automatically
- * - Zebra striping via even-row muted background
- * - Pagination on by default when data exceeds pageSize
+ * - All columns uniformly left-aligned — consistent scan direction across the row
+ * - Comfortable rows (py-3), generous padding
+ * - Optional `getRowHref`: entire row becomes a click target (router.push)
+ * - Cells with `meta: { isAction: true }` stop propagation so dropdowns don't navigate
+ * - Cells with `meta: { numeric: true }` get font-mono + tabular-nums (but stay left-aligned)
+ * - Subtle accent hover on clickable rows
  */
 
-export type DataTableMeta = {
-  /** Applies font-mono, tabular-nums, and right-aligns the cell */
+export type ListTableMeta = {
+  /** Stop row-click navigation on this cell (use for action dropdowns / buttons) */
+  isAction?: boolean;
+  /** Apply font-mono tabular-nums for financial figures — alignment stays left */
   numeric?: boolean;
 };
 
-type DataTableProps<TData, TValue> = {
+type ListTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  /** Return a URL to navigate to when the row is clicked. Omit or return falsy to disable. */
+  getRowHref?: (row: TData) => string | null | undefined;
   emptyMessage?: string;
   pageSize?: number;
   enablePagination?: boolean;
@@ -47,33 +53,31 @@ type DataTableProps<TData, TValue> = {
   onPageChange?: (pageIndex: number) => void;
 };
 
-export function DataTable<TData, TValue>({
+export function ListTable<TData, TValue>({
   columns,
   data,
+  getRowHref,
   emptyMessage = "No results.",
   pageSize = 10,
   enablePagination = false,
   totalCount,
   resetKey,
   onPageChange,
-}: DataTableProps<TData, TValue>) {
+}: ListTableProps<TData, TValue>) {
+  const router = useRouter();
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
 
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageSize }));
   }, [pageSize]);
 
-  // Reset to page 0 when the dataset identity changes (filter change, account change, refresh)
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey]);
 
-  // Always call the latest version of onPageChange without re-running on identity changes
   const onPageChangeRef = useRef(onPageChange);
-  useEffect(() => {
-    onPageChangeRef.current = onPageChange;
-  });
+  useEffect(() => { onPageChangeRef.current = onPageChange; });
   useEffect(() => {
     onPageChangeRef.current?.(pagination.pageIndex);
   }, [pagination.pageIndex]);
@@ -100,56 +104,51 @@ export function DataTable<TData, TValue>({
   return (
     <div className="rounded-lg border bg-card">
       <Table>
+        {/* Headers — always left-aligned to match cells */}
         <TableHeader className="bg-muted/50">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
-                const meta = header.column.columnDef.meta as DataTableMeta | undefined;
-                return (
-                  <TableHead
-                    key={header.id}
-                    className={cn(
-                      // Compact header height
-                      "h-8 py-0",
-                      meta?.numeric && "text-right"
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
           {rows.length ? (
-            rows.map((row, rowIndex) => (
-              <TableRow
-                key={row.id}
-                className={cn(
-                  // Compact row height
-                  "[&>td]:py-1.5",
-                  // Zebra striping — even rows get a subtle muted background
-                  rowIndex % 2 === 1 && "bg-muted/30"
-                )}
-              >
-                {row.getVisibleCells().map((cell) => {
-                  const meta = cell.column.columnDef.meta as DataTableMeta | undefined;
-                  return (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        meta?.numeric && "text-right font-mono tabular-nums"
-                      )}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))
+            rows.map((row) => {
+              const href = getRowHref?.(row.original);
+              const isClickable = !!href;
+
+              return (
+                <TableRow
+                  key={row.id}
+                  onClick={isClickable ? () => router.push(href!) : undefined}
+                  className={cn(
+                    "[&>td]:py-3",
+                    isClickable && "cursor-pointer transition-colors hover:bg-accent/40"
+                  )}
+                >
+                  {row.getVisibleCells().map((cell) => {
+                    const meta = cell.column.columnDef.meta as ListTableMeta | undefined;
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        onClick={meta?.isAction ? (e) => e.stopPropagation() : undefined}
+                        className={cn(meta?.numeric && "font-mono tabular-nums")}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow>
               <TableCell

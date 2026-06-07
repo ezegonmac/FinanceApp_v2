@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { MoreHorizontal } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
 
 import ErrorMessage from "./ErrorMessage";
 import { useDebug } from "./debug/DebugContext";
@@ -24,14 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { ListTable } from "@/components/ui/list-table";
+import Link from "next/link";
 
 type Account = {
     id: number;
@@ -39,6 +33,18 @@ type Account = {
     balance: number | string;
     active: boolean;
     created_at: string;
+};
+
+const formatBalance = (value: unknown) => {
+    const numericValue = typeof value === "number" ? value : Number(value);
+    if (Number.isNaN(numericValue)) return `${value} EUR`;
+    const hasDecimals = !Number.isInteger(numericValue);
+    return new Intl.NumberFormat("es-ES", {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: hasDecimals ? 2 : 0,
+        maximumFractionDigits: 2,
+    }).format(numericValue);
 };
 
 export default function AccountsTable() {
@@ -55,23 +61,6 @@ export default function AccountsTable() {
     const [accountBalance, setAccountBalance] = useState("");
     const [adding, setAdding] = useState(false);
 
-    const formatBalance = (value: unknown) => {
-        const numericValue = typeof value === "number" ? value : Number(value);
-
-        if (Number.isNaN(numericValue)) {
-            return `${value} EUR`;
-        }
-
-        const hasDecimals = !Number.isInteger(numericValue);
-
-        return new Intl.NumberFormat("es-ES", {
-            style: "currency",
-            currency: "EUR",
-            minimumFractionDigits: hasDecimals ? 2 : 0,
-            maximumFractionDigits: 2,
-        }).format(numericValue);
-    };
-
     const resetForm = () => {
         setAccountName("");
         setAccountBalance("");
@@ -80,22 +69,15 @@ export default function AccountsTable() {
 
     const handleDialogChange = (open: boolean) => {
         setIsDialogOpen(open);
-
-        if (!open && !adding) {
-            resetForm();
-        }
+        if (!open && !adding) resetForm();
     };
 
     const fetchAccounts = async () => {
         setLoading(true);
         setFetchError(null);
-
         try {
             const response = await fetch("/api/accounts");
-            if (!response.ok) {
-                throw new Error("Failed to fetch accounts");
-            }
-
+            if (!response.ok) throw new Error("Failed to fetch accounts");
             const data: Account[] = await response.json();
             setAccounts(data);
         } catch (err) {
@@ -105,9 +87,7 @@ export default function AccountsTable() {
         }
     };
 
-    useEffect(() => {
-        void fetchAccounts();
-    }, []);
+    useEffect(() => { void fetchAccounts(); }, []);
 
     const handleRefresh = async () => {
         setRefreshing(true);
@@ -120,26 +100,18 @@ export default function AccountsTable() {
             setFormError("Account name cannot be empty");
             return;
         }
-
         setAdding(true);
         setFormError(null);
-
         try {
             const response = await fetch("/api/accounts", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: accountName.trim(),
                     balance: accountBalance ? parseFloat(accountBalance) : 0,
                 }),
             });
-
-            if (!response.ok) {
-                throw new Error("Failed to add account");
-            }
-
+            if (!response.ok) throw new Error("Failed to add account");
             resetForm();
             setIsDialogOpen(false);
             await fetchAccounts();
@@ -149,6 +121,67 @@ export default function AccountsTable() {
             setAdding(false);
         }
     };
+
+    const columns: ColumnDef<Account>[] = [];
+
+    if (debug) {
+        columns.push({
+            accessorKey: "id",
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Id</span>,
+        });
+    }
+
+    columns.push(
+        {
+            accessorKey: "name",
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</span>,
+            cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+        },
+        {
+            accessorKey: "balance",
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balance</span>,
+            cell: ({ row }) => formatBalance(row.original.balance),
+            meta: { numeric: true },
+        },
+        {
+            accessorKey: "active",
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active</span>,
+            cell: ({ row }) => (
+                <Badge variant={row.original.active ? "success" : "outline"}>
+                    {row.original.active ? "Active" : "Inactive"}
+                </Badge>
+            ),
+        }
+    );
+
+    if (debug) {
+        columns.push({
+            accessorKey: "created_at",
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Created At</span>,
+            cell: ({ row }) => new Date(row.original.created_at).toLocaleString(),
+        });
+    }
+
+    columns.push({
+        id: "actions",
+        header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</span>,
+        cell: ({ row }) => (
+            <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="size-4" />
+                        <span className="sr-only">Open actions</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link href={`/accounts/${row.original.id}`}>View account</Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        ),
+        meta: { isAction: true },
+    });
 
     return (
         <div className="space-y-5">
@@ -227,55 +260,12 @@ export default function AccountsTable() {
             ) : fetchError ? (
                 <ErrorMessage message={fetchError} />
             ) : accounts.length > 0 ? (
-                <Table>
-                    <TableHeader className="bg-muted/50">
-                        <TableRow>
-                            {debug && <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Id</TableHead>}
-                            <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balance</TableHead>
-                            <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active</TableHead>
-                            {debug && <TableHead className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Created At</TableHead>}
-                            <TableHead className="text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {accounts.map((account) => (
-                            <TableRow key={account.id}>
-                                {debug && <TableCell>{account.id}</TableCell>}
-                                <TableCell>
-                                    <Link
-                                        href={`/accounts/${account.id}`}
-                                        className="font-medium text-primary underline-offset-4 hover:underline"
-                                    >
-                                        {account.name}
-                                    </Link>
-                                </TableCell>
-                                <TableCell className="font-mono tabular-nums">{formatBalance(account.balance)}</TableCell>
-                                <TableCell>
-                                    <Badge variant={account.active ? "success" : "outline"}>
-                                        {account.active ? "Active" : "Inactive"}
-                                    </Badge>
-                                </TableCell>
-                                {debug && <TableCell>{new Date(account.created_at).toLocaleString()}</TableCell>}
-                                <TableCell className="text-right">
-                                    <DropdownMenu modal={false}>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="ml-auto">
-                                                <MoreHorizontal className="size-4" />
-                                                <span className="sr-only">Open actions</span>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuItem asChild>
-                                                <Link href={`/accounts/${account.id}`}>View account</Link>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                <ListTable
+                    columns={columns}
+                    data={accounts}
+                    getRowHref={(account) => `/accounts/${account.id}`}
+                    emptyMessage="No accounts available."
+                />
             ) : (
                 <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                     No accounts available.

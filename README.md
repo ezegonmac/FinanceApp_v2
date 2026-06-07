@@ -84,6 +84,7 @@ Domain model (UML)
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
 - Misc
+  - Migrate tables to two different components one more data-driven and one more list styled 🔷
   - Upload erd dbdocs file and update erd.png 🟨
 
 #### Status Legend

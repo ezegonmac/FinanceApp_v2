@@ -238,6 +238,29 @@ Every card is an "Information Module":
 - Header: bottom border (`--border`), `headline-sm` title, `16px` padding
 - Body: `16px` padding, `stack-md` (12px) vertical gap between rows
 
+### List Tables
+
+`ListTable` is used for entity browsing/listing pages (accounts, etc.) where comfortable row density and row-level navigation matter. It wraps TanStack Table and shares the same base structure as `DataTable` but with different row sizing.
+
+**Differences from `DataTable` (compact, used for financial data within a month/detail view):**
+
+| Aspect | `DataTable` | `ListTable` |
+|---|---|---|
+| Row height | 32px compact / 40px default | 40px default (`[&>td]:py-3`) |
+| Row navigation | — | Optional `getRowHref` — entire row is a nav target |
+| Hover state | `hover:bg-muted/50` (table default) | `hover:bg-accent/40` on clickable rows |
+| Action columns | — | `meta: { isAction: true }` stops propagation |
+| Pagination | Always rendered if enabled | Only rendered when `totalRows > pageSize` |
+
+**Usage rules:**
+- Use `ListTable` for top-level entity lists (e.g. `/accounts`).
+- Use `DataTable` for financial line-item tables inside month/account detail views.
+- Clickable rows use `cursor-pointer hover:bg-accent/40 transition-colors` — no other hover override.
+- Action-column cells (dropdowns, buttons) must set `meta: { isAction: true }` to prevent row-click navigation from firing.
+- Numeric/financial columns must set `meta: { numeric: true }` — the table applies `font-mono tabular-nums` to both header and body cells for digit alignment. Unlike `DataTable`, `ListTable` does **not** force `text-right` on numeric columns; alignment follows the column definition.
+- Container: `rounded-lg border bg-card` — same as all card surfaces (no shadow at Level 1).
+- Pagination bar (when shown): `border-t px-3 py-2`, page label in `text-xs text-muted-foreground`.
+
 ### KPI Sparklines
 
 Minimalist line charts embedded in cards. No axes, no labels — trend only.
