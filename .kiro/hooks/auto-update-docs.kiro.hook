@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "name": "Auto-Update Docs on Source Change",
+  "description": "Watches TypeScript/TSX source files, config files, and schema files. When any of them change, asks the agent to reflect those changes in the README or the docs app.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/schema.prisma",
+      "**/package.json",
+      "**/turbo.json",
+      "**/*.css",
+      "**/*.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file was just edited. Review the change and determine whether any documentation needs to be updated to reflect it. Check the root README.md first — update it if the change affects setup instructions, features, API routes, data models, environment variables, or architecture. Also check apps/docs if relevant content lives there. Only update docs sections that are directly affected by the change; do not rewrite unrelated sections."
+  }
+}
