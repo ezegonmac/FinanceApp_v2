@@ -17,7 +17,18 @@ Domain model (UML)
 
 # Features
 
-### Main Features
+This section is the project backlog and single source of truth for feature status.
+
+Features that need further clarification can reference a spec file using `[spec:name]`:
+
+```
+- Monthly Splits across accounts 🟨 [spec:monthly-splits]
+- Investments in different products 🔷 [spec:investments]
+```
+
+Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
+
+## Main Features
 
 - Configuration
   - TurboRepo monorepo with 2 packages: web and db ✅
@@ -85,9 +96,10 @@ Domain model (UML)
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
 - Misc
   - Migrate tables to two different components one more data-driven and one more list styled 🔷
+  - Create development workflow with integrated AI ✅
   - Upload erd dbdocs file and update erd.png 🟨
 
-#### Status Legend
+### Status Legend
 🟨 Pending
 🔷 Ongoing
 ✅ Completed
@@ -236,6 +248,24 @@ ie:
 ```
 npm install zod --workspace=apps/web
 ```
+
+# Spec Workflow
+
+The Features section acts as the project backlog. Spec files are optional — only create one when a feature needs more thought before implementation.
+
+**Convention:** append `[spec:feature-name]` to a backlog entry to link its spec.
+
+```
+- Monthly Splits across accounts 🟨 [spec:monthly-splits]
+```
+
+**Rules:**
+- Specs live under `/specs/<feature-name>.md`.
+- Write a spec before starting implementation when the requirements aren't obvious.
+- A feature can be marked ✅ once its acceptance criteria are all met.
+- Keep specs short. One page is usually enough.
+
+See `/specs/example.md` for the standard structure.
 
 # Screenshots
 
