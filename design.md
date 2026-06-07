@@ -1,0 +1,248 @@
+---
+name: Precision Ledger
+
+# ─────────────────────────────────────────────────────────────
+# TOKEN REFERENCE
+# Every token listed here maps 1:1 to a CSS variable in
+# apps/web/app/globals.css — the single source of truth for
+# actual hex values. This frontmatter exists as a human-readable
+# index, not a generator.
+# ─────────────────────────────────────────────────────────────
+
+tokens:
+  # Surfaces & backgrounds
+  background:         { css: "--background",         hex: "#f7f9fb", use: "Page background"                   }
+  foreground:         { css: "--foreground",         hex: "#191c1e", use: "Primary text"                      }
+  card:               { css: "--card",               hex: "#ffffff", use: "Card / panel surface"              }
+  card-foreground:    { css: "--card-foreground",    hex: "#191c1e", use: "Text on cards"                     }
+  popover:            { css: "--popover",            hex: "#ffffff", use: "Dropdowns, tooltips"               }
+  popover-foreground: { css: "--popover-foreground", hex: "#191c1e", use: "Text in popovers"                  }
+
+  # Brand
+  primary:            { css: "--primary",            hex: "#1e40af", use: "Primary actions, active states, brand" }
+  primary-foreground: { css: "--primary-foreground", hex: "#ffffff", use: "Text on primary"                   }
+
+  # Secondary
+  secondary:            { css: "--secondary",            hex: "#565e74", use: "Secondary buttons, neutral badges" }
+  secondary-foreground: { css: "--secondary-foreground", hex: "#ffffff", use: "Text on secondary"             }
+
+  # Muted
+  muted:            { css: "--muted",            hex: "#e6e8ea", use: "Subtle backgrounds, disabled states, zebra rows" }
+  muted-foreground: { css: "--muted-foreground", hex: "#444653", use: "Subdued text, placeholders, column headers"      }
+
+  # Accent — hover / focus surfaces (NOT financial green)
+  accent:            { css: "--accent",            hex: "#dae2fd", use: "Nav hover, dropdown focus, active link tint" }
+  accent-foreground: { css: "--accent-foreground", hex: "#1e3a8a", use: "Text on accent background"          }
+
+  # Destructive
+  destructive:            { css: "--destructive",            hex: "#ba1a1a", use: "Error states, delete actions" }
+  destructive-foreground: { css: "--destructive-foreground", hex: "#ffffff", use: "Text on destructive"        }
+
+  # Borders & inputs
+  border: { css: "--border", hex: "#e2e8f0", use: "Hairline dividers, table rows, card borders, input borders" }
+  input:  { css: "--input",  hex: "#e2e8f0", use: "Input field border at rest"                                 }
+  ring:   { css: "--ring",   hex: "#93a5d6", use: "Keyboard focus ring"                                        }
+
+  # Semantic financial — solid (for text, solid badges, chart anchors)
+  positive:                   { css: "--positive",                   hex: "#10b981", use: "Income, growth, completed status"  }
+  positive-foreground:        { css: "--positive-foreground",        hex: "#ffffff", use: "Text on positive"                  }
+  negative:                   { css: "--negative",                   hex: "#ef4444", use: "Expenses, loss, failed status"     }
+  negative-foreground:        { css: "--negative-foreground",        hex: "#ffffff", use: "Text on negative"                  }
+
+  # Semantic financial — subtle (for badge / chip backgrounds)
+  positive-subtle:            { css: "--positive-subtle",            hex: "#d1fae5", use: "Positive badge background"         }
+  positive-subtle-foreground: { css: "--positive-subtle-foreground", hex: "#065f46", use: "Text on positive-subtle"           }
+  negative-subtle:            { css: "--negative-subtle",            hex: "#fee2e2", use: "Negative badge background"         }
+  negative-subtle-foreground: { css: "--negative-subtle-foreground", hex: "#991b1b", use: "Text on negative-subtle"           }
+
+  # Chart — green scale (income / growth, light → dark)
+  chart-1: { css: "--chart-1", hex: "#d1fae5" }
+  chart-2: { css: "--chart-2", hex: "#86efac" }
+  chart-3: { css: "--chart-3", hex: "#10b981" }
+  chart-4: { css: "--chart-4", hex: "#059669" }
+  chart-5: { css: "--chart-5", hex: "#065f46" }
+
+  # Chart — red scale (expenses / loss, light → dark)
+  chart-6:  { css: "--chart-6",  hex: "#fee2e2" }
+  chart-7:  { css: "--chart-7",  hex: "#fca5a5" }
+  chart-8:  { css: "--chart-8",  hex: "#ef4444" }
+  chart-9:  { css: "--chart-9",  hex: "#dc2626" }
+  chart-10: { css: "--chart-10", hex: "#991b1b" }
+
+typography:
+  headline-lg: { fontFamily: Inter, fontSize: 24px, fontWeight: 600, lineHeight: 32px, letterSpacing: -0.02em }
+  headline-md: { fontFamily: Inter, fontSize: 18px, fontWeight: 600, lineHeight: 24px, letterSpacing: -0.01em }
+  headline-sm: { fontFamily: Inter, fontSize: 14px, fontWeight: 600, lineHeight: 20px }
+  body-lg:     { fontFamily: Inter, fontSize: 14px, fontWeight: 400, lineHeight: 20px }
+  body-md:     { fontFamily: Inter, fontSize: 13px, fontWeight: 400, lineHeight: 18px }
+  body-sm:     { fontFamily: Inter, fontSize: 12px, fontWeight: 400, lineHeight: 16px }
+  label-md:    { fontFamily: Inter, fontSize: 11px, fontWeight: 600, lineHeight: 14px, letterSpacing: 0.05em, textTransform: uppercase }
+  mono-data:   { fontFamily: JetBrains Mono, fontSize: 13px, fontWeight: 500, lineHeight: 18px }
+
+radius:
+  sm:      0.125rem  # 2px  — status badges, chips
+  DEFAULT: 0.25rem   # 4px  — buttons, inputs (--radius base)
+  lg:      0.5rem    # 8px  — cards, containers
+  xl:      0.75rem   # 12px — modals, large overlays
+  full:    9999px    # pill shapes
+
+spacing:
+  unit:             4px   # baseline grid unit
+  container-margin: 24px  # page-level horizontal margin
+  gutter:           16px  # column gutter (desktop)
+  card-padding:     16px  # internal card padding
+  stack-sm:         8px   # tight vertical gap
+  stack-md:         12px  # standard vertical gap
+  stack-lg:         20px  # section vertical gap
+---
+
+## Brand & Style
+
+Precision Ledger's personality is authoritative, transparent, and rigorous — built for users who prioritize data density and clarity over decorative elements. The emotional tone is control, reliability, and precision.
+
+The design style is **Corporate / Modern** with a lean toward **Functional Minimalism**. Depth is communicated through tonal layers and crisp borders, not shadows. The aesthetic is "Spreadsheet-Plus": the efficiency of a financial tool with the polish of a premium dashboard.
+
+## Colors
+
+The palette anchors on a Global Banking blue (`#1e40af`) for institutional stability.
+
+- **Primary (`#1e40af`)** — primary actions, active states, brand indicators
+- **Background (`#f7f9fb`)** — page surface; paper-like, low eye strain
+- **Border (`#e2e8f0`)** — hairline dividers throughout; defines the grid without weight
+- **Accent (`#dae2fd`)** — soft blue tint used for hover and focus surfaces (nav items, dropdown rows). Not a financial color.
+- **Muted (`#e6e8ea`)** — subtle backgrounds, disabled states, table zebra rows
+- **Positive (`#10b981`)** — strictly for income, growth, and completed/cleared states
+- **Negative (`#ef4444`)** — strictly for expenses, loss, and failed/error states
+- **Destructive (`#ba1a1a`)** — UI error states and destructive actions (delete, remove)
+
+> Positive/Negative are **financial semantics**. Destructive is a **UI action semantic**. Do not mix them.
+
+### Financial Color Usage
+
+| Context              | Token                    | Example                         |
+|----------------------|--------------------------|---------------------------------|
+| Positive amount text | `text-positive`          | `+€1,200`                       |
+| Positive badge bg    | `bg-positive-subtle`     | "Completed" / "Income" chips    |
+| Positive badge text  | `text-positive-subtle-foreground` | Text inside above chip |
+| Negative amount text | `text-negative`          | `-€340`                         |
+| Negative badge bg    | `bg-negative-subtle`     | "Failed" / "Expense" chips      |
+| Negative badge text  | `text-negative-subtle-foreground` | Text inside above chip |
+| Charts (income)      | `chart-1` → `chart-5`   | Green scale, light → dark       |
+| Charts (expenses)    | `chart-6` → `chart-10`  | Red scale, light → dark         |
+
+## Typography
+
+**Inter** is used for all UI text — exceptional legibility at small sizes in data-dense layouts. The scale is intentionally compact to maximize visible information per screen.
+
+**JetBrains Mono** (`mono-data`) is used exclusively for financial figures in tables and KPI values — tabular numerals ensure decimal alignment.
+
+| Token        | Size  | Weight | Usage                                    |
+|--------------|-------|--------|------------------------------------------|
+| `headline-lg`| 24px  | 600    | Page titles                              |
+| `headline-md`| 18px  | 600    | Section / card group headers             |
+| `headline-sm`| 14px  | 600    | Card headers, table section titles       |
+| `body-lg`    | 14px  | 400    | Primary body text                        |
+| `body-md`    | 13px  | 400    | Secondary body text, form labels         |
+| `body-sm`    | 12px  | 400    | Captions, helper text                    |
+| `label-md`   | 11px  | 600    | Column headers, ALL CAPS labels          |
+| `mono-data`  | 13px  | 500    | Financial amounts, IDs, numeric columns  |
+
+> `headline-sm` and `body-lg` share 14px but differ in weight — use `headline-sm` only for titles/labels, never for body copy.
+
+## Layout & Spacing
+
+The layout uses a **Fixed-Fluid Hybrid** grid. Content is constrained to `max-width: 1440px`, centered with `24px` margins.
+
+A strict **4px baseline grid** governs all vertical rhythm:
+
+- **Desktop:** 12-column grid, 16px gutters. Cards use 16px internal padding.
+- **Mobile:** Single column, 12px horizontal padding.
+- **Data tables:** Row heights fixed at 32px (compact) or 40px (default) to maximize row count without sacrificing touch targets.
+
+## Elevation & Depth
+
+Depth is expressed through **tonal layers** and **low-contrast outlines** — never heavy shadows.
+
+| Level | Surface                | Treatment                                                              |
+|-------|------------------------|------------------------------------------------------------------------|
+| 0     | Page background        | `#f7f9fb`                                                              |
+| 1     | Cards / panels         | `#ffffff` + 1px `#e2e8f0` border. No shadow.                          |
+| 2     | Dropdowns / modals     | `#ffffff` + 1px `#e2e8f0` border + `0 4px 12px rgba(15,23,42,0.08)` shadow |
+| —     | Dividers               | 1px `#e2e8f0` hairline stroke — used extensively in tables and lists  |
+
+## Shapes
+
+Base radius is **4px (0.25rem)**. The scale:
+
+| Token      | Value   | Applied to                      |
+|------------|---------|---------------------------------|
+| `sm`       | 2px     | Status badges, chips            |
+| `DEFAULT`  | 4px     | Buttons, inputs, form elements  |
+| `lg`       | 8px     | Cards, containers, panels       |
+| `xl`       | 12px    | Modals, large overlays          |
+| `full`     | 9999px  | Pill shapes                     |
+
+## Components
+
+### Buttons
+
+| Variant     | Background     | Text           | Border         |
+|-------------|----------------|----------------|----------------|
+| Primary     | `--primary`    | `--primary-fg` | —              |
+| Secondary   | `--secondary`  | `--secondary-fg`| —             |
+| Outline     | `--background` | `--foreground` | `--border`     |
+| Ghost       | transparent    | `--foreground` | —              |
+| Destructive | `--destructive`| `--destructive-fg` | —          |
+
+- Padding: `8px 12px` (compact). Use `size="sm"` for table actions.
+- Disabled: `opacity-50`, `pointer-events-none`.
+
+### Data Tables
+
+The primary UI surface for financial data.
+
+- Header cells: `label-md` style (`11px`, `600`, `uppercase`, `tracking-wide`, `text-muted-foreground`)
+- Row height: 40px default, 32px compact
+- Zebra striping: alternate rows use `bg-muted/30` (`#e6e8ea` at 30% opacity)
+- Amounts: `mono-data` font, right-aligned
+- Border: `--border` between rows; outer container has `rounded-lg border`
+
+### Status Badges / Chips
+
+Use `bg-*-subtle` + `text-*-subtle-foreground` pairs for filled chips. Use `variant="secondary"` for neutral states.
+
+| Status      | Background           | Text                          |
+|-------------|----------------------|-------------------------------|
+| Completed   | `positive-subtle`    | `positive-subtle-foreground`  |
+| Failed      | `negative-subtle`    | `negative-subtle-foreground`  |
+| Pending     | `muted`              | `muted-foreground`            |
+| Cancelled   | `muted`              | `muted-foreground`            |
+| Active      | `accent`             | `accent-foreground`           |
+| Manual      | `secondary`          | `secondary-foreground`        |
+
+Shape: `radius-sm` (2px) for a sharp, technical look.
+
+### Input Fields
+
+- Border: 1px `--input` at rest
+- Focus: border color → `--primary`, focus ring → `--ring` at 50% opacity
+- Disabled: `bg-muted`, `opacity-50`
+- Error: border color → `--destructive`
+
+### Cards
+
+Every card is an "Information Module":
+
+- Background: `--card` (`#ffffff`)
+- Border: 1px `--border`, `radius-lg` (8px)
+- Header: bottom border (`--border`), `headline-sm` title, `16px` padding
+- Body: `16px` padding, `stack-md` (12px) vertical gap between rows
+
+### KPI Sparklines
+
+Minimalist line charts embedded in cards. No axes, no labels — trend only.
+
+- Positive trend: `--positive` (`#10b981`)
+- Negative trend: `--negative` (`#ef4444`)
+- Neutral / primary trend: `--primary` (`#1e40af`)
+- Height: 40–48px. Width fills the card body.

@@ -7,11 +7,13 @@ It is usual to own many bank accounts for different purposes: investing, saving 
 
 # Useful Links
 Domain model (UML)
-ERD (Entity Relationship Diagram): https://dbdiagram.io/d/6988d001bd82f5fce207a50d
+- ERD (Entity Relationship Diagram): https://dbdiagram.io/d/6988d001bd82f5fce207a50d
 
 ![ERD diagram](./erd.png)
 
-Time Tracker: https://track.toggl.com/timer
+- Time Tracker: https://track.toggl.com/timer
+- Figma: https://www.figma.com/design/woEmmTwFi1JKnyUZOcUek2/FinanceApp-v2?t=WkrJKEab9Lb9dFqG-0
+- Stitch (AI design): https://stitch.withgoogle.com/projects/16204193569097462166?pli=1
 
 # Features
 
@@ -29,7 +31,6 @@ Time Tracker: https://track.toggl.com/timer
   - New package: mobile 🟨
   - New package: shared (for shared types and utils) 🟨
   - New package: api 🟨
-
 - Create & List
   - Accounts ✅
   - Disabled accounts 🟨
@@ -82,6 +83,8 @@ Time Tracker: https://track.toggl.com/timer
 - Year analytics with the total amount of incomes, expenses and transactions for the year 🟨
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
+- Misc
+  - Upload erd dbdocs file and update erd.png 🟨
 
 #### Status Legend
 🟨 Pending

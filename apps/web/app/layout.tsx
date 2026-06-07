@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import React from "react";
 import Link from "next/link";
-import { Geist } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import {
   BarChart3,
   CalendarDays,
@@ -24,7 +24,8 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "Finance App",
@@ -48,7 +49,7 @@ const devLinks = [
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={cn("font-sans", inter.variable, jetbrains.variable)}>
       <body>
         <DebugProvider>
           <header className="border-b">
