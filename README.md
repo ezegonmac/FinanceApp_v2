@@ -97,6 +97,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Allow account icon ✅
   - Prioritize icons and visual cues for better UX 🟨
   - Improve cleanliness and usability of the UI (data-driven application) 🟨
+  - Implement calendar for better dates visualization 🟨
 - Infrastructure
   - Deploy prod version 🟨
 - Misc
