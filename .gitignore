@@ -95,3 +95,4 @@ package-lock.json
 
 # MariaDB
 mariadb_data
+db-dump.sql

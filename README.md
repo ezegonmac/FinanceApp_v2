@@ -132,14 +132,16 @@ npm install
 ```
 
 ### 3. Configure environment variables
-Create a .env file from the existing .env.example.
 
-To configure the web app, create a /apps/web/.env file from the existing /apps/web/.env.example.
+Copy each `.env.example` to `.env`:
 
-To configure your database connection, create a /packages/db/.env from the existing /packages/db/.env.example.
+| File | Purpose |
+|------|---------|
+| `.env` | App port, DB connection, cron secret |
+| `apps/web/.env` | Web-specific (CRON_SECRET) |
+| `packages/db/.env` | `DATABASE_URL` for Prisma CLI migrations |
 
-For scheduled jobs, set these values:
-- CRON_SECRET: shared secret used by internal job endpoint
+> `packages/db/.env` must have a `DATABASE_URL` matching the root DB values.
 
 ### 4. Start the database container
 ```
@@ -147,25 +149,71 @@ npm run db:start
 ```
 
 ### 5. Run Prisma migrations
-From /packages/db run
+Apply existing migrations to the database:
 ```
-npx turbo db:migrate
-npx turbo db:generate
-or
-npx prisma migrate dev
+npx turbo db:deploy
 ```
 
+> **Note:** Migrations are NOT applied automatically on `dev` startup. You must run this manually after creating a new database or pulling new migrations.
+
 ### 6. Start development server
-From the project root folder (/turborepo) run
+From the project root folder run:
 ```
 npx turbo run dev --filter=web
-or
-npm run dev
 ```
-The application will start in development mode 
+The app starts on the port defined by `WEB_PORT` in `.env` (default `3000`):
 ```
 http://localhost:3000
 ```
+
+# Working with Multiple Branches (Worktrees)
+
+Use git worktrees to run multiple branches simultaneously, each with its own Kiro session.
+
+### 1. Create a worktree for parallel work
+
+```bash
+git worktree add ../finance-design -b feature/design
+```
+
+This creates a second working directory on a separate branch:
+```
+~/projects/
+  finance-app/        -> feature/auth   (original)
+  finance-app-design/     -> feature/design (worktree)
+```
+
+### 2. Configure each instance
+
+Each worktree has its own `.env`. Use different ports and (optionally) different databases:
+
+**Instance A** (`.env`):
+```env
+WEB_PORT=3000
+DB_PORT=3309
+```
+
+**Instance B** (`.env`):
+```env
+WEB_PORT=3001
+DB_PORT=3310
+```
+
+If using separate databases, also update `DB_NAME` and `packages/db/.env` accordingly.
+
+### 3. Run independently
+
+Open each folder in its own VS Code/Kiro window. Run `npx turbo run dev --filter=web` in each. The agents won't interfere since they operate on different branches and directories.
+
+### 4. Merge when ready
+
+```bash
+git checkout main
+git merge feature/auth
+git merge feature/design
+```
+
+Resolve conflicts if needed.
 
 # Connect to database
 Confirm that the database container is running

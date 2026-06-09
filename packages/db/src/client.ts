@@ -4,16 +4,14 @@ import { PrismaClient } from '../generated/prisma/client.js'
 
 const adapter = new PrismaMariaDb(
   {
-    host: "localhost",
-    port: 3309,
+    host: process.env.DB_HOST || "localhost",
+    port: Number(process.env.DB_PORT) || 3309,
     connectionLimit: 5,
-    user: "financeuser",
-    password: "financepass"
+    user: process.env.DB_USER || "financeuser",
+    password: process.env.DB_PASSWORD || "financepass"
   },
-  { database: "financeapp" }
+  { database: process.env.DB_NAME || "financeapp" }
 )
-
-// export const prisma = new PrismaClient({ adapter });
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 

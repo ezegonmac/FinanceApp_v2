@@ -70,9 +70,9 @@ npm run db:force_reset  # prisma migrate reset --force
 
 ## Environment Variables
 
-Root `.env` / `.env.example` (Docker compose + cron):
+Root `.env` / `.env.example` (Docker compose + Prisma client):
 ```
-DB_NAME, DB_USER, DB_PASSWORD, DB_ROOT_PASSWORD, DB_PORT=3309, CRON_SECRET
+DB_HOST=localhost, DB_PORT=3309, DB_NAME, DB_USER, DB_PASSWORD, DB_ROOT_PASSWORD, CRON_SECRET, WEB_PORT=3000
 ```
 
 `apps/web/.env`:
