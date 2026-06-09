@@ -141,6 +141,11 @@ To configure your database connection, create a /packages/db/.env from the exist
 For scheduled jobs, set these values:
 - CRON_SECRET: shared secret used by internal job endpoint
 
+For authentication (`apps/web/.env`), set these values:
+- AUTH_SECRET: random 32+ character string used to sign/encrypt session tokens
+- AUTH_USER_EMAIL: the single user's email address
+- AUTH_USER_PASSWORD: the single user's password
+
 ### 4. Start the database container
 ```
 npm run db:start
