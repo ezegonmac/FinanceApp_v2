@@ -78,7 +78,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Allow recurrent expenses with no end date ✅
   - Allow recurrent transactions with no end date ✅
   - Enable/Disable account 🟨
-  - Edit account details 🔷
+  - Edit account details ✅
   - Edit income and expense details ✅
   - Edit transaction details ✅
   - Delete individual transactions, incomes and expenses ✅
@@ -103,7 +103,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Migrate tables to two different components one more data-driven and one more list styled ✅
   - Create development workflow with integrated AI ✅
   - Upload erd dbdocs file and update erd.png 🟨
-  - Add native authentification layer with nextjs 🟨
+  - Add native authentification layer with nextjs [spec:basic-authentication] 🔷
   - Create a covering test suite 🟨
 
 ### Status Legend
