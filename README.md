@@ -104,7 +104,8 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Migrate tables to two different components one more data-driven and one more list styled ✅
   - Create development workflow with integrated AI ✅
   - Upload erd dbdocs file and update erd.png 🟨
-  - Add native authentification layer with nextjs [spec:basic-authentication] 🔷
+  - Example database data for app testing ✅
+  - Add native authentification layer with nextjs [spec:basic-authentication] ✅
   - Create a covering test suite 🟨
 
 ### Status Legend
@@ -180,6 +181,16 @@ docker ps
 Exec into the container and enter password
 ```
 docker exec -it financeapp_db mariadb -u financeuser -p
+```
+
+# Load example database data
+A `db-dump.sql` file is available locally (gitignored) with example data for testing. To restore it after a reset:
+```
+docker exec -i financeapp_db mariadb -u financeuser -pfinancepass financeapp < db-dump.sql
+```
+To regenerate the dump from your current database:
+```
+docker exec financeapp_db mariadb-dump -u financeuser -pfinancepass --complete-insert --skip-comments financeapp > db-dump.sql
 ```
 
 # Reset the database container
