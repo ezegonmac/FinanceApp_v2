@@ -215,8 +215,8 @@ Open each folder in its own VS Code/Kiro window. Run `npx turbo run dev --filter
 
 ```bash
 git checkout main
-git merge feature/auth
-git merge feature/design
+git merge feature/backend
+git merge feature/frontend
 ```
 
 Resolve conflicts if needed.
@@ -228,17 +228,17 @@ docker ps
 ```
 Exec into the container and enter password
 ```
-docker exec -it financeapp_db mariadb -u financeuser -p
+docker exec -it <DB_CONTAINER_NAME> mariadb -u <DB_USER> -p
 ```
 
-# Load example database data
-A `db-dump.sql` file is available locally (gitignored) with example data for testing. To restore it after a reset:
+# Load database dump
+If you have a `db-dump.sql` file, restore it with:
 ```
-docker exec -i financeapp_db mariadb -u financeuser -pfinancepass financeapp < db-dump.sql
+docker exec -i <DB_CONTAINER_NAME> mariadb -u <DB_USER> -p<DB_PASSWORD> <DB_NAME> < db-dump.sql
 ```
-To regenerate the dump from your current database:
+To create a dump from your current database:
 ```
-docker exec financeapp_db mariadb-dump -u financeuser -pfinancepass --complete-insert --skip-comments financeapp > db-dump.sql
+docker exec <DB_CONTAINER_NAME> mariadb-dump -u <DB_USER> -p<DB_PASSWORD> --complete-insert --skip-comments <DB_NAME> > db-dump.sql
 ```
 
 # Reset the database container
