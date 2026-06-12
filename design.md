@@ -271,6 +271,66 @@ Small square containers that display an account's custom icon image or a fallbac
 - Fallback: `bg-muted` surface with a `text-muted-foreground` icon centered.
 - Image: `object-contain` to preserve aspect ratio within the square.
 
+### HeroMetric
+
+The dominant visual element on any page that needs a single KPI anchor. Replaces scattered equal-weight metrics with a clear hierarchy: one number rules the page. Renders as a `<header>` landmark containing the page title.
+
+- **Element:** `<header>` — semantic landmark; contains the page `<h1>`
+- **Height:** content-driven, no fixed height
+- **Background:** `--card` (`#ffffff`)
+- **Border:** none — the hero earns its elevation from shadow alone
+- **Radius:** `xl` (8px / `rounded-xl`)
+- **Shadow:** Level 2 — `0 2px 8px rgba(15,23,42,0.04)` (very subtle, just enough to lift)
+- **Padding:** `24px` horizontal, `20px` vertical
+
+**Layout:**
+- Two-column flex row (`flex items-center justify-between gap-6`)
+- Left column: title + optional description
+- Right column: label, value, delta chip (right-aligned)
+
+**Title (required):**
+- Rendered as `<h1>` — the page heading lives inside the hero
+- `text-lg` / `font-semibold` / `tracking-tight`
+- Color: `text-foreground`
+
+**Description (optional):**
+- Rendered below the title when provided
+- `text-sm` / `text-muted-foreground`
+- Margin: `mt-0.5` below the title
+
+**Label:**
+- `text-[11px]` / `font-semibold` / `uppercase` / `tracking-wide`
+- Color: `text-muted-foreground`
+
+**Value:**
+- `text-3xl` (30px) / `font-weight: 700` / `tabular-nums`
+- Color: `text-foreground`
+- Uses system font stack (Inter) at this size for visual weight; no mono needed at display scale
+
+**Delta chip:**
+- Inline-flex row below the value (`mt-1.5`), right-aligned (`justify-end`)
+- Chip: `rounded-sm px-1.5 py-0.5 text-[11px] font-medium`
+- Directional arrow prefix: `↑` / `↓`
+- Semantic background:
+  - Up → `bg-positive-subtle text-positive-subtle-foreground`
+  - Down → `bg-negative-subtle text-negative-subtle-foreground`
+  - Neutral → `bg-muted text-muted-foreground`
+- Context label beside chip: `text-[11px] text-muted-foreground` (e.g. "vs last month")
+
+**Structure:**
+```
+┌───────────────────────────────────────────────────────────────┐
+│  Accounts                              TOTAL BALANCE          │
+│  Overview of your balances       16.821,50 €                  │
+│  and key insights                ↑ 2.3%  vs last month        │
+└───────────────────────────────────────────────────────────────┘
+```
+
+**Usage rules:**
+- One `HeroMetric` per page maximum. It is the visual anchor — not a grid of equals.
+- Place at the top of the page content area — the component contains its own `<h1>`, so no separate page title is needed above it.
+- If no delta data is available (e.g. first month), render without the chip — the component handles this gracefully.
+
 ### KPI Sparklines
 
 Minimalist line charts embedded in cards. No axes, no labels — trend only.

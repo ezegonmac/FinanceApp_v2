@@ -1,5 +1,6 @@
 import AccountsTable from "@/components/AccountsTable";
 import AccountQuickInsightsStrip from "@/components/accounts/AccountQuickInsightsStrip";
+import { HeroMetric } from "@/components/ui/hero-metric";
 import { prisma } from "@repo/db";
 import { formatYearMonth, getEuropeMadridDateParts } from "@repo/utils";
 
@@ -28,11 +29,91 @@ export default async function AccountsPage() {
     }).format(value);
   };
 
+  // Fetch total balance
   const accountsBalanceAgg = await prisma.account.aggregate({
     where: { active: true },
     _sum: { balance: true },
   });
   const totalBalance = toNumber(accountsBalanceAgg._sum.balance);
+
+  // Calculate delta vs last month using MonthSnapshot
+  const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+  const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+  const lastMonthSnapshots = await prisma.monthSnapshot.findMany({
+    where: {
+      month: {
+        year: prevYear,
+        month: prevMonth,
+      },
+      account: { active: true },
+    },
+    select: {
+      total_incomes: true,
+      total_expenses: true,
+      total_transactions_in: true,
+      total_transactions_out: true,
+    },
+  });
+
+  // Last month's end balance approximation: current balance minus this month's net movement
+  // Better approach: sum snapshot net flows to get last month's balance relative to current
+  let balanceDelta: { value: string; direction: "up" | "down" | "neutral"; context: string } | undefined;
+
+  if (lastMonthSnapshots.length > 0) {
+    // Net change this month = sum of all snapshot net flows for the previous month
+    // Previous month end balance ≈ current balance - this month's net changes
+    // Instead, compute: last month's total net = incomes + txn_in - expenses - txn_out
+    const lastMonthNet = lastMonthSnapshots.reduce((sum, s) => {
+      return sum
+        + toNumber(s.total_incomes)
+        + toNumber(s.total_transactions_in)
+        - toNumber(s.total_expenses)
+        - toNumber(s.total_transactions_out);
+    }, 0);
+
+    // The balance at end of last month was approximately: current - this month's activity
+    // But we can also interpret the delta as: how much did balance change this month?
+    // currentBalance - (currentBalance - thisMonthNet) = thisMonthNet
+    // Actually the simplest accurate approach: balance before last month's activity applied
+    // was (currentBalance - lastMonthNet - thisMonthNet). Let's just show the % change
+    // relative to what the balance was at start of this month.
+    // Start of this month balance = currentBalance - thisMonthNet (from current month snapshots)
+
+    let thisMonthNet = 0;
+    if (currentMonthRecord) {
+      const currentSnapshots = await prisma.monthSnapshot.findMany({
+        where: {
+          month_id: currentMonthRecord.id,
+          account: { active: true },
+        },
+        select: {
+          total_incomes: true,
+          total_expenses: true,
+          total_transactions_in: true,
+          total_transactions_out: true,
+        },
+      });
+      thisMonthNet = currentSnapshots.reduce((sum, s) => {
+        return sum
+          + toNumber(s.total_incomes)
+          + toNumber(s.total_transactions_in)
+          - toNumber(s.total_expenses)
+          - toNumber(s.total_transactions_out);
+      }, 0);
+    }
+
+    const startOfMonthBalance = totalBalance - thisMonthNet;
+    if (startOfMonthBalance !== 0) {
+      const pctChange = ((totalBalance - startOfMonthBalance) / Math.abs(startOfMonthBalance)) * 100;
+      const direction = pctChange > 0 ? "up" : pctChange < 0 ? "down" : "neutral";
+      balanceDelta = {
+        value: `${Math.abs(pctChange).toFixed(1)}%`,
+        direction,
+        context: "vs last month",
+      };
+    }
+  }
 
   let totalIncome = 0;
   let totalExpenses = 0;
@@ -91,15 +172,13 @@ export default async function AccountsPage() {
 
   return (
     <section className="space-y-5">
-      <header className="flex items-end justify-between gap-4">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Accounts</h1>
-        </div>
-        <div className="text-right">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total balance</p>
-          <p className="text-2xl font-semibold tabular-nums text-foreground">{formatCurrency(totalBalance)}</p>
-        </div>
-      </header>
+      <HeroMetric
+        title="Accounts"
+        description="Overview of your balances and key insights"
+        label="Total Balance"
+        value={formatCurrency(totalBalance)}
+        delta={balanceDelta}
+      />
 
       <AccountQuickInsightsStrip
         monthLabel={currentMonthLabel}
