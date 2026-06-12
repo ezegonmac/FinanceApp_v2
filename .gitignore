@@ -94,5 +94,7 @@ package-lock.json
 # pnpm-lock.yaml
 
 # MariaDB
-mariadb_data
+
+# Database dumps
 db-dump.sql
+*.dump.sql
