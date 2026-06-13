@@ -1,97 +1,85 @@
-import { CalendarDays, Coins, Repeat, Scale, Wallet } from "lucide-react";
+import { CalendarDays, Coins, TrendingUp, Flame } from "lucide-react";
 
 type Props = {
-  monthLabel: string;
   daysLeft: number;
   daysInMonth: number;
   avgExpensePerMonthDay: number;
   netPerMonthDay: number;
   expenseToIncomeRatio: number | null;
-  scheduledRecurrentCount: number;
 };
 
-const formatCurrency = (value: number) => {
-  const hasDecimals = !Number.isInteger(value);
-  return new Intl.NumberFormat("es-ES", {
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("es-ES", {
     style: "currency",
     currency: "EUR",
-    minimumFractionDigits: hasDecimals ? 2 : 0,
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
-};
 
-type InsightCardProps = {
-  title: string;
+type KpiCardProps = {
+  label: string;
   value: string;
   subtitle: string;
   icon: React.ReactNode;
+  iconBg: string;
 };
 
-function InsightCard({ title, value, subtitle, icon }: InsightCardProps) {
+function KpiCard({ label, value, subtitle, icon, iconBg }: KpiCardProps) {
   return (
-    <article className="rounded-lg border border-border bg-gradient-to-b from-muted/20 to-transparent p-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
-        <span className="text-muted-foreground">{icon}</span>
+    <article className="flex items-start gap-4 rounded-lg border bg-card p-5">
+      <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${iconBg}`}>
+        {icon}
       </div>
-      <p className="text-lg font-semibold tabular-nums text-foreground">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+      <div className="min-w-0">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">{value}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+      </div>
     </article>
   );
 }
 
 export default function AccountQuickInsightsStrip({
-  monthLabel,
   daysLeft,
   daysInMonth,
   avgExpensePerMonthDay,
   netPerMonthDay,
   expenseToIncomeRatio,
-  scheduledRecurrentCount,
 }: Props) {
   const ratioText = expenseToIncomeRatio == null
     ? "N/A"
     : `${(expenseToIncomeRatio * 100).toFixed(0)}%`;
 
   return (
-    <section className="space-y-3 rounded-lg border bg-card p-4 text-card-foreground">
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Quick Insights</h3>
-        <p className="text-xs text-muted-foreground">{monthLabel}</p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <InsightCard
-          title="Days Left"
-          value={`${daysLeft}`}
-          subtitle={`${daysInMonth} days in this month`}
-          icon={<CalendarDays className="size-4" />}
-        />
-        <InsightCard
-          title="Expense / Month Day"
-          value={formatCurrency(avgExpensePerMonthDay)}
-          subtitle="Monthly expenses spread across full month"
-          icon={<Coins className="size-4" />}
-        />
-        <InsightCard
-          title="Net / Month Day"
-          value={formatCurrency(netPerMonthDay)}
-          subtitle="(Income - Expense) across full month"
-          icon={<Wallet className="size-4" />}
-        />
-        <InsightCard
-          title="Expense/Income"
-          value={ratioText}
-          subtitle="Current month burn ratio"
-          icon={<Scale className="size-4" />}
-        />
-        <InsightCard
-          title="Recurrent Scheduled"
-          value={`${scheduledRecurrentCount}`}
-          subtitle="Active recurrent rules due this month"
-          icon={<Repeat className="size-4" />}
-        />
-      </div>
-    </section>
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <KpiCard
+        label="Days Left"
+        value={`${daysLeft}`}
+        subtitle={`${daysInMonth} days in this month`}
+        icon={<CalendarDays className="size-5 text-primary" />}
+        iconBg="bg-accent"
+      />
+      <KpiCard
+        label="Daily Budget"
+        value={formatCurrency(netPerMonthDay)}
+        subtitle="(Income − Expense) per day"
+        icon={<TrendingUp className="size-5 text-positive" />}
+        iconBg="bg-positive-subtle"
+      />
+      <KpiCard
+        label="Expenses"
+        value={`${formatCurrency(avgExpensePerMonthDay)} / day`}
+        subtitle="Monthly expenses spread"
+        icon={<Coins className="size-5 text-primary" />}
+        iconBg="bg-accent"
+      />
+      <KpiCard
+        label="Burn Rate"
+        value={ratioText}
+        subtitle="Current month burn ratio"
+        icon={<Flame className="size-5 text-primary" />}
+        iconBg="bg-accent"
+      />
+    </div>
   );
 }

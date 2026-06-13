@@ -80,27 +80,62 @@ typography:
   mono-data:   { fontFamily: JetBrains Mono, fontSize: 13px, fontWeight: 500, lineHeight: 18px }
 
 radius:
-  sm:      0.0625rem # 1px  — status badges, chips
-  DEFAULT: 0.125rem  # 2px  — buttons, inputs (--radius base)
-  lg:      0.25rem   # 4px  — cards, containers
-  xl:      0.5rem    # 8px  — modals, large overlays
+  sm:      0.125rem  # 2px  — status badges, chips
+  DEFAULT: 0.25rem   # 4px  — buttons, inputs (--radius base)
+  lg:      0.5rem    # 8px  — cards, containers
+  xl:      1rem      # 16px — modals, large overlays
   full:    9999px    # pill shapes
 
 spacing:
   unit:             4px   # baseline grid unit
-  container-margin: 24px  # page-level horizontal margin
+  container-margin: 32px  # page-level horizontal margin
   gutter:           16px  # column gutter (desktop)
-  card-padding:     16px  # internal card padding
+  card-padding:     20px  # internal card padding
   stack-sm:         8px   # tight vertical gap
   stack-md:         12px  # standard vertical gap
-  stack-lg:         20px  # section vertical gap
+  stack-lg:         24px  # section vertical gap
 ---
 
 ## Brand & Style
 
 Precision Ledger's personality is authoritative, transparent, and rigorous — built for users who prioritize data density and clarity over decorative elements. The emotional tone is control, reliability, and precision.
 
-The design style is **Corporate / Modern** with a lean toward **Functional Minimalism**. Depth is communicated through tonal layers and crisp borders, not shadows. The aesthetic is "Spreadsheet-Plus": the efficiency of a financial tool with the polish of a premium dashboard.
+The design style is **Modern Functional** — clean surfaces, restrained geometry (8px max radius), and subtle borders. The interface feels premium through organization, not decoration.
+
+### Visual Hierarchy Principles
+
+Hierarchy is established through:
+
+1. **Typography** — size, weight, and case create clear levels (page title → section label → body → caption)
+2. **Positioning** — primary KPI right-aligned in the header, supporting metrics below, detail tables last
+3. **Spacing** — 24px section gaps separate content groups without needing visual containers
+4. **Alignment** — consistent left edge for labels, right-aligned numerics, grid-based card layouts
+
+Hierarchy is **not** established through:
+- Large shadows
+- Large radii
+- Bright colors on containers
+- Nested boxes or excessive framing
+
+The interface should feel premium through organization.
+
+### Design Guardrails
+
+**Preserve data density.** Do not redesign toward consumer fintech. This is a financial workspace. Always keep:
+- Tables as the primary data surface
+- Compact row heights (32–40px)
+- Tabular numbers (`font-mono tabular-nums`) for all financial figures
+- Visible borders between rows and around containers
+- High information density per screen
+
+**Preserve existing design foundations.** The refresh improves hierarchy and polish — it does not change brand identity. Do not modify:
+- Color palette (primary blue, semantic green/red, neutral grays)
+- Inter typography system
+- JetBrains Mono for financial data
+- Financial semantic token pairs (positive/negative)
+- Table architecture (DataTable + ListTable)
+- Button variants and sizing
+- Status badge/chip system
 
 ## Colors
 
@@ -151,38 +186,118 @@ The palette anchors on a Global Banking blue (`#1e40af`) for institutional stabi
 
 ## Layout & Spacing
 
-The layout uses a **Fixed-Fluid Hybrid** grid. Content is constrained to `max-width: 1440px`, centered with `24px` margins.
+The layout uses a **Fixed-Fluid Hybrid** grid. Content is constrained to `max-width: 1440px`, centered with `32px` margins.
 
 A strict **4px baseline grid** governs all vertical rhythm:
 
-- **Desktop:** 12-column grid, 16px gutters. Cards use 16px internal padding.
-- **Mobile:** Single column, 12px horizontal padding.
+- **Desktop:** 12-column grid, 16px gutters. Cards use 20px internal padding. Sections separated by 24px gaps.
+- **Mobile:** Single column, 16px horizontal padding.
 - **Data tables:** Row heights fixed at 32px (compact) or 40px (default) to maximize row count without sacrificing touch targets.
+
+The goal is improved hierarchy, not empty space — breathing room makes content groups distinct without wasting screen real estate.
+
+### Section Framing
+
+Reduce visual containers. Use whitespace to separate content groups before introducing another box.
+
+**Preferred structure:**
+```
+Page Title + KPI
+KPI Cards (grid)
+Table
+```
+
+**Avoid nested framing:**
+```
+Page
+└ Section (card)
+  └ Section (card)
+    └ Table
+```
+
+A component that already renders its own bordered container (e.g. `ListTable`) should **not** be wrapped in an additional card. Let the component's own border define the boundary.
+
+### Redundant Titles
+
+Every title must introduce a new concept. If the page is already called "Accounts", don't add "Accounts list" as a sub-heading — that's the same concept restated.
+
+**Remove titles that:**
+- Repeat the page name in different words
+- Label something already obvious from context (e.g. "Quick Insights" above a row of KPI cards)
+- Add a subtitle that describes what you can already see
+
+**Keep titles that:**
+- Introduce a genuinely new section with different content type
+- Are needed for accessibility landmarks
+- Disambiguate when multiple distinct data sets share a page
+
+### Dashboard Page Pattern
+
+All top-level pages follow a consistent three-part structure:
+
+```
+Header
+├── Title
+├── Description
+└── HeaderKPI (right-aligned)
+
+Metrics Row
+├── KpiCard
+├── KpiCard
+├── KpiCard
+└── KpiCard
+
+Primary Content
+└── Table (or other main data view)
+```
+
+- Container: a single `<section className="space-y-6">` — no wrapper component needed
+- Header: `<header className="flex items-end justify-between gap-4">`
+- Metrics row and table are direct children, separated by whitespace (24px gap)
+- No additional framing or nesting between these three layers
 
 ## Elevation & Depth
 
-Depth is expressed through **tonal layers** and **low-contrast outlines** — never heavy shadows.
+Depth is expressed through **tonal layers** and **subtle outlines**. Shadows are optional and always micro-scale.
 
 | Level | Surface                | Treatment                                                              |
 |-------|------------------------|------------------------------------------------------------------------|
 | 0     | Page background        | `#f7f9fb`                                                              |
-| 1     | Cards / panels         | `#ffffff` + 1px `#e2e8f0` border. No shadow.                          |
-| 2     | Dropdowns / modals     | `#ffffff` + 1px `#e2e8f0` border + `0 4px 12px rgba(15,23,42,0.08)` shadow |
-| —     | Dividers               | 1px `#e2e8f0` hairline stroke — used extensively in tables and lists  |
+| 1     | Cards / panels         | `#ffffff` + 1px `--border` + optional `0 1px 2px rgba(15,23,42,0.03)` |
+| 2     | Dropdowns / modals     | `#ffffff` + 1px `--border` + `0 4px 12px rgba(15,23,42,0.08)` shadow  |
+| —     | Dividers               | 1px `#e2e8f0` hairline stroke — used in tables and lists              |
 
 ## Shapes
 
-Base radius is **2px (0.125rem)**. The scale:
+Base radius is **4px (0.25rem)**. The scale:
 
 | Token      | Value   | Applied to                      |
 |------------|---------|---------------------------------|
-| `sm`       | 1px     | Status badges, chips            |
-| `DEFAULT`  | 2px     | Buttons, inputs, form elements  |
-| `lg`       | 4px     | Cards, containers, panels       |
-| `xl`       | 8px     | Modals, large overlays          |
+| `sm`       | 2px     | Status badges, chips            |
+| `DEFAULT`  | 4px     | Buttons, inputs, form elements  |
+| `lg`       | 8px     | Cards, containers, panels       |
+| `xl`       | 16px    | Modals, large overlays          |
 | `full`     | 9999px  | Pill shapes                     |
 
 ## Components
+
+### Navigation Bar
+
+Sticky top navigation bar — the only global chrome element.
+
+- **Height:** `48px` (`h-12`)
+- **Background:** `--card` (`#ffffff`)
+- **Border:** 1px bottom `--border`
+- **Padding:** `0 32px` (matches container margin)
+- **Position:** `sticky top-0 z-40`
+
+**Nav links:**
+- Inline icon + text, `text-sm font-medium`
+- Icon: `size-4`, inline (no background/ring container)
+- Gap between icon and label: `8px` (`gap-2`)
+- Active state: `text-foreground` + `inset_0_-2px_0_0_var(--primary)` bottom bar
+- Inactive state: `text-muted-foreground`, hover → `text-foreground`
+- Link height matches bar: `h-12`
 
 ### Buttons
 
@@ -235,9 +350,12 @@ Shape: `radius-sm` (2px) for a sharp, technical look.
 Every card is an "Information Module":
 
 - Background: `--card` (`#ffffff`)
-- Border: 1px `--border`, `radius-lg` (4px)
-- Header: bottom border (`--border`), `headline-sm` title, `16px` padding
-- Body: `16px` padding, `stack-md` (12px) vertical gap between rows
+- Border: 1px `--border` (standard, full opacity), `radius-lg` (8px)
+- Shadow: optional `0 1px 2px rgba(15,23,42,0.03)` — only when extra lift helps hierarchy
+- Header: bottom border (`--border`), `headline-sm` title, `20px` padding
+- Body: `20px` padding, `stack-md` (12px) vertical gap between rows
+
+Do not exceed `radius: 8px`. Avoid fintech-style oversized radii.
 
 ### List Tables
 
@@ -271,65 +389,74 @@ Small square containers that display an account's custom icon image or a fallbac
 - Fallback: `bg-muted` surface with a `text-muted-foreground` icon centered.
 - Image: `object-contain` to preserve aspect ratio within the square.
 
-### HeroMetric
+### HeaderKPI
 
-The dominant visual element on any page that needs a single KPI anchor. Replaces scattered equal-weight metrics with a clear hierarchy: one number rules the page. Renders as a `<header>` landmark containing the page title.
+The primary KPI displayed in the page header, right-aligned. It feels like part of the page structure — not a card, not a container. Just the number.
 
-- **Element:** `<header>` — semantic landmark; contains the page `<h1>`
-- **Height:** content-driven, no fixed height
-- **Background:** `--card` (`#ffffff`)
-- **Border:** none — the hero earns its elevation from shadow alone
-- **Radius:** `xl` (8px / `rounded-xl`)
-- **Shadow:** Level 2 — `0 2px 8px rgba(15,23,42,0.04)` (very subtle, just enough to lift)
-- **Padding:** `24px` horizontal, `20px` vertical
-
-**Layout:**
-- Two-column flex row (`flex items-center justify-between gap-6`)
-- Left column: title + optional description
-- Right column: label, value, delta chip (right-aligned)
-
-**Title (required):**
-- Rendered as `<h1>` — the page heading lives inside the hero
-- `text-lg` / `font-semibold` / `tracking-tight`
-- Color: `text-foreground`
-
-**Description (optional):**
-- Rendered below the title when provided
-- `text-sm` / `text-muted-foreground`
-- Margin: `mt-0.5` below the title
+- **Container:** none — transparent background, no border, no shadow
+- **Position:** right side of the page header, aligned with `items-end`
+- **Layout:** stacked vertically, `text-right`
 
 **Label:**
 - `text-[11px]` / `font-semibold` / `uppercase` / `tracking-wide`
 - Color: `text-muted-foreground`
+- Position: top (above the value)
 
-**Value:**
-- `text-3xl` (30px) / `font-weight: 700` / `tabular-nums`
-- Color: `text-foreground`
-- Uses system font stack (Inter) at this size for visual weight; no mono needed at display scale
-
-**Delta chip:**
-- Inline-flex row below the value (`mt-1.5`), right-aligned (`justify-end`)
+**Value + Delta (inline row):**
+- Value: `text-3xl` (30px) / `font-bold` / `tabular-nums` / `text-foreground`
+- Delta chip sits to the right of the value on the same baseline (`items-baseline gap-3`)
 - Chip: `rounded-sm px-1.5 py-0.5 text-[11px] font-medium`
-- Directional arrow prefix: `↑` / `↓`
+- Directional arrow: `↑` / `↓`
 - Semantic background:
   - Up → `bg-positive-subtle text-positive-subtle-foreground`
   - Down → `bg-negative-subtle text-negative-subtle-foreground`
   - Neutral → `bg-muted text-muted-foreground`
-- Context label beside chip: `text-[11px] text-muted-foreground` (e.g. "vs last month")
+
+**Context line (optional):**
+- Below the value row: `text-[11px] text-muted-foreground` (e.g. "vs last month")
 
 **Structure:**
 ```
-┌───────────────────────────────────────────────────────────────┐
-│  Accounts                              TOTAL BALANCE          │
-│  Overview of your balances       16.821,50 €                  │
-│  and key insights                ↑ 2.3%  vs last month        │
-└───────────────────────────────────────────────────────────────┘
+                         TOTAL BALANCE
+                  €16,821.50  ↑ 2.3%
+                         vs last month
 ```
 
 **Usage rules:**
-- One `HeroMetric` per page maximum. It is the visual anchor — not a grid of equals.
-- Place at the top of the page content area — the component contains its own `<h1>`, so no separate page title is needed above it.
-- If no delta data is available (e.g. first month), render without the chip — the component handles this gracefully.
+- One `HeaderKPI` per page maximum.
+- Lives inside the page `<header>` element alongside the `<h1>` and description.
+- No wrapping card — the KPI is part of the page chrome, not content.
+- If no delta data is available, render without the chip.
+
+### KpiCard
+
+Compact metric cards used for secondary KPIs (quick insights). Scannable, not decorative.
+
+- **Padding:** `20px` (`p-5`)
+- **Border:** 1px `--border` (standard, full opacity)
+- **Radius:** `rounded-lg` (8px)
+- **Shadow:** none
+- **Background:** `--card`
+
+**Structure:**
+```
+[icon-circle]  Label
+               Value
+               Subtitle text
+```
+
+- **Icon container:** `size-10` (40px) rounded-lg square with a tinted background (`bg-accent`, `bg-positive-subtle`, etc.)
+- **Icon:** `size-5` (20px), colored to match the semantic intent (`text-primary`, `text-positive`)
+- **Label:** `text-sm` / `text-muted-foreground` — title case, not uppercase
+- **Value:** `text-xl` / `font-semibold` / `tabular-nums`
+- **Subtitle:** `text-xs` / `text-muted-foreground`
+
+**Layout:** `flex items-start gap-4` — icon left, text stacked right.
+
+**Usage rules:**
+- Use for secondary metrics that support the HeaderKPI.
+- Always render in a grid (typically 4 columns on desktop, 2 on tablet).
+- Keep content to one value + one subtitle. No charts, no actions.
 
 ### KPI Sparklines
 

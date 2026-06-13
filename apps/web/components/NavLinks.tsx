@@ -52,22 +52,13 @@ export default function NavLinks() {
             key={href}
             href={href}
             className={cn(
-              "group inline-flex items-center gap-1.5 h-10 px-3 text-sm font-medium whitespace-nowrap transition-colors relative",
+              "group inline-flex items-center gap-2 h-12 px-3 text-sm font-medium whitespace-nowrap transition-colors relative",
               isActive
                 ? "text-foreground shadow-[inset_0_-2px_0_0_var(--primary)]"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            <span
-              className={cn(
-                "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] ring-1 transition-colors",
-                isActive
-                  ? "bg-accent ring-accent"
-                  : "bg-muted/60 ring-border/50 group-hover:bg-accent group-hover:ring-accent",
-              )}
-            >
-              <Icon className="h-3 w-3" aria-hidden="true" />
-            </span>
+            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>{label}</span>
             {href === "/todos" ? <TodoNavBadge /> : null}
           </Link>
@@ -80,8 +71,7 @@ export default function NavLinks() {
           <NavigationMenuItem>
             <NavigationMenuTrigger
               className={cn(
-                // Sizing + text — match the regular nav links exactly
-                "h-10 px-3 text-sm font-medium whitespace-nowrap rounded-none",
+                "h-12 px-3 text-sm font-medium whitespace-nowrap rounded-none",
                 "text-muted-foreground transition-colors",
                 // Force-clear all background states from navigationMenuTriggerStyle
                 "!bg-transparent hover:!bg-transparent focus:!bg-transparent",

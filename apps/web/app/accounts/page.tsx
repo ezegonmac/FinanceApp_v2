@@ -1,12 +1,11 @@
 import AccountsTable from "@/components/AccountsTable";
 import AccountQuickInsightsStrip from "@/components/accounts/AccountQuickInsightsStrip";
-import { HeroMetric } from "@/components/ui/hero-metric";
+import { HeaderKPI } from "@/components/ui/hero-metric";
 import { prisma } from "@repo/db";
-import { formatYearMonth, getEuropeMadridDateParts } from "@repo/utils";
+import { getEuropeMadridDateParts } from "@repo/utils";
 
 export default async function AccountsPage() {
   const { year: currentYear, month: currentMonth, day: currentDay } = getEuropeMadridDateParts();
-  const currentMonthLabel = formatYearMonth(currentYear, currentMonth);
 
   const currentMonthRecord = await prisma.month.findUnique({
     where: {
@@ -117,14 +116,11 @@ export default async function AccountsPage() {
 
   let totalIncome = 0;
   let totalExpenses = 0;
-  let recurrentIncomeCount = 0;
-  let recurrentExpenseCount = 0;
-  let recurrentTransactionCount = 0;
 
   if (currentMonthRecord) {
     const monthId = currentMonthRecord.id;
 
-    const [incomeAgg, expensesAgg, recurrentIncomes, recurrentExpenses, recurrentTransactions] = await Promise.all([
+    const [incomeAgg, expensesAgg] = await Promise.all([
       prisma.income.aggregate({
         where: { month_id: monthId },
         _sum: { amount: true },
@@ -133,34 +129,10 @@ export default async function AccountsPage() {
         where: { month_id: monthId },
         _sum: { amount: true },
       }),
-      prisma.recurrentIncome.count({
-        where: {
-          status: "ACTIVE",
-          next_run_year: currentYear,
-          next_run_month: currentMonth,
-        },
-      }),
-      prisma.recurrentExpense.count({
-        where: {
-          status: "ACTIVE",
-          next_run_year: currentYear,
-          next_run_month: currentMonth,
-        },
-      }),
-      prisma.recurrentTransaction.count({
-        where: {
-          status: "ACTIVE",
-          next_run_year: currentYear,
-          next_run_month: currentMonth,
-        },
-      }),
     ]);
 
     totalIncome = toNumber(incomeAgg._sum.amount);
     totalExpenses = toNumber(expensesAgg._sum.amount);
-    recurrentIncomeCount = recurrentIncomes;
-    recurrentExpenseCount = recurrentExpenses;
-    recurrentTransactionCount = recurrentTransactions;
   }
 
   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
@@ -168,31 +140,30 @@ export default async function AccountsPage() {
   const avgExpensePerMonthDay = totalExpenses / daysInMonth;
   const netPerMonthDay = (totalIncome - totalExpenses) / daysInMonth;
   const expenseToIncomeRatio = totalIncome > 0 ? totalExpenses / totalIncome : null;
-  const scheduledRecurrentCount = recurrentIncomeCount + recurrentExpenseCount + recurrentTransactionCount;
 
   return (
-    <section className="space-y-5">
-      <HeroMetric
-        title="Accounts"
-        description="Overview of your balances and key insights"
-        label="Total Balance"
-        value={formatCurrency(totalBalance)}
-        delta={balanceDelta}
-      />
+    <section className="space-y-6">
+      <header className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Accounts</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Overview of your balances and key financial insights.</p>
+        </div>
+        <HeaderKPI
+          label="Total Balance"
+          value={formatCurrency(totalBalance)}
+          delta={balanceDelta}
+        />
+      </header>
 
       <AccountQuickInsightsStrip
-        monthLabel={currentMonthLabel}
         daysLeft={daysLeft}
         daysInMonth={daysInMonth}
         avgExpensePerMonthDay={avgExpensePerMonthDay}
         netPerMonthDay={netPerMonthDay}
         expenseToIncomeRatio={expenseToIncomeRatio}
-        scheduledRecurrentCount={scheduledRecurrentCount}
       />
 
-      <section className="rounded-lg border bg-card p-4 text-card-foreground">
-        <AccountsTable />
-      </section>
+      <AccountsTable />
     </section>
   );
 }

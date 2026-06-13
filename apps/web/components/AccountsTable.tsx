@@ -22,7 +22,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ListTable } from "@/components/ui/list-table";
 import Link from "next/link";
@@ -42,11 +41,10 @@ type Account = {
 const formatBalance = (value: unknown) => {
     const numericValue = typeof value === "number" ? value : Number(value);
     if (Number.isNaN(numericValue)) return `${value} EUR`;
-    const hasDecimals = !Number.isInteger(numericValue);
     return new Intl.NumberFormat("es-ES", {
         style: "currency",
         currency: "EUR",
-        minimumFractionDigits: hasDecimals ? 2 : 0,
+        minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(numericValue);
 };
@@ -143,10 +141,10 @@ export default function AccountsTable() {
     columns.push(
         {
             accessorKey: "name",
-            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</span>,
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</span>,
             cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <AccountIcon icon={row.original.icon} name={row.original.name} size="sm" />
+                <div className="flex items-center gap-3">
+                    <AccountIcon icon={row.original.icon} name={row.original.name} size="md" />
                     <span className="font-medium">{row.original.name}</span>
                 </div>
             ),
@@ -154,16 +152,19 @@ export default function AccountsTable() {
         {
             accessorKey: "balance",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balance</span>,
-            cell: ({ row }) => formatBalance(row.original.balance),
+            cell: ({ row }) => (
+                <span className="font-mono tabular-nums">{formatBalance(row.original.balance)}</span>
+            ),
             meta: { numeric: true },
         },
         {
             accessorKey: "active",
-            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active</span>,
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</span>,
             cell: ({ row }) => (
-                <Badge variant={row.original.active ? "success" : "outline"}>
+                <span className="inline-flex items-center gap-1.5 text-sm">
+                    <span className={`size-2 rounded-full ${row.original.active ? "bg-positive" : "bg-muted-foreground"}`} />
                     {row.original.active ? "Active" : "Inactive"}
-                </Badge>
+                </span>
             ),
         }
     );
@@ -202,14 +203,8 @@ export default function AccountsTable() {
 
     return (
         <div className="space-y-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold">Accounts list</h2>
-                    <p className="text-sm text-muted-foreground">
-                        Review balances and open individual account details.
-                    </p>
-                </div>
-
+            <div className="flex items-center justify-between gap-4">
+                <h2 className="text-lg font-semibold">Your Accounts</h2>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" onClick={handleRefresh} disabled={loading || adding || refreshing}>
                         {refreshing ? "Refreshing..." : "Refresh"}
