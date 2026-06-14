@@ -173,7 +173,7 @@ The palette anchors on a Global Banking blue (`#1e40af`) for institutional stabi
 
 | Token        | Size  | Weight | Usage                                    |
 |--------------|-------|--------|------------------------------------------|
-| `headline-lg`| 24px  | 600    | Page titles                              |
+| `headline-lg`| 24px  | 600    | Section group titles                     |
 | `headline-md`| 18px  | 600    | Section / card group headers             |
 | `headline-sm`| 14px  | 600    | Card headers, table section titles       |
 | `body-lg`    | 14px  | 400    | Primary body text                        |
@@ -183,6 +183,8 @@ The palette anchors on a Global Banking blue (`#1e40af`) for institutional stabi
 | `mono-data`  | 13px  | 500    | Financial amounts, IDs, numeric columns  |
 
 > `headline-sm` and `body-lg` share 14px but differ in weight — use `headline-sm` only for titles/labels, never for body copy.
+
+> **Page titles** use `text-2xl` (24px) / `font-bold` — anchors the page header and balances the right-aligned HeaderKPI.
 
 ## Layout & Spacing
 
@@ -252,7 +254,10 @@ Primary Content
 ```
 
 - Container: a single `<section className="space-y-6">` — no wrapper component needed
-- Header: `<header className="flex items-end justify-between gap-4">`
+- Header: `<header className="mb-7 flex items-end justify-between gap-4">` — 28px bottom margin
+- Title: `text-2xl` (24px) / `font-bold` / `tracking-tight`
+- Description: `mt-1` (4px) below title, `text-sm text-muted-foreground`
+- HeaderKPI: `self-end` — bottom-aligned with the title baseline area, feels attached to the header
 - Metrics row and table are direct children, separated by whitespace (24px gap)
 - No additional framing or nesting between these three layers
 
@@ -391,40 +396,55 @@ Small square containers that display an account's custom icon image or a fallbac
 
 ### HeaderKPI
 
-The primary KPI displayed in the page header, right-aligned. It feels like part of the page structure — not a card, not a container. Just the number.
+The primary KPI displayed in the page header. It feels like part of the page structure — not a card, not a container. Just the number. The amount dominates; the delta is a quiet annotation.
 
 - **Container:** none — transparent background, no border, no shadow
-- **Position:** right side of the page header, aligned with `items-end`
-- **Layout:** stacked vertically, `text-right`
+- **Min width:** `220px` — gives the value and badge room to breathe, prevents compression
+- **Position:** right side of the page header (use `self-end`)
+- **Alignment:** left (`text-left`) — label, value, and context share a common left edge as a grouped block
 
 **Label:**
-- `text-[11px]` / `font-semibold` / `uppercase` / `tracking-wide`
+- `text-[12px]` / `font-normal` / `uppercase` / `tracking-wide`
 - Color: `text-muted-foreground`
-- Position: top (above the value)
+- Position: top (above the value row)
 
-**Value + Delta (inline row):**
-- Value: `text-3xl` (30px) / `font-bold` / `tabular-nums` / `text-foreground`
-- Delta chip sits to the right of the value on the same baseline (`items-baseline gap-3`)
-- Chip: `rounded-sm px-1.5 py-0.5 text-[11px] font-medium`
-- Directional arrow: `↑` / `↓`
-- Semantic background:
-  - Up → `bg-positive-subtle text-positive-subtle-foreground`
-  - Down → `bg-negative-subtle text-negative-subtle-foreground`
-  - Neutral → `bg-muted text-muted-foreground`
+**Value + Delta (inline row, `items-end justify-start gap-3`):**
+- Value: `text-3xl` (30px) / `font-semibold` / `leading-none` (line-height 1) / `tabular-nums` / `text-foreground`
+- Badge + context are stacked in a column to the right of the value
+- The column uses `self-center` so the badge aligns with the **vertical center** of the amount
 
-**Context line (optional):**
-- Below the value row: `text-[11px] text-muted-foreground` (e.g. "vs last month")
+**Delta badge (lightweight, quiet):**
+- `rounded-full` / `border` (1px) / `px-2 py-1` (8px / 4px — 2:1 horizontal:vertical ratio) / `text-[11px]` / `font-semibold` / `leading-none`
+- Glyph: Lucide `ChevronUp` / `ChevronDown` icon (chevron — a stickless arrowhead) at `size-3` / `strokeWidth={2.5}`, with `gap-0.5` between glyph and value
+- Subtle border + muted fill (never bright):
+  - Up → `border-positive/10 bg-positive-subtle/60 text-positive-subtle-foreground`
+  - Down → `border-negative/10 bg-negative-subtle/60 text-negative-subtle-foreground`
+  - Neutral → `border-border/50 bg-muted/60 text-muted-foreground`
+
+**Context text (belongs to the badge):**
+- `text-[10px]` / `text-muted-foreground`
+- `ml-0.5 mt-0.5` — nudged just beneath the badge
+
+**Value → Badge gap:** `12px` (`gap-3`)
 
 **Structure:**
 ```
-                         TOTAL BALANCE
-                  €16,821.50  ↑ 2.3%
-                         vs last month
+TOTAL BALANCE
+€16,821.50   ↑ 2.3%
+             vs last month
 ```
+
+The composition reads as a single grouped element — the amount dominates while the delta acts as a quiet annotation.
+
+**Implementation notes:**
+- Every node carries a `data-slot` attribute (`header-kpi`, `kpi-label`, `kpi-value-row`, `kpi-value`, `kpi-delta`, `kpi-delta-badge`, `kpi-delta-context`) for identification.
+- Direction-specific styles live in lookup maps (`DELTA_BADGE_STYLES`, `DELTA_ARROW`) rather than inline conditionals.
+- The badge + context render as a separate `DeltaBadge` sub-component.
 
 **Usage rules:**
 - One `HeaderKPI` per page maximum.
 - Lives inside the page `<header>` element alongside the `<h1>` and description.
+- Use `self-end` so the KPI bottom-aligns with the header content and feels attached, not floating.
 - No wrapping card — the KPI is part of the page chrome, not content.
 - If no delta data is available, render without the chip.
 

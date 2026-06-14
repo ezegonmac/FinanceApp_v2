@@ -1,6 +1,6 @@
 import AccountsTable from "@/components/AccountsTable";
 import AccountQuickInsightsStrip from "@/components/accounts/AccountQuickInsightsStrip";
-import { HeaderKPI } from "@/components/ui/hero-metric";
+import { HeaderKPI } from "@/components/ui/header-kpi";
 import { prisma } from "@repo/db";
 import { getEuropeMadridDateParts } from "@repo/utils";
 
@@ -143,15 +143,16 @@ export default async function AccountsPage() {
 
   return (
     <section className="space-y-6">
-      <header className="flex items-end justify-between gap-4">
+      <header className="mb-7 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Accounts</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Accounts</h1>
           <p className="mt-1 text-sm text-muted-foreground">Overview of your balances and key financial insights.</p>
         </div>
         <HeaderKPI
           label="Total Balance"
           value={formatCurrency(totalBalance)}
           delta={balanceDelta}
+          className="self-end"
         />
       </header>
 
