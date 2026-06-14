@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
 import TodoNavBadge from "@/components/todos/TodoNavBadge";
 import {
   NavigationMenu,
@@ -49,18 +48,18 @@ export default function NavLinks() {
                 : "font-normal text-muted-foreground hover:text-foreground",
             )}
           >
-            <span className="relative inline-flex h-full items-center">
+            <span className="relative inline-flex h-full items-center gap-1">
               {label}
+              {href === "/todos" && <TodoNavBadge />}
               <span
                 className={cn(
-                  "absolute inset-x-0 bottom-0 h-[2px] transition-opacity",
+                  "absolute inset-x-0 -bottom-px h-[3px] transition-opacity",
                   isActive
                     ? "bg-primary"
                     : "bg-muted-foreground/30 opacity-0 group-hover:opacity-100",
                 )}
               />
             </span>
-            {href === "/todos" ? <TodoNavBadge /> : null}
           </Link>
         );
       })}
@@ -71,22 +70,17 @@ export default function NavLinks() {
           <NavigationMenuItem>
             <NavigationMenuTrigger
               className={cn(
-                "h-14 px-5 text-sm font-normal whitespace-nowrap rounded-none",
+                "group relative h-14 px-5 text-sm font-normal whitespace-nowrap rounded-none",
                 "text-muted-foreground transition-colors",
-                // Force-clear all background states from navigationMenuTriggerStyle
                 "!bg-transparent hover:!bg-transparent focus:!bg-transparent",
                 "data-[state=open]:!bg-transparent data-[state=open]:hover:!bg-transparent data-[state=open]:focus:!bg-transparent",
-                // Text colour on hover and open
                 "hover:text-foreground data-[state=open]:text-foreground",
-                // Open state: bottom bar matches active links
-                "data-[state=open]:shadow-[inset_0_-2px_0_0_var(--primary)]",
-                // Hide the built-in chevron — we render our own
                 "[&>svg:last-child]:hidden",
               )}
             >
               Dev
-              <ChevronDown className="h-3 w-3 transition-transform duration-200 [[data-state=open]_&]:rotate-180" aria-hidden="true" />
               <DebugIndicator />
+              <span className="absolute inset-x-0 -bottom-px h-[3px] bg-muted-foreground/30 opacity-0 transition-opacity group-hover:opacity-100 group-data-[state=open]:bg-primary group-data-[state=open]:opacity-100" />
             </NavigationMenuTrigger>
             <NavigationMenuContent className="flex flex-col p-1 min-w-[8rem]">
               {devLinks.map(({ href, label }) => (
