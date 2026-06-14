@@ -33,6 +33,7 @@ import EditAccountForm from "@/components/accounts/EditAccountForm";
 type Account = {
     id: number;
     name: string;
+    description: string | null;
     icon: string | null;
     balance: number | string;
     active: boolean;
@@ -61,6 +62,7 @@ export default function AccountsTable() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [accountName, setAccountName] = useState("");
+    const [accountDescription, setAccountDescription] = useState("");
     const [accountBalance, setAccountBalance] = useState("");
     const [accountIcon, setAccountIcon] = useState<string | null>(null);
     const [adding, setAdding] = useState(false);
@@ -69,6 +71,7 @@ export default function AccountsTable() {
 
     const resetForm = () => {
         setAccountName("");
+        setAccountDescription("");
         setAccountBalance("");
         setAccountIcon(null);
         setFormError(null);
@@ -115,6 +118,7 @@ export default function AccountsTable() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: accountName.trim(),
+                    description: accountDescription.trim() || null,
                     icon: accountIcon,
                     balance: accountBalance ? parseFloat(accountBalance) : 0,
                 }),
@@ -146,7 +150,12 @@ export default function AccountsTable() {
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
                     <AccountIcon icon={row.original.icon} name={row.original.name} size="md" />
-                    <span className="font-medium">{row.original.name}</span>
+                    <div>
+                        <span className="font-medium">{row.original.name}</span>
+                        {row.original.description && (
+                            <p className="text-xs text-muted-foreground">{row.original.description}</p>
+                        )}
+                    </div>
                 </div>
             ),
         },
@@ -256,6 +265,19 @@ export default function AccountsTable() {
                                 </div>
 
                                 <div className="grid gap-2">
+                                    <label htmlFor="account-description" className="text-sm font-medium">
+                                        Description
+                                    </label>
+                                    <Input
+                                        id="account-description"
+                                        value={accountDescription}
+                                        onChange={(e) => setAccountDescription(e.target.value)}
+                                        placeholder="Checking account, Digital wallet..."
+                                        disabled={adding}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
                                     <label htmlFor="account-balance" className="text-sm font-medium">
                                         Initial balance (EUR)
                                     </label>
@@ -309,6 +331,7 @@ export default function AccountsTable() {
                     account={{
                         id: editingAccount.id,
                         name: editingAccount.name,
+                        description: editingAccount.description,
                         icon: editingAccount.icon,
                         active: editingAccount.active,
                     }}

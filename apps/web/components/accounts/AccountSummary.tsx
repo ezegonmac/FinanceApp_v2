@@ -6,13 +6,14 @@ import AccountIcon from "@/components/accounts/AccountIcon";
 
 type Props = {
   name: string;
+  description?: string | null;
   icon?: string | null;
   balance: string;
   createdAtIso: string;
   active: boolean;
 };
 
-export default function AccountSummary({ name, icon, balance, createdAtIso, active }: Props) {
+export default function AccountSummary({ name, description, icon, balance, createdAtIso, active }: Props) {
   const { debug } = useDebug();
 
   return (
@@ -21,6 +22,9 @@ export default function AccountSummary({ name, icon, balance, createdAtIso, acti
         <AccountIcon icon={icon} name={name} size="lg" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
+          {description && (
+            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+          )}
           <div className="mt-2">
             <Badge variant={active ? "success" : "outline"}>
               {active ? "Active" : "Inactive"}

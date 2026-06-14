@@ -10,6 +10,7 @@ type Props = {
   account: {
     id: number;
     name: string;
+    description: string | null;
     icon: string | null;
     balance: string;
     createdAtIso: string;
@@ -25,6 +26,7 @@ export default function AccountHeader({ account }: Props) {
       <div className="flex items-start justify-between">
         <AccountSummary
           name={account.name}
+          description={account.description}
           icon={account.icon}
           balance={account.balance}
           createdAtIso={account.createdAtIso}
@@ -44,6 +46,7 @@ export default function AccountHeader({ account }: Props) {
         account={{
           id: account.id,
           name: account.name,
+          description: account.description,
           icon: account.icon,
           active: account.active,
         }}

@@ -20,6 +20,7 @@ type Props = {
   account: {
     id: number;
     name: string;
+    description: string | null;
     icon: string | null;
     active: boolean;
   };
@@ -30,6 +31,7 @@ type Props = {
 export default function EditAccountForm({ account, open, onOpenChange }: Props) {
   const router = useRouter();
   const [name, setName] = useState(account.name);
+  const [description, setDescription] = useState(account.description ?? "");
   const [icon, setIcon] = useState<string | null>(account.icon);
   const [active, setActive] = useState(account.active);
   const [saving, setSaving] = useState(false);
@@ -48,6 +50,8 @@ export default function EditAccountForm({ account, open, onOpenChange }: Props) 
     // Compute diff: only send changed fields
     const body: Record<string, unknown> = {};
     if (name !== account.name) body.name = name;
+    const newDescription = description.trim() || null;
+    if (newDescription !== account.description) body.description = newDescription;
     if (icon !== account.icon) body.icon = icon;
     if (active !== account.active) body.active = active;
 
@@ -106,6 +110,19 @@ export default function EditAccountForm({ account, open, onOpenChange }: Props) 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Account name"
+              disabled={saving}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <label htmlFor="edit-account-description" className="text-sm font-medium">
+              Description
+            </label>
+            <Input
+              id="edit-account-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Checking account, Digital wallet..."
               disabled={saving}
             />
           </div>

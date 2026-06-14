@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic"; // recommended with Prisma
 
 const accountSchema = z.object({
   name: z.string().min(1),
+  description: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
   balance: z.number().nonnegative().optional(),
 });
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
     const newAccount = await prisma.account.create({
       data: {
         name: parsed.name,
+        description: parsed.description ?? undefined,
         icon: parsed.icon ?? undefined,
         balance: parsed.balance ?? 0,
       },
