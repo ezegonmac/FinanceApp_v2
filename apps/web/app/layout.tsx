@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <DebugProvider>
           {session && (
             <header className="sticky top-0 z-40 border-b border-border bg-card">
-              <div className="flex items-center h-10 px-4">
+              <div className="flex items-center h-14 px-8">
                 <NavLinks />
                 <div className="ml-auto">
                   <SignOutButton />
@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             </header>
           )}
-          <main className="p-4">{children}</main>
+          <main className="px-8 py-6">{children}</main>
         </DebugProvider>
       </body>
     </html>

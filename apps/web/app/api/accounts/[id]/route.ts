@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const updateAccountSchema = z.object({
   name: z.string().min(1).optional(),
+  description: z.string().nullable().optional(),
   icon: z.string().nullable().optional(),
   active: z.boolean().optional(),
 }).refine(
@@ -85,6 +86,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
     const updateData: Record<string, unknown> = {};
     if (parsed.name !== undefined) updateData.name = parsed.name;
+    if (parsed.description !== undefined) updateData.description = parsed.description;
     if (parsed.icon !== undefined) updateData.icon = parsed.icon;
     if (parsed.active !== undefined) updateData.active = parsed.active;
 

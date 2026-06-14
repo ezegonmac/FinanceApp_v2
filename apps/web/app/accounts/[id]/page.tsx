@@ -77,6 +77,7 @@ export default async function AccountPage({
           account={{
             id: account.id,
             name: account.name,
+            description: account.description,
             icon: account.icon,
             balance: account.balance?.toString() ?? "N/A",
             createdAtIso: account.created_at.toISOString(),

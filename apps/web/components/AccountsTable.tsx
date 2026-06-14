@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus, RefreshCw } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import ErrorMessage from "./ErrorMessage";
 import { useDebug } from "./debug/DebugContext";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
@@ -22,7 +23,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ListTable } from "@/components/ui/list-table";
 import Link from "next/link";
@@ -33,6 +33,7 @@ import EditAccountForm from "@/components/accounts/EditAccountForm";
 type Account = {
     id: number;
     name: string;
+    description: string | null;
     icon: string | null;
     balance: number | string;
     active: boolean;
@@ -42,11 +43,10 @@ type Account = {
 const formatBalance = (value: unknown) => {
     const numericValue = typeof value === "number" ? value : Number(value);
     if (Number.isNaN(numericValue)) return `${value} EUR`;
-    const hasDecimals = !Number.isInteger(numericValue);
     return new Intl.NumberFormat("es-ES", {
         style: "currency",
         currency: "EUR",
-        minimumFractionDigits: hasDecimals ? 2 : 0,
+        minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(numericValue);
 };
@@ -62,6 +62,7 @@ export default function AccountsTable() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [accountName, setAccountName] = useState("");
+    const [accountDescription, setAccountDescription] = useState("");
     const [accountBalance, setAccountBalance] = useState("");
     const [accountIcon, setAccountIcon] = useState<string | null>(null);
     const [adding, setAdding] = useState(false);
@@ -70,6 +71,7 @@ export default function AccountsTable() {
 
     const resetForm = () => {
         setAccountName("");
+        setAccountDescription("");
         setAccountBalance("");
         setAccountIcon(null);
         setFormError(null);
@@ -116,6 +118,7 @@ export default function AccountsTable() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: accountName.trim(),
+                    description: accountDescription.trim() || null,
                     icon: accountIcon,
                     balance: accountBalance ? parseFloat(accountBalance) : 0,
                 }),
@@ -143,27 +146,41 @@ export default function AccountsTable() {
     columns.push(
         {
             accessorKey: "name",
-            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</span>,
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account</span>,
             cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <AccountIcon icon={row.original.icon} name={row.original.name} size="sm" />
-                    <span className="font-medium">{row.original.name}</span>
+                <div className="flex items-center gap-3">
+                    <AccountIcon icon={row.original.icon} name={row.original.name} size="md" />
+                    <div>
+                        <span className="font-medium">{row.original.name}</span>
+                        {row.original.description && (
+                            <p className="text-xs text-muted-foreground">{row.original.description}</p>
+                        )}
+                    </div>
                 </div>
             ),
         },
         {
             accessorKey: "balance",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balance</span>,
-            cell: ({ row }) => formatBalance(row.original.balance),
+            cell: ({ row }) => (
+                <span className="font-mono tabular-nums">{formatBalance(row.original.balance)}</span>
+            ),
             meta: { numeric: true },
         },
         {
             accessorKey: "active",
-            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active</span>,
+            header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</span>,
             cell: ({ row }) => (
-                <Badge variant={row.original.active ? "success" : "outline"}>
+                <span
+                    className={cn(
+                        "inline-flex items-center rounded-full border px-2 py-1 text-[11px] font-semibold leading-none",
+                        row.original.active
+                            ? "border-positive/10 bg-positive-subtle/60 text-positive-subtle-foreground"
+                            : "border-border/50 bg-muted/60 text-muted-foreground"
+                    )}
+                >
                     {row.original.active ? "Active" : "Inactive"}
-                </Badge>
+                </span>
             ),
         }
     );
@@ -201,23 +218,21 @@ export default function AccountsTable() {
     });
 
     return (
-        <div className="space-y-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold">Accounts list</h2>
-                    <p className="text-sm text-muted-foreground">
-                        Review balances and open individual account details.
-                    </p>
-                </div>
-
+        <div className="rounded-lg border bg-card">
+            <div className="flex items-center justify-between gap-4 p-5">
+                <h2 className="text-lg font-semibold">Your Accounts</h2>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={handleRefresh} disabled={loading || adding || refreshing}>
+                    <Button variant="outline" size="sm" className="bg-white" onClick={handleRefresh} disabled={loading || adding || refreshing}>
+                        <RefreshCw className="size-3.5" />
                         {refreshing ? "Refreshing..." : "Refresh"}
                     </Button>
 
                     <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
                         <DialogTrigger asChild>
-                            <Button>Add account</Button>
+                            <Button size="sm">
+                                <Plus className="size-3.5" />
+                                Add account
+                            </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -245,6 +260,19 @@ export default function AccountsTable() {
                                         value={accountName}
                                         onChange={(e) => setAccountName(e.target.value)}
                                         placeholder="Savings, Santander, Revolut..."
+                                        disabled={adding}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <label htmlFor="account-description" className="text-sm font-medium">
+                                        Description
+                                    </label>
+                                    <Input
+                                        id="account-description"
+                                        value={accountDescription}
+                                        onChange={(e) => setAccountDescription(e.target.value)}
+                                        placeholder="Checking account, Digital wallet..."
                                         disabled={adding}
                                     />
                                 </div>
@@ -279,20 +307,23 @@ export default function AccountsTable() {
             </div>
 
             {loading ? (
-                <p className="text-sm text-muted-foreground">Loading accounts...</p>
+                <p className="border-t px-5 py-8 text-center text-sm text-muted-foreground">Loading accounts...</p>
             ) : fetchError ? (
-                <ErrorMessage message={fetchError} />
+                <div className="border-t px-5 py-8">
+                    <ErrorMessage message={fetchError} />
+                </div>
             ) : accounts.length > 0 ? (
                 <ListTable
                     columns={columns}
                     data={accounts}
                     getRowHref={(account) => `/accounts/${account.id}`}
                     emptyMessage="No accounts available."
+                    bare
                 />
             ) : (
-                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                <p className="border-t px-5 py-8 text-center text-sm text-muted-foreground">
                     No accounts available.
-                </div>
+                </p>
             )}
 
             {editingAccount && (
@@ -300,6 +331,7 @@ export default function AccountsTable() {
                     account={{
                         id: editingAccount.id,
                         name: editingAccount.name,
+                        description: editingAccount.description,
                         icon: editingAccount.icon,
                         active: editingAccount.active,
                     }}

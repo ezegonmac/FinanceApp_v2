@@ -51,6 +51,8 @@ type ListTableProps<TData, TValue> = {
   totalCount?: number;
   resetKey?: unknown;
   onPageChange?: (pageIndex: number) => void;
+  /** When true, skips the outer `rounded-lg border bg-card` wrapper — use when the table is already inside a card container. */
+  bare?: boolean;
 };
 
 export function ListTable<TData, TValue>({
@@ -63,6 +65,7 @@ export function ListTable<TData, TValue>({
   totalCount,
   resetKey,
   onPageChange,
+  bare = false,
 }: ListTableProps<TData, TValue>) {
   const router = useRouter();
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
@@ -102,7 +105,7 @@ export function ListTable<TData, TValue>({
   const shouldShowPagination = enablePagination && totalRows > pagination.pageSize;
 
   return (
-    <div className="rounded-lg border bg-card">
+    <div className={bare ? "border-t" : "rounded-lg border bg-card"}>
       <Table>
         {/* Headers — always left-aligned to match cells */}
         <TableHeader className="bg-muted/50">
