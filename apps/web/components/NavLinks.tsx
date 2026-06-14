@@ -3,16 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  BarChart3,
-  CalendarDays,
-  CheckSquare,
-  ChevronDown,
-  Home,
-  Landmark,
-  Repeat,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import TodoNavBadge from "@/components/todos/TodoNavBadge";
 import {
   NavigationMenu,
@@ -23,13 +14,13 @@ import {
 } from "@/components/ui/navigation-menu";
 import DebugIndicator from "@/components/debug/DebugIndicator";
 
-const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/",               label: "Home",          icon: Home         },
-  { href: "/accounts",       label: "Accounts",      icon: Landmark     },
-  { href: "/todos",          label: "Todos",         icon: CheckSquare  },
-  { href: "/recurrent",      label: "Recurrent",     icon: Repeat       },
-  { href: "/months/current", label: "Current Month", icon: CalendarDays },
-  { href: "/metrics",        label: "Metrics",       icon: BarChart3    },
+const navLinks: { href: string; label: string }[] = [
+  { href: "/",               label: "Home"          },
+  { href: "/accounts",       label: "Accounts"      },
+  { href: "/todos",          label: "Todos"         },
+  { href: "/recurrent",      label: "Recurrent"     },
+  { href: "/months/current", label: "Current Month" },
+  { href: "/metrics",        label: "Metrics"       },
 ];
 
 const devLinks = [
@@ -44,7 +35,7 @@ export default function NavLinks() {
   return (
     <div className="flex items-center">
       {/* Main links */}
-      {navLinks.map(({ href, label, icon: Icon }) => {
+      {navLinks.map(({ href, label }) => {
         const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
 
         return (
@@ -52,14 +43,23 @@ export default function NavLinks() {
             key={href}
             href={href}
             className={cn(
-              "group inline-flex items-center gap-2 h-12 px-3 text-sm font-medium whitespace-nowrap transition-colors relative",
+              "group relative inline-flex items-center h-14 px-5 text-sm whitespace-nowrap transition-colors",
               isActive
-                ? "text-foreground shadow-[inset_0_-2px_0_0_var(--primary)]"
-                : "text-muted-foreground hover:text-foreground",
+                ? "font-semibold text-foreground"
+                : "font-normal text-muted-foreground hover:text-foreground",
             )}
           >
-            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>{label}</span>
+            <span className="relative inline-flex h-full items-center">
+              {label}
+              <span
+                className={cn(
+                  "absolute inset-x-0 bottom-0 h-[2px] transition-opacity",
+                  isActive
+                    ? "bg-primary"
+                    : "bg-muted-foreground/30 opacity-0 group-hover:opacity-100",
+                )}
+              />
+            </span>
             {href === "/todos" ? <TodoNavBadge /> : null}
           </Link>
         );
@@ -71,7 +71,7 @@ export default function NavLinks() {
           <NavigationMenuItem>
             <NavigationMenuTrigger
               className={cn(
-                "h-12 px-3 text-sm font-medium whitespace-nowrap rounded-none",
+                "h-14 px-5 text-sm font-normal whitespace-nowrap rounded-none",
                 "text-muted-foreground transition-colors",
                 // Force-clear all background states from navigationMenuTriggerStyle
                 "!bg-transparent hover:!bg-transparent focus:!bg-transparent",

@@ -315,19 +315,19 @@ Base radius is **4px (0.25rem)**. The scale:
 
 Sticky top navigation bar — the only global chrome element.
 
-- **Height:** `48px` (`h-12`)
+- **Height:** `56px` (`h-14`)
 - **Background:** `--card` (`#ffffff`)
 - **Border:** 1px bottom `--border`
 - **Padding:** `0 32px` (matches container margin)
 - **Position:** `sticky top-0 z-40`
 
-**Nav links:**
-- Inline icon + text, `text-sm font-medium`
-- Icon: `size-4`, inline (no background/ring container)
-- Gap between icon and label: `8px` (`gap-2`)
-- Active state: `text-foreground` + `inset_0_-2px_0_0_var(--primary)` bottom bar
-- Inactive state: `text-muted-foreground`, hover → `text-foreground`
-- Link height matches bar: `h-12`
+**Nav links — text only, differentiated by weight:**
+- Text only, no icons. `text-sm`, `px-5` horizontal padding, link height matches the bar (`h-14`)
+- **Active:** `font-semibold text-foreground` with a primary underline. The underline is a child element scoped to the label text (a full-height inner span with an `absolute inset-x-0 bottom-0 h-[3px] rounded-full bg-primary` line), so it spans **only the word width** and sits at the bar's bottom edge — not the full padded link width.
+- **Inactive:** `font-normal text-muted-foreground`, hover → `text-foreground` plus a faint underline (`bg-muted-foreground/30`, `opacity-0 group-hover:opacity-100`) that fades in to hint at the active state — subtle, never competing with the active primary line.
+- Hierarchy comes from **weight + color contrast** (active is bold and full-contrast; inactive is normal weight and muted), not from icons or background fills
+
+**Nav badge (e.g. Todos count):** neutral, not colored — `bg-muted text-muted-foreground ring-1 ring-border`, `rounded-full`, `text-[10px] font-semibold`. A count indicator is informational, not an alert, so it stays in the neutral palette.
 
 ### Buttons
 

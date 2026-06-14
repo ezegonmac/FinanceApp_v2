@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <DebugProvider>
           {session && (
             <header className="sticky top-0 z-40 border-b border-border bg-card">
-              <div className="flex items-center h-12 px-8">
+              <div className="flex items-center h-14 px-8">
                 <NavLinks />
                 <div className="ml-auto">
                   <SignOutButton />
