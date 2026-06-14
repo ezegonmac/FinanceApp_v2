@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Plus, RefreshCw } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import ErrorMessage from "./ErrorMessage";
 import { useDebug } from "./debug/DebugContext";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
@@ -161,8 +162,14 @@ export default function AccountsTable() {
             accessorKey: "active",
             header: () => <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</span>,
             cell: ({ row }) => (
-                <span className="inline-flex items-center gap-1.5 text-sm">
-                    <span className={`size-2 rounded-full ${row.original.active ? "bg-positive" : "bg-muted-foreground"}`} />
+                <span
+                    className={cn(
+                        "inline-flex items-center rounded-full border px-2 py-1 text-[11px] font-semibold leading-none",
+                        row.original.active
+                            ? "border-positive/10 bg-positive-subtle/60 text-positive-subtle-foreground"
+                            : "border-border/50 bg-muted/60 text-muted-foreground"
+                    )}
+                >
                     {row.original.active ? "Active" : "Inactive"}
                 </span>
             ),
@@ -202,17 +209,21 @@ export default function AccountsTable() {
     });
 
     return (
-        <div className="space-y-5">
-            <div className="flex items-center justify-between gap-4">
+        <div className="rounded-lg border bg-card">
+            <div className="flex items-center justify-between gap-4 p-5">
                 <h2 className="text-lg font-semibold">Your Accounts</h2>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={handleRefresh} disabled={loading || adding || refreshing}>
+                    <Button variant="outline" size="sm" className="bg-white" onClick={handleRefresh} disabled={loading || adding || refreshing}>
+                        <RefreshCw className="size-3.5" />
                         {refreshing ? "Refreshing..." : "Refresh"}
                     </Button>
 
                     <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
                         <DialogTrigger asChild>
-                            <Button>Add account</Button>
+                            <Button size="sm">
+                                <Plus className="size-3.5" />
+                                Add account
+                            </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -274,20 +285,23 @@ export default function AccountsTable() {
             </div>
 
             {loading ? (
-                <p className="text-sm text-muted-foreground">Loading accounts...</p>
+                <p className="border-t px-5 py-8 text-center text-sm text-muted-foreground">Loading accounts...</p>
             ) : fetchError ? (
-                <ErrorMessage message={fetchError} />
+                <div className="border-t px-5 py-8">
+                    <ErrorMessage message={fetchError} />
+                </div>
             ) : accounts.length > 0 ? (
                 <ListTable
                     columns={columns}
                     data={accounts}
                     getRowHref={(account) => `/accounts/${account.id}`}
                     emptyMessage="No accounts available."
+                    bare
                 />
             ) : (
-                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                <p className="border-t px-5 py-8 text-center text-sm text-muted-foreground">
                     No accounts available.
-                </div>
+                </p>
             )}
 
             {editingAccount && (
