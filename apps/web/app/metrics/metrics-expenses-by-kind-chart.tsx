@@ -103,6 +103,16 @@ export default function MetricsExpensesByKindChart() {
           stack: "expenses",
           emphasis: { focus: "series" as const },
           data: data.variable,
+          label: {
+            show: true,
+            position: "top" as const,
+            formatter: (params: { dataIndex: number }) => {
+              const total = (data.fixed[params.dataIndex] ?? 0) + (data.variable[params.dataIndex] ?? 0);
+              return formatCompactEur(total);
+            },
+            fontSize: 11,
+            color: "hsl(var(--muted-foreground))",
+          },
         },
         {
           name: "Budget",

@@ -1,6 +1,7 @@
 import MetricsBalances from "./metrics-balances";
 import MetricsAccountBalanceChart from "./metrics-account-balance-chart";
 import MetricsExpensesByKindChart from "./metrics-expenses-by-kind-chart";
+import MetricsBudgetSurplusChart from "./metrics-budget-surplus-chart";
 import MetricsMonthlySummary from "./metrics-monthly-summary";
 
 export default function MetricsPage() {
@@ -18,6 +19,11 @@ export default function MetricsPage() {
       <section className="rounded-md border bg-card p-6 text-card-foreground">
         <h2 className="mb-4 text-xl font-semibold tracking-tight">Expenses by Kind (Fixed vs Variable)</h2>
         <MetricsExpensesByKindChart />
+      </section>
+
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <h2 className="mb-4 text-xl font-semibold tracking-tight">Budget Surplus / Deficit</h2>
+        <MetricsBudgetSurplusChart />
       </section>
 
       <section className="rounded-md border bg-card p-6 text-card-foreground">
