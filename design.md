@@ -211,6 +211,18 @@ A strict **4px baseline grid** governs all vertical rhythm:
 
 The goal is improved hierarchy, not empty space — breathing room makes content groups distinct without wasting screen real estate.
 
+### Padding Rhythm — horizontal ≥ vertical
+
+For compact, text-bearing components — buttons, badges/chips, inputs, KPI cards — **horizontal padding is larger than vertical, typically ~2:1** (1.5:1 at minimum). Line-height already gives text vertical presence, so the vertical axis feels filled at smaller padding; the horizontal axis needs explicit room or text feels cramped against the edges.
+
+| Component   | Padding (V × H) | Ratio |
+|-------------|-----------------|-------|
+| Button      | `8px × 12px`    | 1.5:1 |
+| Delta badge | `4px × 8px`     | 2:1   |
+| KPI card    | `16px × 48px` (`py-4 px-12`) | 3:1 |
+
+This is a heuristic for **component interiors**, not page layout. The ratio scales with how much horizontal room the component can afford — tighter elements (buttons) sit near 1.5:1, while roomy display cards can go up to ~3:1. Page-level margins, section gaps, and grid gutters follow the 4px baseline grid (see spacing tokens), where horizontal and vertical can be equal. Full-bleed containers may use symmetric padding.
+
 ### Section Framing
 
 Reduce visual containers. Use whitespace to separate content groups before introducing another box.
@@ -482,33 +494,43 @@ The composition reads as a single grouped element — the amount dominates while
 
 ### KpiCard
 
-Compact metric cards used for secondary KPIs (quick insights). Scannable, not decorative.
+Compact metric cards for secondary KPIs. **The metric is the product — everything else supports it.** The card should read like a financial summary, not a dashboard widget.
 
-- **Padding:** `20px` (`p-5`)
-- **Border:** 1px `--border` (standard, full opacity)
-- **Radius:** `rounded-lg` (8px)
-- **Shadow:** none
-- **Background:** `--card`
+**Attention budget:** Value ~70% · Label ~20% · Context ~8% · Icon ~2%.
 
-**Structure:**
+**Layout — left-aligned content, watermark icon top-right:**
 ```
-[icon-circle]  Label
-               Value
-               Subtitle text
+Label                    ◹ (watermark)
+Value
+Context
 ```
 
-- **Icon container:** `size-10` (40px) rounded-lg square with a tinted background (`bg-accent`, `bg-positive-subtle`, etc.)
-- **Icon:** `size-5` (20px), colored to match the semantic intent (`text-primary`, `text-positive`)
-- **Label:** `text-sm` / `text-muted-foreground` — title case, not uppercase
-- **Value:** `text-xl` / `font-semibold` / `tabular-nums`
-- **Subtitle:** `text-xs` / `text-muted-foreground`
+- **Padding:** `16px × 48px` (`py-4 px-12`) — horizontal 3× vertical, see *Padding Rhythm*. Content top-aligned (never vertically centered)
+- **Label:** `text-sm` (14px) / `font-medium` / `text-muted-foreground` — always above the value
+- **Value:** `text-2xl` (24px) / `font-semibold` / `tabular-nums` / `text-foreground` — highest contrast, the focal point. Generous breathing room (`mt-2` above, `mt-1` below)
+- **Context:** `text-xs` (12px) / `text-muted-foreground/70` — one line, kept concise. Softer than the label so it recedes as the lowest tier of the card.
+- **Watermark icon:** Lucide icon, `absolute` in the top-right, aligned to the card padding (`right-12 top-4`), `size-8` (32px), `strokeWidth={1.5}`, `pointer-events-none`. Dim it with **element opacity** (`text-foreground opacity-[0.07]`), *not* a semi-transparent stroke color. Stroke alpha (`text-foreground/[0.08]`) compounds where strokes overlap — joints and crossings render darker, looking like a rendering glitch. Element opacity composites the whole icon once, keeping it uniform. Decorative texture only — never a colored chip, never affects layout.
 
-**Layout:** `flex items-start gap-4` — icon left, text stacked right.
+> The value (24px) stays below the HeaderKPI value (30px) so the page hero remains primary, while still dominating its own card.
 
-**Usage rules:**
-- Use for secondary metrics that support the HeaderKPI.
-- Always render in a grid (typically 4 columns on desktop, 2 on tablet).
-- Keep content to one value + one subtitle. No charts, no actions.
+**Grouping — fused stripe:** related KPI cards are visually fused into a single bordered stripe rather than separate floating cards. One container owns the border/background; individual cards drop their own border and are divided by subtle internal separators.
+- Container: `rounded-lg border bg-card`, `grid-cols-1` → `md:grid-cols-4`
+- **Single separator system:** separators are drawn with `border-image` (a gradient that's transparent at the ends, solid in the middle) applied to `.kpi-stripe > * + *` — horizontal top border when stacked, vertical left border in the row. The `> * + *` selector means every card except the first gets one.
+- **Why border-image, not a pseudo-element line:** only real borders snap to whole device pixels. A 1px/2px pseudo-element or background at a fractional column boundary anti-aliases and renders unevenly (one separator looks thicker than the rest). A border-image is a true border — it snaps crisply and renders identically on every column — while the gradient fades the ends to keep the inset look.
+- Inset: 1rem at the ends on mobile (horizontal), 2rem on desktop (vertical). Color: muted `--border`.
+- **Do not** use `divide-x`/`divide-y` or absolutely-positioned pseudo-lines for these separators — they don't snap and produce uneven/doubled lines.
+- Each card: padding only (`py-4 px-12`), no border/radius/background of its own.
+
+**Unit normalization:** the unit/period lives in the **label**, never repeated in the value. The label tells you the context; the value is a clean number.
+- ✅ `Daily Expenses` → `38,58 €`
+- ❌ `Expenses` → `38,58 € / day`
+
+This gives every card an identical `Label / Value / Context` rhythm — the dashboard reads as more intentional and polished.
+
+**Anti-patterns — do not:**
+- Place the icon before the label, or use a colored icon background
+- Center content vertically
+- Make the icon larger than the value, or give it equal visual weight to the metric
 
 ### KPI Sparklines
 

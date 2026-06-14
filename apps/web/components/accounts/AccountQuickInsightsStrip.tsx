@@ -1,4 +1,4 @@
-import { CalendarDays, Coins, TrendingUp, Flame } from "lucide-react";
+import { CalendarDays, Coins, TrendingUp, Flame, type LucideIcon } from "lucide-react";
 
 type Props = {
   daysLeft: number;
@@ -20,21 +20,21 @@ type KpiCardProps = {
   label: string;
   value: string;
   subtitle: string;
-  icon: React.ReactNode;
-  iconBg: string;
+  icon: LucideIcon;
 };
 
-function KpiCard({ label, value, subtitle, icon, iconBg }: KpiCardProps) {
+function KpiCard({ label, value, subtitle, icon: Icon }: KpiCardProps) {
   return (
-    <article className="flex items-start gap-4 rounded-lg border bg-card p-5">
-      <div className={`flex size-9 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">{value}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
-      </div>
+    <article className="relative px-12 py-4">
+      {/* Decorative watermark — texture, not content. Never affects layout. */}
+      <Icon
+        className="pointer-events-none absolute right-12 top-4 size-9 text-foreground opacity-[0.06]"
+        strokeWidth={1.5}
+        aria-hidden="true"
+      />
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tabular-nums text-foreground">{value}</p>
+      <p className="mt-1 text-xs text-muted-foreground/60">{subtitle}</p>
     </article>
   );
 }
@@ -51,34 +51,30 @@ export default function AccountQuickInsightsStrip({
     : `${(expenseToIncomeRatio * 100).toFixed(0)}%`;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="kpi-stripe grid grid-cols-1 rounded-lg border bg-card md:grid-cols-4">
       <KpiCard
-        label="Days Left"
+        label="Days Remaining"
         value={`${daysLeft}`}
         subtitle={`${daysInMonth} days in this month`}
-        icon={<CalendarDays className="size-4.5 text-primary" />}
-        iconBg="bg-accent"
+        icon={CalendarDays}
       />
       <KpiCard
         label="Daily Budget"
         value={formatCurrency(netPerMonthDay)}
-        subtitle="(Income − Expense) per day"
-        icon={<TrendingUp className="size-5 text-primary" />}
-        iconBg="bg-accent"
+        subtitle="Income − Expense per day"
+        icon={TrendingUp}
       />
       <KpiCard
-        label="Expenses"
-        value={`${formatCurrency(avgExpensePerMonthDay)} / day`}
+        label="Daily Expenses"
+        value={formatCurrency(avgExpensePerMonthDay)}
         subtitle="Monthly expenses spread"
-        icon={<Coins className="size-5 text-primary" />}
-        iconBg="bg-accent"
+        icon={Coins}
       />
       <KpiCard
         label="Burn Rate"
         value={ratioText}
         subtitle="Current month burn ratio"
-        icon={<Flame className="size-5 text-primary" />}
-        iconBg="bg-accent"
+        icon={Flame}
       />
     </div>
   );
