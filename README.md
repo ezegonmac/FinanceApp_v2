@@ -51,6 +51,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Recurrent incomes (start-of-month auto-apply) ✅
   - Recurrent transactions ✅
   - Transactions between accounts ✅
+  - Monthly Budget per month (set a spending target) ✅
   - Monthly Splits across accounts (The splits planned at the beginning of the month) (recurrent transactions) 🟨
   - Investments in different products in these accounts 🟨
 - View

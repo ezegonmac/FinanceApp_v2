@@ -8,6 +8,7 @@ import IncomesTable from "@/components/incomes/IncomesTable";
 import TransactionsTable from "@/components/transactions/TransactionsTable";
 import ExpensesTable from "@/components/expenses/ExpensesTable";
 import ExpensesCircularPlot from "@/components/expenses/ExpensesCircularPlot";
+import BudgetBar from "@/components/expenses/BudgetBar";
 import MonthSnapshotsTable from "@/components/snapshots/MonthSnapshotsTable";
 import AccountMonthBreakdownTable from "@/components/snapshots/AccountMonthBreakdownTable";
 import AccountMovementsBreakdownTable from "@/components/snapshots/AccountMovementsBreakdownTableRefactored";
@@ -202,7 +203,14 @@ export default function MonthContent({ year, month }: Props) {
 
           <section className="rounded-md border bg-card p-6 text-card-foreground">
             <h2 className="mb-4 text-xl font-semibold tracking-tight">Expenses for this Month</h2>
-            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+            <BudgetBar
+              year={year}
+              month={month}
+              totalExpenses={expenses
+                .filter((e: any) => e.status === "COMPLETED")
+                .reduce((sum: number, e: any) => sum + Number(e.analytics_amount ?? e.amount), 0)}
+            />
+            <div className="mt-6 grid gap-6 grid-cols-1 lg:grid-cols-2">
               <div className="overflow-hidden">
                 <ExpensesTable
                   expenses={expenses}

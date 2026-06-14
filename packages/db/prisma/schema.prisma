@@ -366,6 +366,16 @@ enum JobRunStatus {
   FAILED
 }
 
+model MonthBudget {
+  id         Int      @id @default(autoincrement())
+  month_id   Int      @unique
+  amount     Decimal  @db.Decimal(18,2)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  month Month @relation(fields: [month_id], references: [id])
+}
+
 model Month {
   id        Int      @id @default(autoincrement())
   year      Int
@@ -385,6 +395,7 @@ model Month {
   lastAppliedRecurrentTransactions RecurrentTransaction[] @relation("RecurrentTransactionLastAppliedMonth")
   recurrentTransactionRuns RecurrentTransactionRun[]
   monthSnapshots MonthSnapshot[]
+  budget MonthBudget?
 }
 
 model MonthSnapshot {
