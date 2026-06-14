@@ -97,4 +97,5 @@ package-lock.json
 
 # Database dumps
 db-dump.sql
+db-dump*.sql
 *.dump.sql
