@@ -70,13 +70,17 @@ tokens:
   chart-10: { css: "--chart-10", hex: "#991b1b" }
 
 typography:
-  headline-lg: { fontFamily: Inter, fontSize: 24px, fontWeight: 600, lineHeight: 32px, letterSpacing: -0.02em }
+  page-title:  { fontFamily: Inter, fontSize: 24px, fontWeight: 700, lineHeight: 30px, letterSpacing: -0.02em }                                  # page <h1>
+  metric:      { fontFamily: Inter, fontSize: 30px, fontWeight: 600, lineHeight: 1, fontVariantNumeric: tabular-nums }                           # primary KPI value
+  headline-lg: { fontFamily: Inter, fontSize: 24px, fontWeight: 600, lineHeight: 32px, letterSpacing: -0.02em }                                  # section group titles
   headline-md: { fontFamily: Inter, fontSize: 18px, fontWeight: 600, lineHeight: 24px, letterSpacing: -0.01em }
   headline-sm: { fontFamily: Inter, fontSize: 14px, fontWeight: 600, lineHeight: 20px }
   body-lg:     { fontFamily: Inter, fontSize: 14px, fontWeight: 400, lineHeight: 20px }
   body-md:     { fontFamily: Inter, fontSize: 13px, fontWeight: 400, lineHeight: 18px }
   body-sm:     { fontFamily: Inter, fontSize: 12px, fontWeight: 400, lineHeight: 16px }
-  label-md:    { fontFamily: Inter, fontSize: 11px, fontWeight: 600, lineHeight: 14px, letterSpacing: 0.05em, textTransform: uppercase }
+  label-lg:    { fontFamily: Inter, fontSize: 12px, fontWeight: 600, lineHeight: 16px, letterSpacing: 0.05em, textTransform: uppercase }         # KPI / section labels
+  label-md:    { fontFamily: Inter, fontSize: 11px, fontWeight: 600, lineHeight: 14px, letterSpacing: 0.05em, textTransform: uppercase }         # column headers, badges
+  caption-xs:  { fontFamily: Inter, fontSize: 10px, fontWeight: 400, lineHeight: 14px }                                                          # micro annotations
   mono-data:   { fontFamily: JetBrains Mono, fontSize: 13px, fontWeight: 500, lineHeight: 18px }
 
 radius:
@@ -94,6 +98,7 @@ spacing:
   stack-sm:         8px   # tight vertical gap
   stack-md:         12px  # standard vertical gap
   stack-lg:         24px  # section vertical gap
+  header-margin:    28px  # page header → first content section
 ---
 
 ## Brand & Style
@@ -169,22 +174,30 @@ The palette anchors on a Global Banking blue (`#1e40af`) for institutional stabi
 
 **Inter** is used for all UI text — exceptional legibility at small sizes in data-dense layouts. The scale is intentionally compact to maximize visible information per screen.
 
-**JetBrains Mono** (`mono-data`) is used exclusively for financial figures in tables and KPI values — tabular numerals ensure decimal alignment.
+**JetBrains Mono** (`mono-data`) is used for financial figures **inside tables** — tabular numerals ensure decimal alignment. Display-scale KPI values use Inter with `tabular-nums` (the `metric` style), not mono.
 
-| Token        | Size  | Weight | Usage                                    |
-|--------------|-------|--------|------------------------------------------|
-| `headline-lg`| 24px  | 600    | Section group titles                     |
-| `headline-md`| 18px  | 600    | Section / card group headers             |
-| `headline-sm`| 14px  | 600    | Card headers, table section titles       |
-| `body-lg`    | 14px  | 400    | Primary body text                        |
-| `body-md`    | 13px  | 400    | Secondary body text, form labels         |
-| `body-sm`    | 12px  | 400    | Captions, helper text                    |
-| `label-md`   | 11px  | 600    | Column headers, ALL CAPS labels          |
-| `mono-data`  | 13px  | 500    | Financial amounts, IDs, numeric columns  |
+| Token        | Size  | Weight | Usage                                        |
+|--------------|-------|--------|----------------------------------------------|
+| `page-title` | 24px  | 700    | Page `<h1>` — anchors the header             |
+| `metric`     | 30px  | 600    | Primary KPI value (Inter + `tabular-nums`)   |
+| `headline-lg`| 24px  | 600    | Section group titles                         |
+| `headline-md`| 18px  | 600    | Section / card group headers                 |
+| `headline-sm`| 14px  | 600    | Card headers, table section titles           |
+| `body-lg`    | 14px  | 400    | Primary body text                            |
+| `body-md`    | 13px  | 400    | Secondary body text, form labels             |
+| `body-sm`    | 12px  | 400    | Captions, helper text                        |
+| `label-lg`   | 12px  | 600    | KPI / section labels (ALL CAPS)              |
+| `label-md`   | 11px  | 600    | Column headers, badge text (ALL CAPS)        |
+| `caption-xs` | 10px  | 400    | Micro annotations (e.g. KPI delta context)   |
+| `mono-data`  | 13px  | 500    | Financial amounts, IDs, numeric table cells  |
 
 > `headline-sm` and `body-lg` share 14px but differ in weight — use `headline-sm` only for titles/labels, never for body copy.
 
-> **Page titles** use `text-2xl` (24px) / `font-bold` — anchors the page header and balances the right-aligned HeaderKPI.
+> `page-title` (24px/700) and `headline-lg` (24px/600) share a size but differ in weight — page `<h1>` is bold, section group titles are semibold.
+
+> **Uppercase labels** (`label-lg`, `label-md`) are rendered at reduced emphasis via `text-muted-foreground` — and `text-muted-foreground/70` when they should recede further (e.g. the HeaderKPI label).
+
+> **Implementation:** `metric` and `page-title` map to Tailwind defaults (`text-3xl`, `text-2xl`). The sub-`text-xs` steps (`label-md` 11px, `caption-xs` 10px) use arbitrary values (`text-[11px]`, `text-[10px]`); `label-lg` (12px) uses `text-xs`. (Custom `@theme` text utilities were not used — they don't reliably generate under `@theme inline`.)
 
 ## Layout & Spacing
 
@@ -254,9 +267,9 @@ Primary Content
 ```
 
 - Container: a single `<section className="space-y-6">` — no wrapper component needed
-- Header: `<header className="mb-7 flex items-end justify-between gap-4">` — 28px bottom margin
-- Title: `text-2xl` (24px) / `font-bold` / `tracking-tight`
-- Description: `mt-1` (4px) below title, `text-sm text-muted-foreground`
+- Header: `<header className="mb-7 flex items-end justify-between gap-4">` — `header-margin` (28px) bottom separation
+- Title: `page-title` type (24px / 700 / `tracking-tight`)
+- Description: `mt-1` (4px) below title, `body-lg` in `text-muted-foreground`
 - HeaderKPI: `self-end` — bottom-aligned with the title baseline area, feels attached to the header
 - Metrics row and table are direct children, separated by whitespace (24px gap)
 - No additional framing or nesting between these three layers
@@ -343,6 +356,32 @@ Use `bg-*-subtle` + `text-*-subtle-foreground` pairs for filled chips. Use `vari
 
 Shape: `radius-sm` (2px) for a sharp, technical look.
 
+### Trend / Delta Badge
+
+A lightweight pill that annotates a metric with its direction of change (used in `HeaderKPI`). Distinct from status chips: it is **quiet** — muted fill, near-invisible border, small chevron.
+
+- Shape: `rounded-full` (pill)
+- Border: 1px, semantic color at **10% opacity** (`/10`) — just enough to define the edge
+- Fill: semantic subtle at **60% opacity** (`/60`) — softer than a solid status chip
+- Text: semantic subtle-foreground, `label-md` (11px / 600), `leading-none`
+- Padding: `px-2 py-1` (8px / 4px — 2:1 horizontal:vertical)
+- Glyph: Lucide `ChevronUp` / `ChevronDown` at `size-3`, `strokeWidth={2.5}`, `gap-0.5` from value
+
+| Direction | Border           | Fill                   | Text                          |
+|-----------|------------------|------------------------|-------------------------------|
+| Up        | `positive/10`    | `positive-subtle/60`   | `positive-subtle-foreground`  |
+| Down      | `negative/10`    | `negative-subtle/60`   | `negative-subtle-foreground`  |
+| Neutral   | `border/50`      | `muted/60`             | `muted-foreground`            |
+
+### Opacity De-emphasis Convention
+
+When an element needs to recede without changing its color token, apply an opacity modifier rather than picking a new color:
+
+- `/70` — de-emphasized labels (e.g. HeaderKPI label keeps `font-semibold` weight but softens via `text-muted-foreground/70`)
+- `/60` — subtle badge fills
+- `/50` — neutral hairline borders
+- `/10` — semantic accent borders (barely-there edge)
+
 ### Input Fields
 
 - Border: 1px `--input` at rest
@@ -404,28 +443,21 @@ The primary KPI displayed in the page header. It feels like part of the page str
 - **Alignment:** left (`text-left`) — label, value, and context share a common left edge as a grouped block
 
 **Label:**
-- `text-[12px]` / `font-normal` / `uppercase` / `tracking-wide`
-- Color: `text-muted-foreground`
+- Type: `label-lg` (12px / 600 / uppercase)
+- Color: `text-muted-foreground/70` — muted opacity so the semibold weight doesn't draw too much attention (see *Opacity De-emphasis Convention*)
 - Position: top (above the value row)
 
 **Value + Delta (inline row, `items-end justify-start gap-3`):**
-- Value: `text-3xl` (30px) / `font-semibold` / `leading-none` (line-height 1) / `tabular-nums` / `text-foreground`
+- Value: `metric` type (30px / 600 / `leading-none` / `tabular-nums`, Inter) / `text-foreground`
 - Badge + context are stacked in a column to the right of the value
 - The column uses `self-center` so the badge aligns with the **vertical center** of the amount
+- Value → Badge gap: `12px` (`gap-3` / `stack-md`)
 
-**Delta badge (lightweight, quiet):**
-- `rounded-full` / `border` (1px) / `px-2 py-1` (8px / 4px — 2:1 horizontal:vertical ratio) / `text-[11px]` / `font-semibold` / `leading-none`
-- Glyph: Lucide `ChevronUp` / `ChevronDown` icon (chevron — a stickless arrowhead) at `size-3` / `strokeWidth={2.5}`, with `gap-0.5` between glyph and value
-- Subtle border + muted fill (never bright):
-  - Up → `border-positive/10 bg-positive-subtle/60 text-positive-subtle-foreground`
-  - Down → `border-negative/10 bg-negative-subtle/60 text-negative-subtle-foreground`
-  - Neutral → `border-border/50 bg-muted/60 text-muted-foreground`
+**Delta badge:** see *Trend / Delta Badge* under Components — the quiet pill with semantic `/10` border + `/60` fill and a Lucide chevron.
 
 **Context text (belongs to the badge):**
-- `text-[10px]` / `text-muted-foreground`
+- Type: `caption-xs` (10px) / `text-muted-foreground`
 - `ml-0.5 mt-0.5` — nudged just beneath the badge
-
-**Value → Badge gap:** `12px` (`gap-3`)
 
 **Structure:**
 ```
@@ -438,7 +470,7 @@ The composition reads as a single grouped element — the amount dominates while
 
 **Implementation notes:**
 - Every node carries a `data-slot` attribute (`header-kpi`, `kpi-label`, `kpi-value-row`, `kpi-value`, `kpi-delta`, `kpi-delta-badge`, `kpi-delta-context`) for identification.
-- Direction-specific styles live in lookup maps (`DELTA_BADGE_STYLES`, `DELTA_ARROW`) rather than inline conditionals.
+- Direction-specific styles live in lookup maps (`DELTA_BADGE_STYLES`, `DELTA_ICON`) rather than inline conditionals.
 - The badge + context render as a separate `DeltaBadge` sub-component.
 
 **Usage rules:**

@@ -27,7 +27,7 @@ type KpiCardProps = {
 function KpiCard({ label, value, subtitle, icon, iconBg }: KpiCardProps) {
   return (
     <article className="flex items-start gap-4 rounded-lg border bg-card p-5">
-      <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${iconBg}`}>
+      <div className={`flex size-9 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
         {icon}
       </div>
       <div className="min-w-0">
@@ -56,15 +56,15 @@ export default function AccountQuickInsightsStrip({
         label="Days Left"
         value={`${daysLeft}`}
         subtitle={`${daysInMonth} days in this month`}
-        icon={<CalendarDays className="size-5 text-primary" />}
+        icon={<CalendarDays className="size-4.5 text-primary" />}
         iconBg="bg-accent"
       />
       <KpiCard
         label="Daily Budget"
         value={formatCurrency(netPerMonthDay)}
         subtitle="(Income − Expense) per day"
-        icon={<TrendingUp className="size-5 text-positive" />}
-        iconBg="bg-positive-subtle"
+        icon={<TrendingUp className="size-5 text-primary" />}
+        iconBg="bg-accent"
       />
       <KpiCard
         label="Expenses"

@@ -78,7 +78,7 @@ export function HeaderKPI({ label, value, delta, className }: HeaderKPIProps) {
     <div data-slot="header-kpi" className={cn("min-w-[220px] text-left", className)}>
       <p
         data-slot="kpi-label"
-        className="text-[12px] font-normal uppercase tracking-wide text-muted-foreground"
+        className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground/70"
       >
         {label}
       </p>

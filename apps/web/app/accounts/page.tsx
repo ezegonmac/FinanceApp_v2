@@ -55,30 +55,12 @@ export default async function AccountsPage() {
     },
   });
 
-  // Last month's end balance approximation: current balance minus this month's net movement
-  // Better approach: sum snapshot net flows to get last month's balance relative to current
+  // Delta = % change in total balance vs the start of this month.
+  // Start-of-month balance = current balance minus this month's net movement
+  // (sum of income + transfers in − expenses − transfers out across current-month snapshots).
   let balanceDelta: { value: string; direction: "up" | "down" | "neutral"; context: string } | undefined;
 
   if (lastMonthSnapshots.length > 0) {
-    // Net change this month = sum of all snapshot net flows for the previous month
-    // Previous month end balance ≈ current balance - this month's net changes
-    // Instead, compute: last month's total net = incomes + txn_in - expenses - txn_out
-    const lastMonthNet = lastMonthSnapshots.reduce((sum, s) => {
-      return sum
-        + toNumber(s.total_incomes)
-        + toNumber(s.total_transactions_in)
-        - toNumber(s.total_expenses)
-        - toNumber(s.total_transactions_out);
-    }, 0);
-
-    // The balance at end of last month was approximately: current - this month's activity
-    // But we can also interpret the delta as: how much did balance change this month?
-    // currentBalance - (currentBalance - thisMonthNet) = thisMonthNet
-    // Actually the simplest accurate approach: balance before last month's activity applied
-    // was (currentBalance - lastMonthNet - thisMonthNet). Let's just show the % change
-    // relative to what the balance was at start of this month.
-    // Start of this month balance = currentBalance - thisMonthNet (from current month snapshots)
-
     let thisMonthNet = 0;
     if (currentMonthRecord) {
       const currentSnapshots = await prisma.monthSnapshot.findMany({
