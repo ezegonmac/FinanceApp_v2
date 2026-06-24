@@ -66,6 +66,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Todo tab with pending todo recurrent expenses and recurrent transactions that are not marked as automated (bool attribute) 🟨
   - Sort, filter and search accounts, transactions, incomes and expenses 🟨
   - Sort, filter and paginate incomes, expenses and transactions by month ✅
+  - Plot data related with different financial products [spec:financial-product-data] 🔷
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
   - Pause and resume recurrent incomes 🟨
