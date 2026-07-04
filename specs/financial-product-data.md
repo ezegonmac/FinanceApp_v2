@@ -12,6 +12,7 @@ I want to be able to have historical data from different financial products as E
 - The system shall store the historical data locally to prevent requesting the same information multiple times and reducing the wait times
 - The system shall allow you to plot different financial product prices.
 - The system shall have certain time frames available for filtering these plots. 
+- The system shall allow the user to search for available assets and track specific ones.
 
 ## Acceptance Criteria
 
@@ -159,7 +160,73 @@ Track downloaded history
 Avoid unnecessary API calls
 Know when assets were last updated
 
-The interesting part: detecting missing ranges
+The interesting part: detecting missing ranges:
+
+Imagine your app requests:
+
+BTC
+DAILY
+2025-01-01 → 2026-07-01
+
+Your DB contains:
+
+2025-01-01 → 2025-06-01
+2025-08-01 → 2026-07-01
+
+You can detect that you're missing:
+
+2025-06-01 → 2025-08-01
+
+Then:
+
+Request chart
+    ↓
+Find covered ranges
+    ↓
+Calculate missing ranges
+    ↓
+Fetch ONLY missing ranges from Yahoo
+    ↓
+INSERT asset_prices
+    ↓
+INSERT/MERGE sync ranges
+    ↓
+Return prices
+
+There's one subtle edge case:
+
+Suppose you ask Yahoo for:
+
+2026-01-01 → 2026-01-10
+
+and Yahoo returns:
+
+Jan 2
+Jan 5
+Jan 6
+Jan 7
+Jan 8
+Jan 9
+
+Because:
+
+Jan 1 was a holiday
+Jan 3–4 were a weekend
+Jan 10 was a weekend
+
+You should still mark the whole requested range as synchronized:
+
+2026-01-01 → 2026-01-10
+
+Don't infer synchronization coverage from the rows in asset_prices.
+
+Otherwise your system will constantly think: Im missing January 3
+
+and repeatedly ask Yahoo for a Saturday that will never have a price
+
+
+Range coverage + Missing-range detection + Range merging
+
 
 ---
 

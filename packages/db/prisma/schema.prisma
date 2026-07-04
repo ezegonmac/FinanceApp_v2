@@ -366,6 +366,69 @@ enum JobRunStatus {
   FAILED
 }
 
+// ─── Financial Product Enums ──────────────────────────────────────────────────
+
+enum AssetType {
+  FUND
+  ETF
+  ETP
+  STOCK
+  CRYPTO
+}
+
+enum PriceFrequency {
+  DAILY     // Funds — only one NAV per trading day
+  INTRADAY  // ETFs, ETPs, stocks, crypto — sub-daily prices available
+}
+
+enum Granularity {
+  DAILY
+  HOURLY
+  FIFTEEN_MIN
+  WEEKLY
+}
+
+// ─── Financial Product Models ─────────────────────────────────────────────────
+
+model Asset {
+  id              Int            @id @default(autoincrement())
+  ticker          String         @unique
+  isin            String?
+  name            String
+  asset_type      AssetType
+  price_frequency PriceFrequency
+  currency        String         @db.VarChar(3)
+  created_at      DateTime       @default(now())
+
+  prices     AssetPrice[]
+  syncRanges AssetPriceSyncRange[]
+}
+
+model AssetPrice {
+  asset_id    Int
+  timestamp   DateTime
+  price       Decimal     @db.Decimal(18, 6)
+  granularity Granularity
+
+  asset Asset @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([asset_id, timestamp, granularity], name: "asset_timestamp_granularity")
+  @@index([asset_id, timestamp])
+}
+
+model AssetPriceSyncRange {
+  id              Int         @id @default(autoincrement())
+  asset_id        Int
+  granularity     Granularity
+  from_timestamp  DateTime
+  until_timestamp DateTime
+  synced_at       DateTime    @default(now())
+
+  asset Asset @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@index([asset_id, granularity])
+}
+
 model MonthBudget {
   id         Int      @id @default(autoincrement())
   month_id   Int      @unique

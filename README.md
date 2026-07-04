@@ -100,6 +100,11 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Prioritize icons and visual cues for better UX 🟨
   - Improve cleanliness and usability of the UI (data-driven application) 🟨
   - Implement calendar for better dates visualization 🟨
+  - Add sparklines (miniature plots) next to the different assets [spec:sparklines] 🟨
+  - Portfolio allocation drift [spec:portfolio-drift] 🟨
+  - Asset comparison mode [spec:asset-comparison] 🟨
+  - Financial milestones. Track things like €10k invested, €25k net worth, or 1 year of expenses invested [spec:financial-milestones] 🟨
+  - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] 🟨
 - Infrastructure
   - Deploy prod version 🟨
 - Misc
