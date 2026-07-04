@@ -34,7 +34,7 @@ Then  [expected outcome]
 
 ## Out of Scope
 
-- Things explicitly not covered by this feature.
+- Storing the investments made by the user. This is meant for another feature
 
 ## Notes
 
@@ -144,18 +144,22 @@ Easier future expansion
 
 Price Synchronization
 
-asset_price_sync
-----------------
+asset_price_sync_ranges
+-----------------------
+id
 asset_id
-historical_loaded_until
-last_daily_sync
-last_intraday_sync
+granularity
+from_timestamp
+until_timestamp
+synced_at
 
 Purpose:
 
 Track downloaded history
 Avoid unnecessary API calls
 Know when assets were last updated
+
+The interesting part: detecting missing ranges
 
 ---
 
@@ -203,6 +207,6 @@ investments
 
 asset_prices
 
-asset_price_sync
+asset_price_sync_ranges
 
 portfolio_snapshots
