@@ -261,6 +261,10 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     if (isEffectiveNow) {
       // Current/past month: create COMPLETED in $transaction, update balance
+      const executedAtDate = parsed.executed_at
+        ? new Date(parsed.executed_at.includes("T") ? parsed.executed_at : `${parsed.executed_at}T00:00:00.000Z`)
+        : new Date();
+
       newInvestment = await prisma.$transaction(async (tx) => {
         const investment = await tx.investment.create({
           data: {
@@ -273,6 +277,7 @@ export async function POST(request: Request, { params }: RouteContext) {
             total_amount: totalAmount,
             description: parsed.description ?? null,
             status: "COMPLETED",
+            executed_at: executedAtDate,
             processed_at: new Date(),
           },
         });
@@ -295,6 +300,10 @@ export async function POST(request: Request, { params }: RouteContext) {
       await recalculateMonthSnapshot(accountId, monthRecord.id);
     } else {
       // Future month: create PENDING, no balance change
+      const executedAtDate = parsed.executed_at
+        ? new Date(parsed.executed_at.includes("T") ? parsed.executed_at : `${parsed.executed_at}T00:00:00.000Z`)
+        : null;
+
       newInvestment = await prisma.investment.create({
         data: {
           account_id: accountId,
@@ -306,6 +315,7 @@ export async function POST(request: Request, { params }: RouteContext) {
           total_amount: totalAmount,
           description: parsed.description ?? null,
           status: "PENDING",
+          executed_at: executedAtDate,
         },
       });
     }

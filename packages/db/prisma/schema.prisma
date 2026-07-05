@@ -557,6 +557,7 @@ model Investment {
   total_amount     Decimal          @db.Decimal(18, 2)
   description      String?
   status           InvestmentStatus @default(PENDING)
+  executed_at      DateTime?
   created_at       DateTime         @default(now())
   processed_at     DateTime?
   processing_error String?

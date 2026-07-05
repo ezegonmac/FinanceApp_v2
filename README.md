@@ -98,6 +98,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
   - Current Month is not showing as active in the navbar 🟨
   - You can add one tracked asset to the list as a duplicate and it causes frontend errors 🟨
+  - Asset plots always show $ and it´s not taking in account the initial currency conversion 🟨
 - Design
   - Allow account icon ✅
   - Prioritize icons and visual cues for better UX 🟨
@@ -116,8 +117,9 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Portfolio allocation drift [spec:portfolio-drift] 🟨
   - Asset comparison mode [spec:asset-comparison] 🟨
   - Financial milestones. Track things like €10k invested, €25k net worth, or 1 year of expenses invested [spec:financial-milestones] 🟨
-  - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] 🟨
+  - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] ✅
   - Assets Background Sync [spec:assets-background-sync] 🟨
+  - Portfolio exposure analysis [spec:portfolio-exposure] 🟨
 
 ### Status Legend
 🟨 Pending
