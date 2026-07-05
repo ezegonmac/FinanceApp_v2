@@ -95,16 +95,12 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
   - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
+  - Assets provider [spec:assets-provider] 🟨
 - Design
   - Allow account icon ✅
   - Prioritize icons and visual cues for better UX 🟨
   - Improve cleanliness and usability of the UI (data-driven application) 🟨
   - Implement calendar for better dates visualization 🟨
-  - Add sparklines (miniature plots) next to the different assets [spec:sparklines] 🟨
-  - Portfolio allocation drift [spec:portfolio-drift] 🟨
-  - Asset comparison mode [spec:asset-comparison] 🟨
-  - Financial milestones. Track things like €10k invested, €25k net worth, or 1 year of expenses invested [spec:financial-milestones] 🟨
-  - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] 🟨
 - Infrastructure
   - Deploy prod version 🟨
 - Misc
@@ -114,6 +110,12 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Example database data for app testing ✅
   - Add native authentification layer with nextjs [spec:basic-authentication] ✅
   - Create a covering test suite 🟨
+  - Add sparklines (miniature plots) next to the different assets [spec:sparklines] 🟨
+  - Portfolio allocation drift [spec:portfolio-drift] 🟨
+  - Asset comparison mode [spec:asset-comparison] 🟨
+  - Financial milestones. Track things like €10k invested, €25k net worth, or 1 year of expenses invested [spec:financial-milestones] 🟨
+  - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] 🟨
+  - Assets Background Sync [spec:assets-background-sync] 🟨
 
 ### Status Legend
 🟨 Pending

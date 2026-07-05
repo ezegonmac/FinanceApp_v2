@@ -1,6 +1,6 @@
 import { getEuropeMadridDateParts } from "@repo/utils";
-import type { Timeframe, YahooInterval, GranularityValue } from "./types.js";
-import { TIMEFRAME_CONFIG } from "./types.js";
+import type { Timeframe, YahooInterval, GranularityValue } from "./types";
+import { TIMEFRAME_CONFIG } from "./types";
 import { prisma } from "@repo/db";
 import { type Granularity } from "@repo/db";
 import YahooFinance from "yahoo-finance2";

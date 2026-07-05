@@ -20,6 +20,7 @@ const navLinks: { href: string; label: string }[] = [
   { href: "/recurrent",      label: "Recurrent"     },
   { href: "/months/current", label: "Current Month" },
   { href: "/metrics",        label: "Metrics"       },
+  { href: "/financial-products", label: "Investments" },
 ];
 
 const devLinks = [

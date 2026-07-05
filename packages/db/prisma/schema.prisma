@@ -388,20 +388,40 @@ enum Granularity {
   WEEKLY
 }
 
+// ─── Financial Product Enums (Provider) ───────────────────────────────────────
+
+enum AssetProvider {
+  YAHOO_FINANCE
+}
+
 // ─── Financial Product Models ─────────────────────────────────────────────────
 
 model Asset {
   id              Int            @id @default(autoincrement())
-  ticker          String         @unique
-  isin            String?
+  ticker          String         // Display label, no longer the dedup key
+  isin            String?        @unique
   name            String
   asset_type      AssetType
   price_frequency PriceFrequency
   currency        String         @db.VarChar(3)
   created_at      DateTime       @default(now())
 
-  prices     AssetPrice[]
-  syncRanges AssetPriceSyncRange[]
+  prices           AssetPrice[]
+  syncRanges       AssetPriceSyncRange[]
+  providerMappings AssetProviderMapping[]
+}
+
+model AssetProviderMapping {
+  id              Int           @id @default(autoincrement())
+  asset_id        Int
+  provider        AssetProvider
+  provider_symbol String
+  created_at      DateTime      @default(now())
+
+  asset Asset @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([asset_id, provider], name: "asset_provider")
+  @@unique([provider, provider_symbol], name: "provider_symbol_unique")
 }
 
 model AssetPrice {
