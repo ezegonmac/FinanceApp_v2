@@ -532,6 +532,19 @@ This gives every card an identical `Label / Value / Context` rhythm — the dash
 - Center content vertically
 - Make the icon larger than the value, or give it equal visual weight to the metric
 
+### Investment Type Badges
+
+Investment operations (BUY / SELL) use directional type badges to distinguish cash-flow direction at a glance. These are **not** status badges — they indicate the transaction type, not its lifecycle state.
+
+| Type | Variant | Appearance |
+|------|---------|------------|
+| BUY  | `info`  | Blue background (`blue-100` / `blue-800`) — neutral action, cash out |
+| SELL | `warning` | Amber background (`amber-100` / `amber-800`) — notable action, cash in |
+
+Usage: `<Badge variant="info">BUY</Badge>`, `<Badge variant="warning">SELL</Badge>`
+
+These complement the status badges (Completed → `success`, Pending/Cancelled → `secondary`) on the same row without visual conflict.
+
 ### KPI Sparklines
 
 Minimalist line charts embedded in cards. No axes, no labels — trend only.

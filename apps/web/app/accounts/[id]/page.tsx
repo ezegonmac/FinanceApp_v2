@@ -1,6 +1,7 @@
 import AccountIncomesView from "@/components/incomes/AccountIncomesView";
 import AccountTransactionsView from "@/components/transactions/AccountTransactionsView";
 import AccountExpensesView from "@/components/expenses/AccountExpensesView";
+import AccountInvestmentsView from "@/components/investments/AccountInvestmentsView";
 import AccountHeader from "@/components/accounts/AccountHeader";
 import AccountMonthSummary from "@/components/accounts/AccountMonthSummary";
 import { prisma } from "@repo/db";
@@ -106,6 +107,10 @@ export default async function AccountPage({
 
       <section className="rounded-lg border bg-card p-4 text-card-foreground">
         <AccountTransactionsView accountId={accountId} />
+      </section>
+
+      <section className="rounded-lg border bg-card p-4 text-card-foreground">
+        <AccountInvestmentsView accountId={accountId} />
       </section>
     </div>
   );

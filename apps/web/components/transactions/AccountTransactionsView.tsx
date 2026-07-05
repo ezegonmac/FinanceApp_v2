@@ -44,6 +44,7 @@ export default function AccountTransactionsView({ accountId }: Props) {
   const [endMonth, setEndMonth] = useState(defaultRange.endMonth);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const refresh = () => setRefreshKey((k) => k + 1);
   const resetKey = `${accountId}-${startMonth}-${endMonth}-${refreshKey}`;
 
   useEffect(() => {

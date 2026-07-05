@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import { formatYearMonth } from "@repo/utils";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -181,7 +179,7 @@ export default function AddTransactionForm({ accountId, onAdded, onCancel }: Pro
         <Input
           id="transaction-month"
           type="month"
-          value={formatYearMonth(year, month)}
+          value={`${year}-${String(month).padStart(2, "0")}`}
           onChange={(e) => {
             const [y, m] = e.target.value.split("-");
             setYear(Number(y));

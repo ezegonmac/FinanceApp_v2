@@ -53,7 +53,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Transactions between accounts ✅
   - Monthly Budget per month (set a spending target) ✅
   - Monthly Splits across accounts (The splits planned at the beginning of the month) (recurrent transactions) 🟨
-  - Investments in different products in these accounts 🟨
+  - Investments in different products in these accounts [spec:investments] ✅
 - View
   - Account details ✅
   - Current Month ✅
@@ -66,7 +66,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Todo tab with pending todo recurrent expenses and recurrent transactions that are not marked as automated (bool attribute) 🟨
   - Sort, filter and search accounts, transactions, incomes and expenses 🟨
   - Sort, filter and paginate incomes, expenses and transactions by month ✅
-  - Plot data related with different financial products [spec:financial-product-data] 🔷
+  - Plot data related with different financial products [spec:financial-product-data] ✅
 - Actions
   - Select account instead of account id when creating transactions and incomes ✅
   - Pause and resume recurrent incomes 🟨
@@ -94,8 +94,10 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
 - Year analytics with the total amount of incomes, expenses and transactions for the year 🟨
 - Bugs
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
+  - Assets provider [spec:assets-provider] ✅
   - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
-  - Assets provider [spec:assets-provider] 🟨
+  - Current Month is not showing as active in the navbar 🟨
+  - You can add one tracked asset to the list as a duplicate and it causes frontend errors 🟨
 - Design
   - Allow account icon ✅
   - Prioritize icons and visual cues for better UX 🟨

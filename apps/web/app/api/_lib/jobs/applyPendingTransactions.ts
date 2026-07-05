@@ -5,6 +5,7 @@ import {
   recalculateAllSnapshotsForMonth,
 } from "../snapshots/recalculateMonthSnapshot";
 import { completeJobRun, failJobRun, prepareDailyJobRun } from "./jobRun";
+import { applyPendingInvestmentsForMonth } from "./processors/pendingInvestments";
 import {
   applyPendingExpensesForMonth,
   applyPendingIncomesForMonth,
@@ -72,6 +73,10 @@ export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<A
     addCounts(
       counts,
       await applyPendingExpensesForMonth(monthRecord.id, jobRun.id)
+    );
+    addCounts(
+      counts,
+      await applyPendingInvestmentsForMonth(monthRecord.id, jobRun.id)
     );
 
     // Recalculate current month snapshots for all active accounts (provisional/live)

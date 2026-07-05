@@ -22,7 +22,7 @@ export async function recalculateMonthSnapshot(
   monthId: number,
   options: RecalculateSnapshotOptions = {}
 ): Promise<void> {
-  const [incomesAgg, expensesAgg, txInAgg, txOutAgg] = await Promise.all([
+  const [incomesAgg, expensesAgg, txInAgg, txOutAgg, investOutAgg, investInAgg] = await Promise.all([
     prisma.income.aggregate({
       where: {
         account_id: accountId,
@@ -55,12 +55,32 @@ export async function recalculateMonthSnapshot(
       },
       _sum: { amount: true },
     }),
+    prisma.investment.aggregate({
+      where: {
+        account_id: accountId,
+        month_id: monthId,
+        status: "COMPLETED",
+        type: "BUY",
+      },
+      _sum: { total_amount: true },
+    }),
+    prisma.investment.aggregate({
+      where: {
+        account_id: accountId,
+        month_id: monthId,
+        status: "COMPLETED",
+        type: "SELL",
+      },
+      _sum: { total_amount: true },
+    }),
   ]);
 
   const totalIncomes = incomesAgg._sum.amount ?? 0;
   const totalExpenses = expensesAgg._sum.amount ?? 0;
   const totalIn = txInAgg._sum.amount ?? 0;
   const totalOut = txOutAgg._sum.amount ?? 0;
+  const totalInvestmentsOut = investOutAgg._sum.total_amount ?? 0;
+  const totalInvestmentsIn = investInAgg._sum.total_amount ?? 0;
 
   await prisma.monthSnapshot.upsert({
     where: {
@@ -76,6 +96,8 @@ export async function recalculateMonthSnapshot(
       total_expenses: totalExpenses,
       total_transactions_in: totalIn,
       total_transactions_out: totalOut,
+      total_investments_out: totalInvestmentsOut,
+      total_investments_in: totalInvestmentsIn,
       is_final: options.isFinal ?? false,
       closed_at: options.isFinal ? new Date() : null,
     },
@@ -84,6 +106,8 @@ export async function recalculateMonthSnapshot(
       total_expenses: totalExpenses,
       total_transactions_in: totalIn,
       total_transactions_out: totalOut,
+      total_investments_out: totalInvestmentsOut,
+      total_investments_in: totalInvestmentsIn,
       is_final: options.isFinal ?? false,
       closed_at: options.isFinal ? new Date() : null,
     },
@@ -101,7 +125,7 @@ export async function recalculateAllSnapshotsForMonth(
   options: RecalculateAllOptions = {}
 ): Promise<void> {
   // Collect distinct account IDs with completed activity in this month
-  const [incomeAccounts, expenseAccounts, txFromAccounts, txToAccounts] = await Promise.all([
+  const [incomeAccounts, expenseAccounts, txFromAccounts, txToAccounts, investmentAccounts] = await Promise.all([
     prisma.income.findMany({
       where: { month_id: monthId, status: "COMPLETED" },
       select: { account_id: true },
@@ -122,6 +146,11 @@ export async function recalculateAllSnapshotsForMonth(
       select: { to_account_id: true },
       distinct: ["to_account_id"],
     }),
+    prisma.investment.findMany({
+      where: { month_id: monthId, status: "COMPLETED" },
+      select: { account_id: true },
+      distinct: ["account_id"],
+    }),
   ]);
 
   const accountIds = new Set<number>([
@@ -129,6 +158,7 @@ export async function recalculateAllSnapshotsForMonth(
     ...expenseAccounts.map((r) => r.account_id),
     ...txFromAccounts.map((r) => r.from_account_id),
     ...txToAccounts.map((r) => r.to_account_id),
+    ...investmentAccounts.map((r) => r.account_id),
   ]);
 
   if (options.includeAllActiveAccounts) {
