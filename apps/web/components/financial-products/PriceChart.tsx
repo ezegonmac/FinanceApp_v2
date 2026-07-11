@@ -32,6 +32,17 @@ function formatDate(isoString: string): string {
   });
 }
 
+function formatDateTime(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function buildSingleTooltip(marker: ContributionMarker, currency: string): string {
   const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
   const lines = [
@@ -395,86 +406,124 @@ function MarkerDetailCard({
   currency: string;
   onDismiss: () => void;
 }) {
-  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
+  const formatAmount = (value: string | number) => {
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
 
-  if (detail.kind === "single") {
-    const m = detail.marker;
-    return (
-      <div className="relative rounded-lg border bg-card p-3 text-sm text-card-foreground">
+  const markers = detail.kind === "single" ? [detail.marker] : detail.markers;
+  const totalAmount = detail.kind === "single"
+    ? parseFloat(detail.marker.total_amount)
+    : detail.totalAmount;
+  const totalUnits = markers.reduce((sum, m) => sum + parseFloat(m.units), 0);
+  const avgPrice = totalUnits > 0 ? totalAmount / totalUnits : 0;
+
+  return (
+    <div className="rounded-lg border bg-card p-4 text-card-foreground space-y-4">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {detail.kind === "single" ? (
+            <span
+              className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
+                detail.marker.type === "BUY"
+                  ? "bg-[var(--positive-subtle)] text-[var(--positive-subtle-foreground)]"
+                  : "bg-[var(--negative-subtle)] text-[var(--negative-subtle-foreground)]"
+              }`}
+            >
+              {detail.marker.type}
+            </span>
+          ) : (
+            <span className="inline-flex items-center rounded-sm bg-muted px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {detail.count} ops
+            </span>
+          )}
+          <span className="text-sm text-muted-foreground">
+            {detail.kind === "single"
+              ? formatDateTime(detail.marker.processed_at)
+              : `${detail.buyCount} buy · ${detail.sellCount} sell`}
+          </span>
+        </div>
         <button
           onClick={onDismiss}
-          className="absolute right-2 top-2 cursor-pointer text-muted-foreground hover:text-foreground"
+          className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Dismiss"
         >
           ✕
         </button>
-        <div className="flex items-center gap-2 mb-2">
-          <span className={`font-semibold ${m.type === "BUY" ? "text-positive" : "text-negative"}`}>
-            {m.type}
-          </span>
-          <span className="text-muted-foreground">{formatDate(m.processed_at)}</span>
-        </div>
-        <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs">
-          <div>
-            <span className="text-muted-foreground">Units</span>
-            <p className="font-medium tabular-nums">{parseFloat(m.units).toFixed(4)}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Unit Price</span>
-            <p className="font-medium tabular-nums">{symbol}{parseFloat(m.unit_price).toFixed(4)}</p>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Total</span>
-            <p className="font-medium tabular-nums">{symbol}{parseFloat(m.total_amount).toFixed(2)}</p>
-          </div>
-        </div>
-        {m.description && (
-          <p className="mt-2 text-xs text-muted-foreground">{m.description}</p>
-        )}
       </div>
-    );
-  }
 
-  // Group
-  return (
-    <div className="relative rounded-lg border bg-card p-3 text-sm text-card-foreground">
-      <button
-        onClick={onDismiss}
-        className="absolute right-2 top-2 cursor-pointer text-muted-foreground hover:text-foreground"
-        aria-label="Dismiss"
-      >
-        ✕
-      </button>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="font-semibold">{detail.count} transactions</span>
-        <span className="text-muted-foreground">{formatDate(detail.position.x)}</span>
-      </div>
-      <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs mb-2">
-        <div>
-          <span className="text-muted-foreground">Total</span>
-          <p className="font-medium tabular-nums">{symbol}{detail.totalAmount.toFixed(2)}</p>
+      {/* Metrics grid */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Units</p>
+          <p className="text-sm font-semibold font-mono tabular-nums">{totalUnits.toFixed(4)}</p>
         </div>
-        <div>
-          <span className="text-muted-foreground">Buys</span>
-          <p className="font-medium tabular-nums">{detail.buyCount}</p>
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {detail.kind === "single" ? "Unit Price" : "Avg Price"}
+          </p>
+          <p className="text-sm font-semibold font-mono tabular-nums">
+            {detail.kind === "single"
+              ? formatAmount(detail.marker.unit_price)
+              : formatAmount(avgPrice)}
+          </p>
         </div>
-        <div>
-          <span className="text-muted-foreground">Sells</span>
-          <p className="font-medium tabular-nums">{detail.sellCount}</p>
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total</p>
+          <p className="text-sm font-semibold font-mono tabular-nums">{formatAmount(totalAmount)}</p>
         </div>
       </div>
-      <div className="space-y-1 border-t pt-2">
-        {detail.markers.map((m, i) => (
-          <div key={i} className="flex items-center gap-3 text-xs">
-            <span className={`font-medium ${m.type === "BUY" ? "text-positive" : "text-negative"}`}>
-              {m.type}
-            </span>
-            <span className="tabular-nums">{parseFloat(m.units).toFixed(4)} units</span>
-            <span className="tabular-nums">{symbol}{parseFloat(m.total_amount).toFixed(2)}</span>
-            {m.description && <span className="text-muted-foreground truncate">{m.description}</span>}
+
+      {/* Description (single) or transaction table (group) */}
+      {detail.kind === "single" && detail.marker.description && (
+        <p className="border-t pt-3 text-xs text-muted-foreground">{detail.marker.description}</p>
+      )}
+
+      {detail.kind === "group" && (
+        <div className="border-t pt-3">
+          {/* Column headers */}
+          <div className="grid grid-cols-[auto_1fr_minmax(5rem,auto)_minmax(6rem,auto)] items-center gap-x-3 px-1 pb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Type</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Date & Time</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground text-right">Units</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground text-right">Amount</span>
           </div>
-        ))}
-      </div>
+          {/* Rows */}
+          <div className="space-y-0.5">
+            {detail.markers.map((m, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-[auto_1fr_minmax(5rem,auto)_minmax(6rem,auto)] items-center gap-x-3 rounded px-1 py-1.5 hover:bg-muted/30"
+              >
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-sm px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                    m.type === "BUY"
+                      ? "bg-[var(--positive-subtle)] text-[var(--positive-subtle-foreground)]"
+                      : "bg-[var(--negative-subtle)] text-[var(--negative-subtle-foreground)]"
+                  }`}
+                >
+                  {m.type}
+                </span>
+                <span className="text-xs text-muted-foreground truncate">
+                  {formatDateTime(m.processed_at)}
+                </span>
+                <span className="text-xs font-mono tabular-nums text-right">
+                  {parseFloat(m.units).toFixed(4)}
+                </span>
+                <span className="text-xs font-mono tabular-nums font-medium text-right">
+                  {formatAmount(m.total_amount)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
