@@ -121,6 +121,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] ✅
   - Assets Background Sync [spec:assets-background-sync] 🟨
   - Portfolio exposure analysis [spec:portfolio-exposure] ✅
+  - Portfolio performance [spec:portfolio-performance] 🟨
 
 ### Status Legend
 🟨 Pending
