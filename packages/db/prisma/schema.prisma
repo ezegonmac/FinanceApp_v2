@@ -405,12 +405,14 @@ model Asset {
   asset_type      AssetType
   price_frequency PriceFrequency
   currency        String         @db.VarChar(3)
+  is_favorite     Boolean        @default(false)
   created_at      DateTime       @default(now())
 
   prices           AssetPrice[]
   syncRanges       AssetPriceSyncRange[]
   providerMappings AssetProviderMapping[]
   investments      Investment[]
+  exposureSnapshots AssetExposureSnapshot[]
 }
 
 model AssetProviderMapping {
@@ -570,4 +572,55 @@ model Investment {
   @@index([account_id, asset_id, status])
   @@index([month_id, status])
   @@index([job_run_id])
+}
+
+
+// ─── Exposure Models ──────────────────────────────────────────────────────────
+
+enum ExposureType {
+  SECTOR
+  COUNTRY
+}
+
+model ExposureCategory {
+  id             Int          @id @default(autoincrement())
+  exposure_type  ExposureType
+  canonical_key  String       @db.VarChar(100)
+  display_name   String       @db.VarChar(150)
+  created_at     DateTime     @default(now())
+
+  mappings  ExposureCategoryMapping[]
+  snapshots AssetExposureSnapshot[]
+
+  @@unique([exposure_type, canonical_key], name: "type_canonical_key")
+}
+
+model ExposureCategoryMapping {
+  id             Int           @id @default(autoincrement())
+  provider       AssetProvider
+  provider_label String        @db.VarChar(200)
+  category_id    Int
+  created_at     DateTime      @default(now())
+
+  category ExposureCategory @relation(fields: [category_id], references: [id])
+
+  @@unique([provider, provider_label, category_id], name: "provider_label_category")
+  @@index([provider, provider_label])
+}
+
+model AssetExposureSnapshot {
+  id            Int          @id @default(autoincrement())
+  asset_id      Int
+  period        String       @db.VarChar(7)
+  exposure_type ExposureType
+  category_id   Int
+  percentage    Decimal      @db.Decimal(7, 4)
+  provider      AssetProvider
+  synced_at     DateTime     @default(now())
+
+  asset    Asset            @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  category ExposureCategory @relation(fields: [category_id], references: [id])
+
+  @@unique([asset_id, period, exposure_type, category_id], name: "asset_period_type_category")
+  @@index([asset_id, period, exposure_type])
 }

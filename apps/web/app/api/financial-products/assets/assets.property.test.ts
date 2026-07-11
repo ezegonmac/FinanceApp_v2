@@ -15,20 +15,26 @@ let assetStore: Array<{
   currency: string;
   isin: string | null;
   created_at: Date;
+  providerMappings: Array<{ provider: string; provider_symbol: string }>;
 }> = [];
 let nextId = 1;
 
 vi.mock("@repo/db", () => ({
   prisma: {
     asset: {
-      findMany: vi.fn(({ orderBy }: { orderBy?: { name: string } }) => {
+      findMany: vi.fn((_args?: unknown) => {
         const sorted = [...assetStore].sort((a, b) =>
           a.name.localeCompare(b.name),
         );
         return Promise.resolve(sorted);
       }),
       findUnique: vi.fn(
-        ({ where }: { where: { ticker?: string; id?: number } }) => {
+        ({ where }: { where: { ticker?: string; id?: number; isin?: string | null } }) => {
+          if (where.isin) {
+            return Promise.resolve(
+              assetStore.find((a) => a.isin === where.isin) ?? null,
+            );
+          }
           if (where.ticker) {
             return Promise.resolve(
               assetStore.find((a) => a.ticker === where.ticker) ?? null,
@@ -53,11 +59,17 @@ vi.mock("@repo/db", () => ({
             price_frequency: string;
             currency: string;
             isin: string | null;
+            providerMappings?: { create: { provider: string; provider_symbol: string } };
           };
         }) => {
+          const providerMappings = data.providerMappings?.create
+            ? [data.providerMappings.create]
+            : [];
+          const { providerMappings: _nested, ...rest } = data;
           const asset = {
             id: nextId++,
-            ...data,
+            ...rest,
+            providerMappings,
             created_at: new Date(),
           };
           assetStore.push(asset);
@@ -70,6 +82,25 @@ vi.mock("@repo/db", () => ({
         const [removed] = assetStore.splice(idx, 1);
         return Promise.resolve(removed);
       }),
+    },
+    assetProviderMapping: {
+      findUnique: vi.fn(
+        ({ where }: { where: { provider_symbol_unique?: { provider: string; provider_symbol: string } } }) => {
+          if (where.provider_symbol_unique) {
+            const { provider, provider_symbol } = where.provider_symbol_unique;
+            for (const asset of assetStore) {
+              const mapping = asset.providerMappings.find(
+                (m) => m.provider === provider && m.provider_symbol === provider_symbol,
+              );
+              if (mapping) {
+                return Promise.resolve({ ...mapping, asset });
+              }
+            }
+          }
+          return Promise.resolve(null);
+        },
+      ),
+      create: vi.fn(),
     },
   },
 }));
@@ -150,6 +181,7 @@ describe("Assets API - Property 6: Tracked asset list is consistent after add/de
             price_frequency: "DAILY",
             currency: "USD",
             isin: null,
+            provider_symbol: asset.ticker,
           });
 
           const res = await POST(req);

@@ -75,6 +75,7 @@ describe("GET /api/financial-products/prices", () => {
         id: 1,
         ticker: "AAPL",
         price_frequency: "INTRADAY",
+        providerMappings: [{ provider: "YAHOO_FINANCE", provider_symbol: "AAPL" }],
       });
       mockDeriveGranularity.mockReturnValue({
         granularity: "DAILY",
@@ -97,6 +98,7 @@ describe("GET /api/financial-products/prices", () => {
         id: 1,
         ticker: "AAPL",
         price_frequency: "INTRADAY",
+        providerMappings: [{ provider: "YAHOO_FINANCE", provider_symbol: "AAPL" }],
       });
       mockDeriveGranularity.mockReturnValue({
         granularity: "DAILY",

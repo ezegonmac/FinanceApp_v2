@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { runPendingJobAction, type RunPendingJobState } from "./actions";
+import { Button } from "@/components/ui/button";
 
 const initialState: RunPendingJobState = {
   ok: true,
@@ -23,16 +24,19 @@ export default function AdminJobsPanel() {
   }, [state.message, router]);
 
   return (
-    <section>
-      <h2>Jobs</h2>
+    <section className="space-y-3">
+      <h2 className="text-lg font-semibold">Daily Job</h2>
+      <p className="text-sm text-muted-foreground">
+        Applies pending transactions, syncs investment prices, and fetches portfolio exposure data (sector &amp; country breakdowns) from Yahoo Finance.
+      </p>
       <form action={formAction}>
-        <button type="submit" disabled={isPending}>
-          {isPending ? "Running..." : "Run pending transactions job"}
-        </button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Running..." : "Run daily job"}
+        </Button>
       </form>
 
       {state.message ? (
-        <p style={{ marginTop: "0.75rem", color: state.ok ? "green" : "red" }}>
+        <p className={`mt-3 text-sm ${state.ok ? "text-positive" : "text-destructive"}`}>
           {state.message}
           {state.ok
             ? ` (processed: ${state.processed ?? 0}, failed: ${state.failed ?? 0}, skipped: ${state.skipped ?? 0}, alreadyRun: ${String(state.alreadyRun ?? false)})`

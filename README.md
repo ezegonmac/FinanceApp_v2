@@ -14,6 +14,7 @@ Domain model (UML)
 - Time Tracker: https://track.toggl.com/timer
 - Figma: https://www.figma.com/design/woEmmTwFi1JKnyUZOcUek2/FinanceApp-v2?t=WkrJKEab9Lb9dFqG-0
 - Stitch (AI design): https://stitch.withgoogle.com/projects/16204193569097462166?pli=1
+- BrandFetch (Brand Logos): https://brandfetch.com/
 
 # Features
 
@@ -270,9 +271,9 @@ From packages/db run
 npx prisma studio
 ```
 
-# Scheduled job: apply pending month items
+# Scheduled job: daily job
 The endpoint below processes PENDING incomes, expenses and transactions for the current month using Europe/Madrid timezone.
-It also applies active recurrent incomes once per month (idempotent run-log by month).
+It also applies active recurrent incomes once per month (idempotent run-log by month), syncs investment prices, and fetches portfolio exposure data (sector & country breakdowns) from Yahoo Finance.
 ```
 POST /api/internal/jobs/apply-pending-transactions
 Authorization: Bearer <CRON_SECRET>

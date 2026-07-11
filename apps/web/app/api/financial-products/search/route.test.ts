@@ -80,12 +80,14 @@ describe("GET /api/financial-products/search", () => {
         name: "Apple Inc.",
         asset_type: "STOCK",
         exchange: "NMS",
+        currency: "",
       });
       expect(body[1]).toEqual({
         ticker: "VOO",
         name: "Vanguard S&P 500 ETF",
         asset_type: "ETF",
         exchange: "PCX",
+        currency: "",
       });
     });
 

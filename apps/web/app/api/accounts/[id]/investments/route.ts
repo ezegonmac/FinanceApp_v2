@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { recalculateMonthSnapshot } from "@/app/api/_lib/snapshots/recalculateMonthSnapshot";
 import { syncPrices } from "@/app/api/_lib/financialProducts/priceSyncAlgorithm";
+import { fetchExposureFromYahoo } from "@/app/api/_lib/exposure/yahooFetcher";
+import { resolveCanonicalCategory } from "@/app/api/_lib/exposure/normalizer";
 
 export const dynamic = "force-dynamic";
 
@@ -320,6 +322,11 @@ export async function POST(request: Request, { params }: RouteContext) {
       });
     }
 
+    // Sync exposure data for this asset (non-blocking, best-effort)
+    if (parsed.type === "BUY") {
+      syncAssetExposure(parsed.asset_id).catch(() => {});
+    }
+
     return NextResponse.json(newInvestment, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -429,5 +436,63 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       { error: "Failed to cancel investment" },
       { status: 500 }
     );
+  }
+}
+
+/**
+ * Syncs exposure data for a single asset for the current period.
+ * Skips if snapshots already exist. Non-blocking — errors are swallowed.
+ */
+async function syncAssetExposure(assetId: number): Promise<void> {
+  const { year, month } = getEuropeMadridDateParts();
+  const period = `${year}-${String(month).padStart(2, "0")}`;
+
+  // Skip if already synced
+  const existing = await prisma.assetExposureSnapshot.count({
+    where: { asset_id: assetId, period },
+  });
+  if (existing > 0) return;
+
+  const asset = await prisma.asset.findUnique({
+    where: { id: assetId },
+    select: {
+      id: true,
+      asset_type: true,
+      providerMappings: {
+        select: { provider: true, provider_symbol: true },
+      },
+    },
+  });
+  if (!asset) return;
+
+  const exposureData = await fetchExposureFromYahoo(asset);
+  if (!exposureData) return;
+
+  for (const sector of exposureData.sectors) {
+    const categoryId = await resolveCanonicalCategory("YAHOO_FINANCE", sector.label, "SECTOR");
+    await prisma.assetExposureSnapshot.create({
+      data: {
+        asset_id: assetId,
+        period,
+        exposure_type: "SECTOR",
+        category_id: categoryId,
+        percentage: sector.percentage,
+        provider: "YAHOO_FINANCE",
+      },
+    });
+  }
+
+  for (const country of exposureData.countries) {
+    const categoryId = await resolveCanonicalCategory("YAHOO_FINANCE", country.label, "COUNTRY");
+    await prisma.assetExposureSnapshot.create({
+      data: {
+        asset_id: assetId,
+        period,
+        exposure_type: "COUNTRY",
+        category_id: categoryId,
+        percentage: country.percentage,
+        provider: "YAHOO_FINANCE",
+      },
+    });
   }
 }

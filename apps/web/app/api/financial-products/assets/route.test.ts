@@ -4,6 +4,7 @@ const mockFindMany = vi.fn();
 const mockFindUnique = vi.fn();
 const mockCreate = vi.fn();
 const mockDelete = vi.fn();
+const mockProviderMappingFindUnique = vi.fn();
 
 vi.mock("@repo/db", () => ({
   prisma: {
@@ -12,6 +13,10 @@ vi.mock("@repo/db", () => ({
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
       create: (...args: unknown[]) => mockCreate(...args),
       delete: (...args: unknown[]) => mockDelete(...args),
+    },
+    assetProviderMapping: {
+      findUnique: (...args: unknown[]) => mockProviderMappingFindUnique(...args),
+      create: vi.fn(),
     },
   },
 }));
@@ -32,7 +37,7 @@ describe("GET /api/financial-products/assets", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual([]);
-    expect(mockFindMany).toHaveBeenCalledWith({ orderBy: { name: "asc" } });
+    expect(mockFindMany).toHaveBeenCalledWith({ orderBy: { name: "asc" }, include: { providerMappings: true } });
   });
 
   it("returns 200 with list ordered by name", async () => {
@@ -47,7 +52,7 @@ describe("GET /api/financial-products/assets", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual(assets);
-    expect(mockFindMany).toHaveBeenCalledWith({ orderBy: { name: "asc" } });
+    expect(mockFindMany).toHaveBeenCalledWith({ orderBy: { name: "asc" }, include: { providerMappings: true } });
   });
 });
 
@@ -58,6 +63,7 @@ describe("POST /api/financial-products/assets", () => {
     asset_type: "STOCK",
     price_frequency: "INTRADAY",
     currency: "USD",
+    provider_symbol: "AAPL",
   };
 
   it("returns 400 on missing required fields", async () => {
@@ -109,8 +115,11 @@ describe("POST /api/financial-products/assets", () => {
   });
 
   it("returns 200 with existing record on idempotent re-track", async () => {
-    const existingAsset = { id: 1, ...validPayload, isin: null, created_at: "2024-01-01T00:00:00Z" };
-    mockFindUnique.mockResolvedValue(existingAsset);
+    const existingAsset = { id: 1, ...validPayload, isin: null, created_at: "2024-01-01T00:00:00Z", providerMappings: [{ provider: "YAHOO_FINANCE", provider_symbol: "AAPL" }] };
+    // ISIN is null so skip ISIN check; provider_symbol already mapped → return existing asset
+    mockProviderMappingFindUnique.mockResolvedValue({
+      asset: existingAsset,
+    });
 
     const request = new Request("http://localhost/api/financial-products/assets", {
       method: "POST",
@@ -123,13 +132,13 @@ describe("POST /api/financial-products/assets", () => {
 
     expect(response.status).toBe(200);
     expect(body).toEqual(existingAsset);
-    expect(mockFindUnique).toHaveBeenCalledWith({ where: { ticker: "AAPL" } });
     expect(mockCreate).not.toHaveBeenCalled();
   });
 
   it("returns 200 with new record on first track", async () => {
-    const newAsset = { id: 1, ...validPayload, isin: null, created_at: "2024-01-01T00:00:00Z" };
-    mockFindUnique.mockResolvedValue(null);
+    const newAsset = { id: 1, ...validPayload, isin: null, created_at: "2024-01-01T00:00:00Z", providerMappings: [{ provider: "YAHOO_FINANCE", provider_symbol: "AAPL" }] };
+    // No existing ISIN match, no existing provider mapping → create new
+    mockProviderMappingFindUnique.mockResolvedValue(null);
     mockCreate.mockResolvedValue(newAsset);
 
     const request = new Request("http://localhost/api/financial-products/assets", {
@@ -151,7 +160,14 @@ describe("POST /api/financial-products/assets", () => {
         price_frequency: "INTRADAY",
         currency: "USD",
         isin: null,
+        providerMappings: {
+          create: {
+            provider: "YAHOO_FINANCE",
+            provider_symbol: "AAPL",
+          },
+        },
       },
+      include: { providerMappings: true },
     });
   });
 });

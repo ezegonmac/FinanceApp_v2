@@ -122,6 +122,7 @@ describe("Prices API - Property 5: Price query only returns rows in the requeste
             id: 1,
             ticker: "TST",
             price_frequency: priceFrequency,
+            providerMappings: [{ provider: "YAHOO_FINANCE", provider_symbol: "TST" }],
           });
 
           // syncPrices does nothing (no-op)

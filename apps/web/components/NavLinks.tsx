@@ -20,7 +20,11 @@ const navLinks: { href: string; label: string }[] = [
   { href: "/recurrent",      label: "Recurrent"     },
   { href: "/months/current", label: "Current Month" },
   { href: "/metrics",        label: "Metrics"       },
-  { href: "/financial-products", label: "Investments" },
+];
+
+const investmentsLinks = [
+  { href: "/investments",          label: "Portfolio" },
+  { href: "/investments/exposure", label: "Exposure"  },
 ];
 
 const devLinks = [
@@ -64,6 +68,52 @@ export default function NavLinks() {
           </Link>
         );
       })}
+
+      {/* Investments dropdown */}
+      <NavigationMenu viewport={false}>
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger
+              className={cn(
+                "group relative h-14 px-5 text-sm whitespace-nowrap rounded-none",
+                "transition-colors",
+                "!bg-transparent hover:!bg-transparent focus:!bg-transparent",
+                "data-[state=open]:!bg-transparent data-[state=open]:hover:!bg-transparent data-[state=open]:focus:!bg-transparent",
+                "[&>svg:last-child]:hidden",
+                pathname.startsWith("/investments")
+                  ? "font-semibold text-foreground"
+                  : "font-normal text-muted-foreground hover:text-foreground data-[state=open]:text-foreground",
+              )}
+            >
+              Investments
+              <span
+                className={cn(
+                  "absolute inset-x-0 -bottom-px h-[3px] transition-opacity",
+                  pathname.startsWith("/investments")
+                    ? "bg-primary opacity-100"
+                    : "bg-muted-foreground/30 opacity-0 group-hover:opacity-100 group-data-[state=open]:bg-primary group-data-[state=open]:opacity-100",
+                )}
+              />
+            </NavigationMenuTrigger>
+            <NavigationMenuContent className="flex flex-col p-1 min-w-[8rem]">
+              {investmentsLinks.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "block rounded-sm px-3 py-1.5 text-sm transition-colors",
+                    pathname === href
+                      ? "bg-accent text-accent-foreground font-medium"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  )}
+                >
+                  {label}
+                </Link>
+              ))}
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
 
       {/* Dev dropdown — inline, same height as nav links */}
       <NavigationMenu viewport={false}>
