@@ -97,7 +97,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - In the account section, transactions for this account, I can only see the "to" column. I can add the from column too or use two separate tables for incoming and outgoing transactions ✅
   - Assets provider [spec:assets-provider] ✅
   - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
-  - Current Month is not showing as active in the navbar 🟨
+  - Current Month is not showing as active in the navbar ✅
   - You can add one tracked asset to the list as a duplicate and it causes frontend errors 🟨
   - Asset plots always show $ and it´s not taking in account the initial currency conversion 🟨
 - Design

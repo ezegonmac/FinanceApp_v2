@@ -41,7 +41,12 @@ export default function NavLinks() {
     <div className="flex items-center">
       {/* Main links */}
       {navLinks.map(({ href, label }) => {
-        const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const isActive =
+          href === "/"
+            ? pathname === "/"
+            : href === "/months/current"
+              ? pathname.startsWith("/months/current") || /^\/months\/\d{4}\/\d{1,2}$/.test(pathname)
+              : pathname.startsWith(href);
 
         return (
           <Link
@@ -80,7 +85,6 @@ export default function NavLinks() {
                 "transition-colors",
                 "!bg-transparent hover:!bg-transparent focus:!bg-transparent",
                 "data-[state=open]:!bg-transparent data-[state=open]:hover:!bg-transparent data-[state=open]:focus:!bg-transparent",
-                "[&>svg:last-child]:hidden",
                 pathname.startsWith("/investments")
                   ? "font-semibold text-foreground"
                   : "font-normal text-muted-foreground hover:text-foreground data-[state=open]:text-foreground",
@@ -127,7 +131,6 @@ export default function NavLinks() {
                 "!bg-transparent hover:!bg-transparent focus:!bg-transparent",
                 "data-[state=open]:!bg-transparent data-[state=open]:hover:!bg-transparent data-[state=open]:focus:!bg-transparent",
                 "hover:text-foreground data-[state=open]:text-foreground",
-                "[&>svg:last-child]:hidden",
               )}
             >
               Dev
