@@ -23,8 +23,9 @@ const navLinks: { href: string; label: string }[] = [
 ];
 
 const investmentsLinks = [
-  { href: "/investments",          label: "Portfolio" },
-  { href: "/investments/exposure", label: "Exposure"  },
+  { href: "/investments",          label: "Portfolio"   },
+  { href: "/investments/compare",  label: "Compare"    },
+  { href: "/investments/exposure", label: "Exposure"   },
 ];
 
 const devLinks = [
