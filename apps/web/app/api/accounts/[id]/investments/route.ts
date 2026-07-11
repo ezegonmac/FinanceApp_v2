@@ -121,7 +121,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     // Verify asset exists (with provider mapping for potential price sync)
     const asset = await prisma.asset.findUnique({
       where: { id: parsed.asset_id },
-      select: { id: true, providerMappings: true },
+      select: { id: true, price_frequency: true, providerMappings: true },
     });
 
     if (!asset) {
@@ -263,9 +263,30 @@ export async function POST(request: Request, { params }: RouteContext) {
 
     if (isEffectiveNow) {
       // Current/past month: create COMPLETED in $transaction, update balance
-      const executedAtDate = parsed.executed_at
-        ? new Date(parsed.executed_at.includes("T") ? parsed.executed_at : `${parsed.executed_at}T00:00:00.000Z`)
-        : new Date();
+      let executedAtDate: Date;
+
+      if (parsed.executed_at && parsed.executed_at.includes("T")) {
+        // Full datetime provided (intraday assets) — use as-is
+        executedAtDate = new Date(parsed.executed_at);
+      } else if (parsed.executed_at && asset.price_frequency === "DAILY") {
+        // Date-only for a DAILY asset: look up the actual price point timestamp
+        // so the marker aligns exactly with the price line on the chart.
+        const dayStart = new Date(`${parsed.executed_at}T00:00:00.000Z`);
+        const dayEnd = new Date(`${parsed.executed_at}T23:59:59.999Z`);
+        const pricePoint = await prisma.assetPrice.findFirst({
+          where: {
+            asset_id: parsed.asset_id,
+            timestamp: { gte: dayStart, lte: dayEnd },
+          },
+          orderBy: { timestamp: "asc" },
+          select: { timestamp: true },
+        });
+        executedAtDate = pricePoint?.timestamp ?? dayStart;
+      } else if (parsed.executed_at) {
+        executedAtDate = new Date(`${parsed.executed_at}T00:00:00.000Z`);
+      } else {
+        executedAtDate = new Date();
+      }
 
       newInvestment = await prisma.$transaction(async (tx) => {
         const investment = await tx.investment.create({
@@ -302,9 +323,25 @@ export async function POST(request: Request, { params }: RouteContext) {
       await recalculateMonthSnapshot(accountId, monthRecord.id);
     } else {
       // Future month: create PENDING, no balance change
-      const executedAtDate = parsed.executed_at
-        ? new Date(parsed.executed_at.includes("T") ? parsed.executed_at : `${parsed.executed_at}T00:00:00.000Z`)
-        : null;
+      let executedAtDate: Date | null = null;
+
+      if (parsed.executed_at && parsed.executed_at.includes("T")) {
+        executedAtDate = new Date(parsed.executed_at);
+      } else if (parsed.executed_at && asset.price_frequency === "DAILY") {
+        const dayStart = new Date(`${parsed.executed_at}T00:00:00.000Z`);
+        const dayEnd = new Date(`${parsed.executed_at}T23:59:59.999Z`);
+        const pricePoint = await prisma.assetPrice.findFirst({
+          where: {
+            asset_id: parsed.asset_id,
+            timestamp: { gte: dayStart, lte: dayEnd },
+          },
+          orderBy: { timestamp: "asc" },
+          select: { timestamp: true },
+        });
+        executedAtDate = pricePoint?.timestamp ?? dayStart;
+      } else if (parsed.executed_at) {
+        executedAtDate = new Date(`${parsed.executed_at}T00:00:00.000Z`);
+      }
 
       newInvestment = await prisma.investment.create({
         data: {

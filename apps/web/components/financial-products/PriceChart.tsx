@@ -6,7 +6,6 @@ import type { Asset } from "@repo/db";
 import type { Timeframe } from "@/app/api/_lib/financialProducts/types";
 import {
   groupMarkers,
-  findNearestPrice,
   type ContributionMarker,
   type MarkerOrGroup,
 } from "@/lib/groupMarkers";
@@ -23,15 +22,6 @@ type Props = {
   showMarkers?: boolean;
 };
 
-function formatDate(isoString: string): string {
-  const date = new Date(isoString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
 function formatDateTime(isoString: string): string {
   const date = new Date(isoString);
   return date.toLocaleString("en-US", {
@@ -45,28 +35,21 @@ function formatDateTime(isoString: string): string {
 
 function buildSingleTooltip(marker: ContributionMarker, currency: string): string {
   const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
-  const lines = [
-    `<strong>${marker.type}</strong>`,
-    `Units: ${marker.units}`,
-    `Unit Price: ${symbol}${marker.unit_price}`,
+  return [
+    `<span style="color:var(${marker.type === "BUY" ? "--positive" : "--negative"});font-weight:600">${marker.type}</span>`,
+    `${formatDateTime(marker.processed_at)}`,
+    `Price: ${symbol}${marker.unit_price}`,
     `Total: ${symbol}${marker.total_amount}`,
-    `Date: ${formatDate(marker.processed_at)}`,
-  ];
-  if (marker.description) {
-    lines.push(`Description: ${marker.description}`);
-  }
-  return lines.join("<br/>");
+  ].join("<br/>");
 }
 
 function buildGroupTooltip(group: Extract<MarkerOrGroup, { kind: "group" }>, currency: string): string {
   const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
-  const lines = [
-    `<strong>${group.count} transactions</strong>`,
+  return [
+    `<span style="font-weight:600">${group.count} operations</span>`,
+    `${group.buyCount} buy · ${group.sellCount} sell`,
     `Total: ${symbol}${group.totalAmount.toFixed(2)}`,
-    `BUY: ${group.buyCount}`,
-    `SELL: ${group.sellCount}`,
-  ];
-  return lines.join("<br/>");
+  ].join("<br/>");
 }
 
 function buildScatterSeries(
@@ -108,6 +91,7 @@ function buildScatterSeries(
       itemStyle: { color: "#10b981" }, // --positive
       data: buyData.map(([x, y]) => [x, y]),
       tooltip: {
+        trigger: "item",
         formatter: (params: unknown) => {
           const p = params as { dataIndex: number };
           const marker = buyData[p.dataIndex]![2];
@@ -128,6 +112,7 @@ function buildScatterSeries(
       itemStyle: { color: "#ef4444" }, // --negative
       data: sellData.map(([x, y]) => [x, y]),
       tooltip: {
+        trigger: "item",
         formatter: (params: unknown) => {
           const p = params as { dataIndex: number };
           const marker = sellData[p.dataIndex]![2];
@@ -147,6 +132,7 @@ function buildScatterSeries(
       itemStyle: { color: "#565e74" }, // --secondary
       data: neutralData.map(([x, y]) => [x, y]),
       tooltip: {
+        trigger: "item",
         formatter: (params: unknown) => {
           const p = params as { dataIndex: number };
           const marker = neutralData[p.dataIndex]![2];
@@ -170,6 +156,7 @@ function buildScatterSeries(
       itemStyle: { color: "#565e74" }, // --secondary
       data: groupData.map(([x, y]) => [x, y]),
       tooltip: {
+        trigger: "item",
         formatter: (params: unknown) => {
           const p = params as { dataIndex: number };
           const group = groupData[p.dataIndex]![2];
@@ -282,6 +269,33 @@ export function PriceChart({ asset, timeframe, contributions, showMarkers }: Pro
         tooltip: {
           trigger: "axis",
           axisPointer: { type: "line" },
+          formatter: (params: unknown) => {
+            const items = Array.isArray(params) ? params : [params];
+            const lineItems = (items as Array<{
+              seriesType?: string;
+              value?: [string, number];
+              marker?: string;
+            }>).filter((item) => item.seriesType === "line");
+
+            if (lineItems.length === 0) return "";
+
+            const value = lineItems[0]?.value;
+            if (!value) return "";
+
+            const [timestamp, price] = value;
+
+            // Hide the line tooltip when a scatter marker is at this exact position
+            const hasScatter = (items as Array<{ seriesType?: string }>).some(
+              (item) => item.seriesType === "scatter"
+            );
+            if (hasScatter) return "";
+
+            return [
+              `<span style="font-weight:600">Price</span>`,
+              `${formatDateTime(timestamp as string)}`,
+              `${formatCurrency(price)}`,
+            ].join("<br/>");
+          },
         },
         grid: { left: 20, right: 20, top: 32, bottom: 20, containLabel: true },
         xAxis: { type: "time" },

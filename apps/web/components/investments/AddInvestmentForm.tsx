@@ -13,6 +13,7 @@ type Asset = {
   name: string;
   asset_type: string;
   currency: string;
+  price_frequency: "DAILY" | "INTRADAY";
 };
 
 type InputMode = "manual" | "amount";
@@ -35,7 +36,8 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
   // Shared fields
   const [executedAt, setExecutedAt] = useState(() => {
     const now = new Date();
-    return now.toISOString().split("T")[0]!;
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   });
   const [description, setDescription] = useState("");
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -47,9 +49,26 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
   const [assetsLoading, setAssetsLoading] = useState(true);
   const [assetsError, setAssetsError] = useState<string | null>(null);
 
+  // Derive whether selected asset uses intraday pricing
+  const selectedAsset = assets.find((a) => a.id === assetId) ?? null;
+  const isIntraday = selectedAsset?.price_frequency === "INTRADAY";
+
   // Price preview for amount mode
   const [previewPrice, setPreviewPrice] = useState<number | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+
+  // When the user switches asset, convert executedAt between date ↔ datetime format
+  useEffect(() => {
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    if (isIntraday && !executedAt.includes("T")) {
+      // Upgrade date-only → datetime-local (append current time)
+      const now = new Date();
+      setExecutedAt(`${executedAt}T${pad(now.getHours())}:${pad(now.getMinutes())}`);
+    } else if (!isIntraday && executedAt.includes("T")) {
+      // Downgrade datetime → date-only (strip time part)
+      setExecutedAt(executedAt.split("T")[0]!);
+    }
+  }, [isIntraday]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -137,10 +156,16 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
     }
 
     try {
+      // For intraday assets, convert datetime-local to full ISO string.
+      // For daily assets, send date-only string (API normalizes to midnight UTC).
+      const executedAtValue = isIntraday && executedAt.includes("T")
+        ? new Date(executedAt).toISOString()
+        : executedAt;
+
       const payload: Record<string, unknown> = {
         asset_id: assetId,
         type,
-        executed_at: executedAt,
+        executed_at: executedAtValue,
         description: description.trim() || undefined,
         year,
         month,
@@ -166,7 +191,11 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
         setUnits("");
         setUnitPrice("");
         setTotalAmount("");
-        setExecutedAt(new Date().toISOString().split("T")[0]!);
+        setExecutedAt(() => {
+          const now = new Date();
+          const pad = (n: number) => n.toString().padStart(2, "0");
+          return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        });
         setDescription("");
         setMonth(new Date().getMonth() + 1);
         setYear(new Date().getFullYear());
@@ -247,11 +276,11 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
 
       <div className="grid gap-2">
         <label htmlFor="investment-date" className="text-sm font-medium">
-          Date
+          {isIntraday ? "Date & Time" : "Date"}
         </label>
         <Input
           id="investment-date"
-          type="date"
+          type={isIntraday ? "datetime-local" : "date"}
           value={executedAt}
           onChange={(e) => {
             setExecutedAt(e.target.value);
@@ -266,6 +295,13 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
           }}
           disabled={submitting}
         />
+        {selectedAsset && (
+          <p className="text-xs text-muted-foreground">
+            {isIntraday
+              ? "This asset trades throughout the day — the time determines where the marker appears on the chart."
+              : "This asset prices once per day — only the date is needed."}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-2">

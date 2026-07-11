@@ -96,7 +96,7 @@ export function AssetDetailPanel({ asset, isFavorite, onToggleWatchlist }: Props
         <>
           {data.sectors.length === 0 && data.countries.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No exposure data available yet.
+              No exposure data available for this asset.
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -5,8 +5,17 @@ import { prisma } from "@repo/db";
 import { type Granularity } from "@repo/db";
 import YahooFinance from "yahoo-finance2";
 import type { HistoricalOptionsEventsHistory } from "yahoo-finance2/modules/historical";
+import type { ChartResultArrayQuote } from "yahoo-finance2/modules/chart";
 
 const yahooFinance = new YahooFinance();
+
+/**
+ * Returns true when the Yahoo interval requires the chart module (intraday).
+ * Yahoo's historical() only supports "1d" | "1wk" | "1mo".
+ */
+function isIntradayInterval(interval: YahooInterval): boolean {
+  return interval === "15m" || interval === "1h";
+}
 
 /**
  * Resolves the [from, to] Date window for a given timeframe.
@@ -262,23 +271,41 @@ export async function syncPrices(
   // 5. Fetch + persist each gap
   for (const gap of gaps) {
     // a. Fetch from Yahoo Finance — let errors propagate immediately
-    const historicalOptions: HistoricalOptionsEventsHistory = {
-      period1:  gap.from,
-      period2:  gap.to,
-      // Yahoo historical only supports "1d" | "1wk" | "1mo"; intraday intervals
-      // ("15m", "1h") must be fetched via the chart module. We cast here because
-      // the caller is responsible for passing a compatible interval.
-      interval: interval as HistoricalOptionsEventsHistory["interval"],
-    };
-    const rows = await yahooFinance.historical(asset.ticker, historicalOptions);
+    let priceRows: Array<{ date: Date; close: number | null }>;
+
+    if (isIntradayInterval(interval)) {
+      // chart() supports all intervals including intraday (15m, 1h)
+      const chartResult = await yahooFinance.chart(asset.ticker, {
+        period1: gap.from,
+        period2: gap.to,
+        interval: interval,
+      });
+      priceRows = chartResult.quotes.map((q: ChartResultArrayQuote) => ({
+        date: q.date,
+        close: q.close,
+      }));
+    } else {
+      // historical() only supports "1d" | "1wk" | "1mo"
+      const historicalOptions: HistoricalOptionsEventsHistory = {
+        period1: gap.from,
+        period2: gap.to,
+        interval: interval as HistoricalOptionsEventsHistory["interval"],
+      };
+      const rows = await yahooFinance.historical(asset.ticker, historicalOptions);
+      priceRows = rows.map((row) => ({
+        date: row.date,
+        close: row.close ?? row.adjClose ?? null,
+      }));
+    }
 
     // b. Batch-upsert returned rows into asset_prices
-    if (rows.length > 0) {
+    const validRows = priceRows.filter((r) => r.close != null);
+    if (validRows.length > 0) {
       await prisma.assetPrice.createMany({
-        data: rows.map((row) => ({
+        data: validRows.map((row) => ({
           asset_id:    asset.id,
           timestamp:   row.date,
-          price:       row.close ?? row.adjClose ?? 0,
+          price:       row.close!,
           granularity: granularity as Granularity,
         })),
         skipDuplicates: true,
