@@ -2,23 +2,43 @@ import { prisma, type Granularity } from "@repo/db";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { deriveGranularity, syncPrices } from "../../_lib/financialProducts/priceSyncAlgorithm";
-import type { Timeframe } from "../../_lib/financialProducts/types";
+import { customRangeGranularity } from "../../_lib/financialProducts/customRangeGranularity";
+import type { Timeframe, GranularityValue, YahooInterval } from "../../_lib/financialProducts/types";
 
 export const dynamic = "force-dynamic";
 
 const pricesQuerySchema = z.object({
   assetId: z.coerce.number().int().positive(),
-  timeframe: z.enum(["TODAY", "1W", "1M", "3M", "6M", "1Y", "5Y", "ALL"]),
-});
+  timeframe: z.enum(["TODAY", "1W", "1M", "3M", "6M", "1Y", "5Y", "ALL"]).optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+}).refine(
+  (data) => data.timeframe || (data.startDate && data.endDate),
+  { message: "Either timeframe or both startDate and endDate must be provided" },
+).refine(
+  (data) => !(data.timeframe && data.startDate && data.endDate),
+  { message: "Cannot provide both timeframe and custom date range" },
+).refine(
+  (data) => {
+    if (data.startDate && data.endDate) {
+      return data.startDate < data.endDate;
+    }
+    return true;
+  },
+  { message: "startDate must be before endDate" },
+);
 
 // GET /api/financial-products/prices?assetId=<id>&timeframe=<timeframe>
+// GET /api/financial-products/prices?assetId=<id>&startDate=<iso>&endDate=<iso>
 export async function GET(request: Request) {
   try {
     // 1. Validate query params — 400 on ZodError
     const { searchParams } = new URL(request.url);
     const parsed = pricesQuerySchema.parse({
       assetId: searchParams.get("assetId"),
-      timeframe: searchParams.get("timeframe"),
+      timeframe: searchParams.get("timeframe") || undefined,
+      startDate: searchParams.get("startDate") || undefined,
+      endDate: searchParams.get("endDate") || undefined,
     });
 
     // 2. Load asset from DB — 404 if not found
@@ -46,10 +66,32 @@ export async function GET(request: Request) {
     }
 
     // 3. Derive granularity, interval, and date range
-    const { granularity, interval, from, to } = deriveGranularity(
-      parsed.timeframe as Timeframe,
-      asset.price_frequency as "DAILY" | "INTRADAY",
-    );
+    let granularity: GranularityValue;
+    let interval: YahooInterval;
+    let from: Date;
+    let to: Date;
+
+    if (parsed.timeframe) {
+      const derived = deriveGranularity(
+        parsed.timeframe as Timeframe,
+        asset.price_frequency as "DAILY" | "INTRADAY",
+      );
+      granularity = derived.granularity;
+      interval = derived.interval;
+      from = derived.from;
+      to = derived.to;
+    } else {
+      // Custom date range
+      const derived = customRangeGranularity(
+        parsed.startDate!,
+        parsed.endDate!,
+        asset.price_frequency as "DAILY" | "INTRADAY",
+      );
+      granularity = derived.granularity;
+      interval = derived.interval;
+      from = parsed.startDate!;
+      to = parsed.endDate!;
+    }
 
     // 4. Sync prices — 502 if Yahoo throws
     try {

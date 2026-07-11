@@ -18,7 +18,8 @@ type Props = {
 export function FinancialProductsView({ initialAssets }: Props) {
   const [allAssets, setAllAssets] = useState<Asset[]>(initialAssets);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-  const [timeframe, setTimeframe] = useState<Timeframe>("1M");
+  const [timeframe, setTimeframe] = useState<Timeframe | "CUSTOM">("1M");
+  const [customRange, setCustomRange] = useState<{ startDate: Date; endDate: Date } | null>(null);
   const [contributions, setContributions] = useState<ContributionMarker[] | null>(null);
   const [showMarkers, setShowMarkers] = useState(true);
 
@@ -35,15 +36,24 @@ export function FinancialProductsView({ initialAssets }: Props) {
       return;
     }
 
+    // Don't fetch if timeframe is CUSTOM but no dates provided yet
+    if (timeframe === "CUSTOM" && !customRange) {
+      return;
+    }
+
     const controller = new AbortController();
     setContributions(null);
 
     async function fetchContributions() {
       try {
-        const res = await fetch(
-          `/api/financial-products/assets/${selectedAsset!.id}/investments?timeframe=${timeframe}`,
-          { signal: controller.signal }
-        );
+        let url: string;
+        if (timeframe === "CUSTOM" && customRange) {
+          url = `/api/financial-products/assets/${selectedAsset!.id}/investments?startDate=${customRange.startDate.toISOString()}&endDate=${customRange.endDate.toISOString()}`;
+        } else {
+          url = `/api/financial-products/assets/${selectedAsset!.id}/investments?timeframe=${timeframe}`;
+        }
+
+        const res = await fetch(url, { signal: controller.signal });
 
         if (!res.ok) {
           setContributions(null);
@@ -64,7 +74,7 @@ export function FinancialProductsView({ initialAssets }: Props) {
     return () => {
       controller.abort();
     };
-  }, [selectedAsset?.id, timeframe]);
+  }, [selectedAsset?.id, timeframe, customRange]);
 
   function handleAssetAdded(asset: Asset) {
     // Add to known assets list (for chart/detail viewing) but don't auto-watchlist
@@ -97,6 +107,12 @@ export function FinancialProductsView({ initialAssets }: Props) {
 
   function handleTimeframeChange(tf: Timeframe) {
     setTimeframe(tf);
+    setCustomRange(null);
+  }
+
+  function handleCustomRangeChange(startDate: Date, endDate: Date) {
+    setCustomRange({ startDate, endDate });
+    setTimeframe("CUSTOM");
   }
 
   return (
@@ -110,7 +126,12 @@ export function FinancialProductsView({ initialAssets }: Props) {
         />
       </aside>
       <main className="space-y-4">
-        <TimeframeSelector value={timeframe} onChange={handleTimeframeChange} />
+        <TimeframeSelector
+          value={timeframe}
+          onChange={handleTimeframeChange}
+          onCustomRangeChange={handleCustomRangeChange}
+          customRange={customRange}
+        />
         {contributions && contributions.length > 0 && (
           <ContributionToggle checked={showMarkers} onChange={setShowMarkers} />
         )}
@@ -119,6 +140,8 @@ export function FinancialProductsView({ initialAssets }: Props) {
           timeframe={timeframe}
           contributions={contributions ?? undefined}
           showMarkers={showMarkers}
+          startDate={customRange?.startDate}
+          endDate={customRange?.endDate}
         />
         <AssetDetailPanel
           asset={selectedAsset}

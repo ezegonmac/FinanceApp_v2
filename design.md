@@ -553,3 +553,34 @@ Minimalist line charts embedded in cards. No axes, no labels — trend only.
 - Negative trend: `--negative` (`#ef4444`)
 - Neutral / primary trend: `--primary` (`#1e40af`)
 - Height: 40–48px. Width fills the card body.
+
+### Comparison Color Palette
+
+A fixed palette of 5 visually distinct hues for multi-asset comparison charts and their associated UI elements (selected chips, watchlist toggle buttons). These are **not** semantic tokens — they are categorical identifiers that distinguish one data series from another.
+
+```typescript
+const COMPARISON_COLORS = [
+  "#2563eb", // blue
+  "#dc2626", // red
+  "#16a34a", // green
+  "#9333ea", // purple
+  "#ea580c", // orange
+];
+```
+
+| Index | Hex       | Hue    |
+|-------|-----------|--------|
+| 0     | `#2563eb` | Blue   |
+| 1     | `#dc2626` | Red    |
+| 2     | `#16a34a` | Green  |
+| 3     | `#9333ea` | Purple |
+| 4     | `#ea580c` | Orange |
+
+**Usage rules:**
+- Colors are assigned by selection order (first selected → index 0, etc.)
+- The same index must produce the same color across all surfaces: chart lines, legend, selected chips, and watchlist buttons
+- Text on these backgrounds uses `text-white`; de-emphasized text uses `text-white/70`
+- These colors exist outside the CSS variable system — they are applied via inline `style` since the index is dynamic
+- The canonical export lives in `compareAssets.ts`; components that need the palette should import from there rather than redeclaring
+
+**Chip shape:** `rounded-full` (pill) for selected asset chips — these are removable selection indicators, not status badges (which use `rounded-sm`).

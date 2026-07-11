@@ -8,8 +8,13 @@ export const dynamic = "force-dynamic";
 
 const investmentsQuerySchema = z.object({
   assetId: z.coerce.number().int().positive(),
-  timeframe: z.enum(["TODAY", "1W", "1M", "3M", "6M", "1Y", "5Y", "ALL"]),
-});
+  timeframe: z.enum(["TODAY", "1W", "1M", "3M", "6M", "1Y", "5Y", "ALL"]).optional(),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+}).refine(
+  (data) => data.timeframe || (data.startDate && data.endDate),
+  { message: "Either timeframe or both startDate and endDate must be provided" },
+);
 
 // GET /api/financial-products/assets/[id]/investments?timeframe=<timeframe>
 export async function GET(
@@ -23,7 +28,9 @@ export async function GET(
 
     const parsed = investmentsQuerySchema.parse({
       assetId: id,
-      timeframe: searchParams.get("timeframe"),
+      timeframe: searchParams.get("timeframe") || undefined,
+      startDate: searchParams.get("startDate") || undefined,
+      endDate: searchParams.get("endDate") || undefined,
     });
 
     // 2. Lookup asset by ID — 404 if not found
@@ -39,7 +46,17 @@ export async function GET(
     }
 
     // 3. Resolve timeframe date range
-    const { from, to } = resolveTimeframeDates(parsed.timeframe as Timeframe);
+    let from: Date;
+    let to: Date;
+
+    if (parsed.timeframe) {
+      const resolved = resolveTimeframeDates(parsed.timeframe as Timeframe);
+      from = resolved.from;
+      to = resolved.to;
+    } else {
+      from = parsed.startDate!;
+      to = parsed.endDate!;
+    }
 
     // 4. Query COMPLETED investments for this asset.
     // Use executed_at (the actual buy/sell date) for chart positioning.

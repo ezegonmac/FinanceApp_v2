@@ -116,11 +116,11 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Create a covering test suite 🟨
   - Add sparklines (miniature plots) next to the different assets [spec:sparklines] 🟨
   - Portfolio allocation drift [spec:portfolio-drift] 🟨
-  - Asset comparison mode [spec:asset-comparison] 🟨
+  - Asset comparison mode [spec:asset-comparison] ✅
   - Financial milestones. Track things like €10k invested, €25k net worth, or 1 year of expenses invested [spec:financial-milestones] 🟨
   - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] ✅
   - Assets Background Sync [spec:assets-background-sync] 🟨
-  - Portfolio exposure analysis [spec:portfolio-exposure] 🟨
+  - Portfolio exposure analysis [spec:portfolio-exposure] ✅
 
 ### Status Legend
 🟨 Pending

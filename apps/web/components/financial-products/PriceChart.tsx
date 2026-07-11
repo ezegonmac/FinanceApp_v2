@@ -17,9 +17,11 @@ type PricePoint = {
 
 type Props = {
   asset: Asset | null;
-  timeframe: Timeframe;
+  timeframe: Timeframe | "CUSTOM";
   contributions?: ContributionMarker[];
   showMarkers?: boolean;
+  startDate?: Date;
+  endDate?: Date;
 };
 
 function formatDateTime(isoString: string): string {
@@ -170,7 +172,7 @@ function buildScatterSeries(
   return series;
 }
 
-export function PriceChart({ asset, timeframe, contributions, showMarkers }: Props) {
+export function PriceChart({ asset, timeframe, contributions, showMarkers, startDate, endDate }: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);
   const groupedRef = useRef<MarkerOrGroup[]>([]);
@@ -187,6 +189,11 @@ export function PriceChart({ asset, timeframe, contributions, showMarkers }: Pro
       return;
     }
 
+    // Don't fetch if timeframe is CUSTOM but no dates provided yet
+    if (timeframe === "CUSTOM" && (!startDate || !endDate)) {
+      return;
+    }
+
     const controller = new AbortController();
 
     async function fetchPrices() {
@@ -195,10 +202,14 @@ export function PriceChart({ asset, timeframe, contributions, showMarkers }: Pro
       setPriceData(null);
 
       try {
-        const res = await fetch(
-          `/api/financial-products/prices?assetId=${asset!.id}&timeframe=${timeframe}`,
-          { signal: controller.signal }
-        );
+        let url: string;
+        if (timeframe === "CUSTOM" && startDate && endDate) {
+          url = `/api/financial-products/prices?assetId=${asset!.id}&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
+        } else {
+          url = `/api/financial-products/prices?assetId=${asset!.id}&timeframe=${timeframe}`;
+        }
+
+        const res = await fetch(url, { signal: controller.signal });
 
         if (!res.ok) {
           setError(true);
@@ -221,7 +232,7 @@ export function PriceChart({ asset, timeframe, contributions, showMarkers }: Pro
     return () => {
       controller.abort();
     };
-  }, [asset?.id, timeframe]);
+  }, [asset?.id, timeframe, startDate?.getTime(), endDate?.getTime()]);
 
   const buildChartOption = useCallback(
     (chartWidth: number): echarts.EChartsOption => {
