@@ -1,5 +1,6 @@
 import RecurrentExpensesView from "@/components/recurrent-expenses/RecurrentExpensesView";
 import RecurrentIncomesView from "@/components/recurrent-incomes/RecurrentIncomesView";
+import RecurrentInvestmentsView from "@/components/recurrent-investments/RecurrentInvestmentsView";
 import RecurrentTransactionsView from "@/components/recurrent-transactions/RecurrentTransactionsView";
 
 export default function RecurrentPage() {
@@ -19,6 +20,10 @@ export default function RecurrentPage() {
 
       <section className="rounded-md border bg-card p-6 text-card-foreground">
         <RecurrentTransactionsView />
+      </section>
+
+      <section className="rounded-md border bg-card p-6 text-card-foreground">
+        <RecurrentInvestmentsView />
       </section>
     </section>
   );

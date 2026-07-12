@@ -55,7 +55,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Monthly Budget per month (set a spending target) ✅
   - Monthly Splits across accounts (The splits planned at the beginning of the month) (recurrent transactions) 🟨
   - Investments in different products in these accounts [spec:investments] ✅
-  - Recurrent investments 🟨
+  - Recurrent investments �
 - View
   - Account details ✅
   - Current Month ✅
@@ -275,7 +275,7 @@ npx prisma studio
 
 # Scheduled job: daily job
 The endpoint below processes PENDING incomes, expenses and transactions for the current month using Europe/Madrid timezone.
-It also applies active recurrent incomes once per month (idempotent run-log by month), syncs investment prices, and fetches portfolio exposure data (sector & country breakdowns) from Yahoo Finance.
+It also applies active recurrent incomes and recurrent investments once per month (idempotent run-log by month), syncs investment prices, and fetches portfolio exposure data (sector & country breakdowns) from Yahoo Finance.
 ```
 POST /api/internal/jobs/apply-pending-transactions
 Authorization: Bearer <CRON_SECRET>

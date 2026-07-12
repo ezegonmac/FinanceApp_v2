@@ -76,10 +76,23 @@ export async function GET(
 
     const data = investments
       .map((inv) => {
-        // Best date: executed_at > created_at > month-derived fallback
-        const chartDate = inv.executed_at
-          ?? inv.created_at
-          ?? new Date(inv.month.year, inv.month.month - 1, 1);
+        // Determine the best chart date.  If executed_at falls within the
+        // investment's own month, use it (correctly placed manual or fixed
+        // automated investments).  Otherwise fall back to the first of the
+        // month so backfilled operations don't cluster on a single date.
+        const monthFirst = new Date(Date.UTC(inv.month.year, inv.month.month - 1, 1));
+        const monthLast = new Date(Date.UTC(inv.month.year, inv.month.month, 0, 23, 59, 59, 999));
+
+        let chartDate: Date;
+        if (inv.executed_at) {
+          const execMs = inv.executed_at.getTime();
+          chartDate = (execMs >= monthFirst.getTime() && execMs <= monthLast.getTime())
+            ? inv.executed_at
+            : monthFirst;
+        } else {
+          chartDate = inv.created_at ?? monthFirst;
+        }
+
         return {
           id: inv.id,
           type: inv.type,

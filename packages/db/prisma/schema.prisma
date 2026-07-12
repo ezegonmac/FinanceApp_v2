@@ -35,6 +35,7 @@ model Account {
   todosAsTo                Todo[]                 @relation("TodoToAccount")
   monthSnapshots   MonthSnapshot[]
   investments      Investment[]
+  recurrentInvestments RecurrentInvestment[]
 }
 
 model Income {
@@ -412,6 +413,7 @@ model Asset {
   syncRanges       AssetPriceSyncRange[]
   providerMappings AssetProviderMapping[]
   investments      Investment[]
+  recurrentInvestments RecurrentInvestment[]
   exposureSnapshots AssetExposureSnapshot[]
 }
 
@@ -484,6 +486,8 @@ model Month {
   monthSnapshots MonthSnapshot[]
   budget MonthBudget?
   investments Investment[]
+  lastAppliedRecurrentInvestments RecurrentInvestment[] @relation("RecurrentInvestmentLastAppliedMonth")
+  recurrentInvestmentRuns RecurrentInvestmentRun[]
 }
 
 model MonthSnapshot {
@@ -527,6 +531,7 @@ model JobRun {
   recurrentTransactionRuns RecurrentTransactionRun[]
   todos          Todo[]
   investments    Investment[]
+  recurrentInvestmentRuns RecurrentInvestmentRun[]
 
   @@unique([job_name, madrid_date], name: "job_name_madrid_date")
 }
@@ -568,6 +573,7 @@ model Investment {
   asset   Asset   @relation(fields: [asset_id], references: [id])
   month   Month   @relation(fields: [month_id], references: [id])
   job_run JobRun? @relation(fields: [job_run_id], references: [id])
+  recurrentInvestmentRuns RecurrentInvestmentRun[]
 
   @@index([account_id, asset_id, status])
   @@index([month_id, status])
@@ -623,4 +629,65 @@ model AssetExposureSnapshot {
 
   @@unique([asset_id, period, exposure_type, category_id], name: "asset_period_type_category")
   @@index([asset_id, period, exposure_type])
+}
+
+// ─── Recurrent Investment Models ──────────────────────────────────────────────
+
+enum RecurrentInvestmentStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum RecurrentInvestmentRunStatus {
+  APPLIED
+  FAILED
+}
+
+model RecurrentInvestment {
+  id                    Int      @id @default(autoincrement())
+  account_id            Int
+  asset_id              Int
+  type                  InvestmentType
+  total_amount          Decimal  @db.Decimal(18, 2)
+  description           String?
+  automated             Boolean  @default(true)
+  start_month           DateTime?
+  end_month             DateTime?
+  next_run_year         Int?
+  next_run_month        Int?
+  last_applied_month_id Int?
+  status                RecurrentInvestmentStatus @default(ACTIVE)
+  created_at            DateTime @default(now())
+
+  account            Account @relation(fields: [account_id], references: [id])
+  asset              Asset   @relation(fields: [asset_id], references: [id])
+  last_applied_month Month?  @relation("RecurrentInvestmentLastAppliedMonth", fields: [last_applied_month_id], references: [id])
+  runs               RecurrentInvestmentRun[]
+
+  @@index([account_id, status])
+  @@index([next_run_year, next_run_month])
+  @@index([last_applied_month_id])
+}
+
+model RecurrentInvestmentRun {
+  id                       Int      @id @default(autoincrement())
+  recurrent_investment_id  Int
+  month_id                 Int
+  investment_id            Int?
+  job_run_id               Int?
+  status                   RecurrentInvestmentRunStatus
+  processing_error         String?
+  created_at               DateTime @default(now())
+  updated_at               DateTime @updatedAt
+
+  recurrent_investment RecurrentInvestment @relation(fields: [recurrent_investment_id], references: [id])
+  month                Month               @relation(fields: [month_id], references: [id])
+  investment           Investment?         @relation(fields: [investment_id], references: [id])
+  job_run              JobRun?             @relation(fields: [job_run_id], references: [id])
+
+  @@unique([recurrent_investment_id, month_id], name: "recurrent_investment_month")
+  @@index([month_id])
+  @@index([job_run_id])
+  @@index([status])
 }
