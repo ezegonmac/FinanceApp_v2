@@ -137,79 +137,137 @@ export function WatchlistPanel({
     if (fullAsset) onSelect(fullAsset);
   }
 
-  return (
-    <div className="flex h-full flex-col gap-3">
-      <AssetSearch onAssetAdded={onAssetAdded} />
+  /** Derives 1-month % change from sparkline points (last point's percentChange). */
+  function getMonthlyChange(assetId: number): number | null {
+    const pts = sparklines.get(assetId);
+    if (!pts || pts.length < 2) return null;
+    return pts[pts.length - 1]!.percentChange;
+  }
 
+  return (
+    <div className="flex h-full flex-col rounded-lg border bg-card">
+      {/* Panel header: Search */}
+      <div className="shrink-0 px-3 pt-3 pb-2">
+        <AssetSearch onAssetAdded={onAssetAdded} />
+      </div>
+
+      {/* Section label */}
+      <div className="shrink-0 flex items-center justify-between px-4 py-1.5">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground/60">
+          Watchlist
+        </span>
+        {!loading && watchlist.length > 0 && (
+          <span className="text-[11px] tabular-nums text-muted-foreground/50">
+            {watchlist.length}
+          </span>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="mx-3 border-t" />
+
+      {/* Asset list */}
       {loading ? (
-        <p className="text-sm text-muted-foreground px-1">Loading watchlist…</p>
+        <div className="flex-1 flex items-center justify-center p-4">
+          <p className="text-sm text-muted-foreground">Loading watchlist…</p>
+        </div>
       ) : watchlist.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center rounded-lg border bg-card p-4">
+        <div className="flex-1 flex items-center justify-center p-4">
           <p className="text-sm text-muted-foreground text-center">
             No assets in your watchlist. Search above to add some.
           </p>
         </div>
       ) : (
-        <div className="flex-1 min-h-0 overflow-y-auto rounded-lg border bg-card">
-          {watchlist.map((item, idx) => (
-            <div
-              key={item.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => handleSelect(item)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleSelect(item);
-                }
-              }}
-              className={cn(
-                "flex cursor-pointer items-center gap-3 px-3 py-2 transition-colors",
-                idx === 0 && "rounded-t-lg",
-                idx === watchlist.length - 1 && "rounded-b-lg",
-                item.id === selectedAssetId
-                  ? "bg-accent/40"
-                  : "hover:bg-muted/50",
-              )}
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{item.name}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  <span className="font-mono">{item.ticker}</span>
-                  {" · "}
-                  {item.asset_type}
-                </p>
-              </div>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          {watchlist.map((item, idx) => {
+            const monthlyChange = getMonthlyChange(item.id);
 
-              <div className="shrink-0">
-                <Sparkline points={sparklines.get(item.id) ?? []} />
-              </div>
-
-              <div className="shrink-0 text-right">
-                {item.latestPrice != null ? (
-                  <>
-                    <p className="text-sm font-mono tabular-nums font-medium">
-                      {formatPrice(item.latestPrice, item.currency)}
-                    </p>
-                    {item.dailyChangePercent != null && (
-                      <p
-                        className={cn(
-                          "text-[11px] font-mono tabular-nums",
-                          item.dailyChangePercent >= 0
-                            ? "text-positive"
-                            : "text-negative",
-                        )}
-                      >
-                        {formatPercent(item.dailyChangePercent)}
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <p className="text-[11px] text-muted-foreground">—</p>
+            return (
+              <div
+                key={item.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleSelect(item)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleSelect(item);
+                  }
+                }}
+                className={cn(
+                  "relative grid cursor-pointer items-center pl-4 pr-3 py-2.5 transition-colors duration-150",
+                  "grid-cols-[1fr_80px_105px]",
+                  "gap-x-2",
+                  idx === watchlist.length - 1 && "rounded-b-lg",
+                  item.id === selectedAssetId
+                    ? "bg-accent/15"
+                    : "hover:bg-muted/50",
                 )}
+              >
+                {/* Selection accent indicator */}
+                {item.id === selectedAssetId && (
+                  <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-primary" />
+                )}
+
+                {/* Column 1: Asset Identity */}
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold leading-tight">
+                    {item.name}
+                  </p>
+                  <p className="mt-1 truncate text-[11px] text-muted-foreground/70 leading-tight">
+                    <span className="font-mono">{item.ticker}</span>
+                    {" · "}
+                    {item.asset_type}
+                  </p>
+                </div>
+
+                {/* Column 2: Sparkline (fixed 80px × 28px) */}
+                <div className="flex items-center justify-center opacity-80">
+                  <Sparkline
+                    points={sparklines.get(item.id) ?? []}
+                    width={80}
+                    height={28}
+                  />
+                </div>
+
+                {/* Column 3: Market Information */}
+                <div className="text-right">
+                  {item.latestPrice != null ? (
+                    <>
+                      <p className="text-[13px] font-mono tabular-nums font-semibold leading-tight">
+                        {formatPrice(item.latestPrice, item.currency)}
+                      </p>
+                      {monthlyChange != null ? (
+                        <p
+                          className={cn(
+                            "mt-1 text-[11px] font-mono tabular-nums leading-tight",
+                            monthlyChange >= 0
+                              ? "text-positive/80"
+                              : "text-negative/80",
+                          )}
+                        >
+                          {formatPercent(monthlyChange)}
+                        </p>
+                      ) : item.dailyChangePercent != null ? (
+                        <p
+                          className={cn(
+                            "mt-1 text-[11px] font-mono tabular-nums leading-tight",
+                            item.dailyChangePercent >= 0
+                              ? "text-positive/80"
+                              : "text-negative/80",
+                          )}
+                        >
+                          {formatPercent(item.dailyChangePercent)}
+                        </p>
+                      ) : null}
+                    </>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">—</p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
