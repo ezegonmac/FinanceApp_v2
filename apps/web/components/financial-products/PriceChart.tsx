@@ -22,6 +22,7 @@ type Props = {
   showMarkers?: boolean;
   startDate?: Date;
   endDate?: Date;
+  chartClassName?: string;
 };
 
 function formatDateTime(isoString: string): string {
@@ -172,7 +173,7 @@ function buildScatterSeries(
   return series;
 }
 
-export function PriceChart({ asset, timeframe, contributions, showMarkers, startDate, endDate }: Props) {
+export function PriceChart({ asset, timeframe, contributions, showMarkers, startDate, endDate, chartClassName }: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);
   const groupedRef = useRef<MarkerOrGroup[]>([]);
@@ -409,8 +410,8 @@ export function PriceChart({ asset, timeframe, contributions, showMarkers, start
   }
 
   return (
-    <div className="space-y-3">
-      <div ref={chartRef} className="h-96 w-full" />
+    <div className={chartClassName ? "flex flex-col h-full" : "space-y-3"}>
+      <div ref={chartRef} className={chartClassName ?? "h-96 w-full"} />
       {selectedDetail && (
         <MarkerDetailCard
           detail={selectedDetail}

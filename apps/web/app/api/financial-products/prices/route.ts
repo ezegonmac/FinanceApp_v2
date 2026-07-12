@@ -1,7 +1,7 @@
 import { prisma, type Granularity } from "@repo/db";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { deriveGranularity, syncPrices } from "../../_lib/financialProducts/priceSyncAlgorithm";
+import { deriveGranularity, syncPrices, getFirstTradeDate } from "../../_lib/financialProducts/priceSyncAlgorithm";
 import { customRangeGranularity } from "../../_lib/financialProducts/customRangeGranularity";
 import type { Timeframe, GranularityValue, YahooInterval } from "../../_lib/financialProducts/types";
 
@@ -80,6 +80,15 @@ export async function GET(request: Request) {
       interval = derived.interval;
       from = derived.from;
       to = derived.to;
+
+      // For ALL, resolve the actual first trade date from Yahoo metadata
+      // so we don't request data for dates before the asset existed.
+      if (parsed.timeframe === "ALL") {
+        const firstTradeDate = await getFirstTradeDate(yahooMapping.provider_symbol);
+        if (firstTradeDate) {
+          from = firstTradeDate;
+        }
+      }
     } else {
       // Custom date range
       const derived = customRangeGranularity(
@@ -93,7 +102,8 @@ export async function GET(request: Request) {
       to = parsed.endDate!;
     }
 
-    // 4. Sync prices — 502 if Yahoo throws
+    // 4. Sync prices — on failure, fall back to serving cached data
+    let syncFailed = false;
     try {
       await syncPrices(
         { id: asset.id, ticker: yahooMapping.provider_symbol },
@@ -104,10 +114,7 @@ export async function GET(request: Request) {
       );
     } catch (syncError) {
       console.error("GET /api/financial-products/prices syncPrices error:", syncError);
-      return NextResponse.json(
-        { error: "Failed to fetch price data from Yahoo Finance" },
-        { status: 502 }
-      );
+      syncFailed = true;
     }
 
     // 5. Query asset_prices filtered by asset_id, granularity, and timestamp range
@@ -122,6 +129,14 @@ export async function GET(request: Request) {
       },
       orderBy: { timestamp: "asc" },
     });
+
+    // If sync failed and we have no cached data at all, return 502
+    if (syncFailed && priceRows.length === 0) {
+      return NextResponse.json(
+        { error: "Failed to fetch price data from Yahoo Finance" },
+        { status: 502 }
+      );
+    }
 
     // 6. Return 200 with PricePoint[]
     const pricePoints = priceRows.map((row) => ({

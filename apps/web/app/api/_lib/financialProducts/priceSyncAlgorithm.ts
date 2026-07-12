@@ -28,7 +28,7 @@ function isIntradayInterval(interval: YahooInterval): boolean {
  *   6M    → now − 6 months
  *   1Y    → now − 1 year
  *   5Y    → now − 5 years
- *   ALL   → Unix epoch (new Date(0))
+ *   ALL   → resolved dynamically via getFirstTradeDate(); falls back to 1980-01-01
  */
 export function resolveTimeframeDates(timeframe: Timeframe): { from: Date; to: Date } {
   const to = new Date();
@@ -71,7 +71,43 @@ export function resolveTimeframeDates(timeframe: Timeframe): { from: Date; to: D
       return { from, to };
     }
     case "ALL": {
-      return { from: new Date(0), to };
+      // Placeholder — callers should use getFirstTradeDate() for accurate resolution.
+      // This static fallback is only used if the dynamic lookup is skipped.
+      return { from: new Date("1980-01-01T00:00:00Z"), to };
+    }
+  }
+}
+
+/**
+ * Queries Yahoo Finance for the asset's first trade date via the chart
+ * module metadata. Returns null if the lookup fails or the asset has no
+ * recorded first trade date.
+ */
+export async function getFirstTradeDate(ticker: string): Promise<Date | null> {
+  try {
+    // Minimal chart request — we only need the meta, not actual price data.
+    // Request a single day of weekly data to minimize payload.
+    const result = await yahooFinance.chart(ticker, {
+      period1: 0,
+      period2: 86400, // 1 day in seconds (epoch + 1 day)
+      interval: "1wk",
+    });
+    return result.meta.firstTradeDate ?? null;
+  } catch {
+    // If the minimal chart call also fails, try with a recent period just to
+    // get the meta block.
+    try {
+      const now = new Date();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const result = await yahooFinance.chart(ticker, {
+        period1: weekAgo,
+        period2: now,
+        interval: "1wk",
+      });
+      return result.meta.firstTradeDate ?? null;
+    } catch {
+      return null;
     }
   }
 }
@@ -269,33 +305,48 @@ export async function syncPrices(
   }
 
   // 5. Fetch + persist each gap
+  let successCount = 0;
+  let lastError: unknown = null;
+
   for (const gap of gaps) {
-    // a. Fetch from Yahoo Finance — let errors propagate immediately
+    // a. Fetch from Yahoo Finance
     let priceRows: Array<{ date: Date; close: number | null }>;
 
-    if (isIntradayInterval(interval)) {
-      // chart() supports all intervals including intraday (15m, 1h)
-      const chartResult = await yahooFinance.chart(asset.ticker, {
-        period1: gap.from,
-        period2: gap.to,
-        interval: interval,
-      });
-      priceRows = chartResult.quotes.map((q: ChartResultArrayQuote) => ({
-        date: q.date,
-        close: q.close,
-      }));
-    } else {
-      // historical() only supports "1d" | "1wk" | "1mo"
-      const historicalOptions: HistoricalOptionsEventsHistory = {
-        period1: gap.from,
-        period2: gap.to,
-        interval: interval as HistoricalOptionsEventsHistory["interval"],
-      };
-      const rows = await yahooFinance.historical(asset.ticker, historicalOptions);
-      priceRows = rows.map((row) => ({
-        date: row.date,
-        close: row.close ?? row.adjClose ?? null,
-      }));
+    try {
+      if (isIntradayInterval(interval)) {
+        // chart() supports all intervals including intraday (15m, 1h)
+        const chartResult = await yahooFinance.chart(asset.ticker, {
+          period1: gap.from,
+          period2: gap.to,
+          interval: interval,
+        });
+        priceRows = chartResult.quotes.map((q: ChartResultArrayQuote) => ({
+          date: q.date,
+          close: q.close,
+        }));
+      } else {
+        // historical() only supports "1d" | "1wk" | "1mo"
+        const historicalOptions: HistoricalOptionsEventsHistory = {
+          period1: gap.from,
+          period2: gap.to,
+          interval: interval as HistoricalOptionsEventsHistory["interval"],
+        };
+        const rows = await yahooFinance.historical(asset.ticker, historicalOptions);
+        priceRows = rows.map((row) => ({
+          date: row.date,
+          close: row.close ?? row.adjClose ?? null,
+        }));
+      }
+    } catch (error) {
+      // If a single gap fails (e.g. Yahoo rejects an old date range), log and
+      // continue with remaining gaps so partial data can still be served.
+      console.warn(
+        `[syncPrices] Gap fetch failed for ${asset.ticker} ` +
+        `[${gap.from.toISOString()} → ${gap.to.toISOString()}]:`,
+        error,
+      );
+      lastError = error;
+      continue;
     }
 
     // b. Batch-upsert returned rows into asset_prices
@@ -314,5 +365,11 @@ export async function syncPrices(
 
     // c. Mark this gap as synced (even when Yahoo returned zero rows)
     await mergeSyncRange(asset.id, granularity, gap.from, gap.to);
+    successCount++;
+  }
+
+  // If ALL gaps failed, throw so the caller knows the sync was a total failure.
+  if (successCount === 0 && gaps.length > 0) {
+    throw lastError ?? new Error("All gap fetches failed");
   }
 }

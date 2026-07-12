@@ -14,7 +14,7 @@ Display a small price trend plot next to each asset for quick visualization. The
 - The system shall return a maximum of approximately 30 points per sparkline.
 - The system shall support fetching sparklines for multiple assets in a single request.
 - When price coverage is missing, the system shall use the existing price synchronization flow to retrieve the required data.
-- If insufficient price data is available, the system shall display the asset without a sparkline.
+- If insufficient price data is available, the system shall display a flat line as the sparkline.
 - The system shall priorityze the asset names. The sparklines will lazyload to prevent them slowdown the page. A flat line will show as a default.
 
 ## Acceptance Criteria

@@ -70,9 +70,9 @@ describe("resolveTimeframeDates", () => {
     },
   );
 
-  it("returns new Date(0) as from for ALL timeframe", () => {
+  it("returns 1980-01-01 as from for ALL timeframe", () => {
     const { from } = resolveTimeframeDates("ALL");
-    expect(from.getTime()).toBe(0);
+    expect(from.getTime()).toBe(new Date("1980-01-01T00:00:00Z").getTime());
   });
 
   it("TODAY resolves from to midnight Europe/Madrid", () => {
