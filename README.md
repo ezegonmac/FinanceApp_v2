@@ -98,7 +98,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Assets provider [spec:assets-provider] ✅
   - When I shift + click a row from Accounts table it doesn´t open a new tab 🟨
   - Current Month is not showing as active in the navbar ✅
-  - You can add one tracked asset to the list as a duplicate and it causes frontend errors 🟨
+  - You can add one tracked asset to the list as a duplicate and it causes frontend errors ✅
   - Asset plots always show $ and it´s not taking in account the initial currency conversion 🟨
 - Design
   - Allow account icon ✅
