@@ -18,9 +18,8 @@ type Props = {
 };
 
 /**
- * Dedicated analytics section below the chart.
- * Currently displays sector/country exposure.
- * Designed to scale with additional panels (holdings, dividends, etc.)
+ * Full-width analytics section below the primary workspace.
+ * Sector and country exposure; designed to scale with additional panels.
  */
 export function AssetAnalyticsPanel({ asset }: Props) {
   const [exposure, setExposure] = useState<ExposureData | null>(null);
@@ -55,31 +54,29 @@ export function AssetAnalyticsPanel({ asset }: Props) {
 
   if (loading) {
     return (
-      <div className="rounded-lg border p-4">
+      <section className="rounded-lg border bg-card p-5">
         <p className="text-sm text-muted-foreground">Loading analytics…</p>
-      </div>
+      </section>
     );
   }
 
-  if (!hasExposure) {
-    return null;
-  }
+  if (!hasExposure) return null;
 
   return (
-    <div className="rounded-lg border p-5 space-y-5">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Analytics
-      </h3>
+    <section className="rounded-lg border bg-card p-5 text-card-foreground space-y-4">
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Exposure
+      </h2>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {exposure.sectors.length > 0 && (
-          <ExposureSection title="Sector Exposure" entries={exposure.sectors} />
+          <ExposureSection title="Sector" entries={exposure.sectors} />
         )}
         {exposure.countries.length > 0 && (
-          <ExposureSection title="Country Allocation" entries={exposure.countries} />
+          <ExposureSection title="Country" entries={exposure.countries} />
         )}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -92,7 +89,7 @@ function ExposureSection({
 }) {
   return (
     <div className="space-y-3">
-      <h4 className="text-xs font-medium text-muted-foreground">{title}</h4>
+      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
       <div className="space-y-2">
         {entries.map((entry) => (
           <div key={entry.categoryName} className="space-y-1">

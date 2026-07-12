@@ -91,38 +91,25 @@ export function AssetOverviewPanel({ asset, isFavorite, onToggleWatchlist }: Pro
 
   return (
     <div className="space-y-3">
-      {/* Row 1: Identity + Price + Watchlist action */}
+      {/* Identity row: icon area + name + metadata + price + action */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-base font-semibold truncate">{asset.name}</h3>
-            <Badge variant="secondary" className="text-[10px] shrink-0">{asset.asset_type}</Badge>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold tracking-tight truncate">{asset.name}</h2>
+            <Badge variant="secondary" className="shrink-0">{asset.asset_type}</Badge>
           </div>
-          <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-            <span className="font-mono">{asset.ticker}</span>
-            <span>·</span>
-            <span>{asset.currency}</span>
-            <span>·</span>
-            <span>{asset.price_frequency === "DAILY" ? "Daily" : "Intraday"}</span>
-            {asset.isin && (
-              <>
-                <span>·</span>
-                <span className="font-mono">{asset.isin}</span>
-              </>
-            )}
-          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {asset.ticker} · {asset.currency} · {asset.price_frequency === "DAILY" ? "Daily" : "Intraday"}
+            {asset.isin && <> · <span className="font-mono">{asset.isin}</span></>}
+          </p>
         </div>
 
-        {/* Price block */}
+        {/* Price */}
         {!loadingPosition && currentPrice != null && (
-          <div className="text-right shrink-0">
-            <p className="text-lg font-semibold tabular-nums">
-              {formatCurrency(currentPrice, asset.currency)}
-            </p>
+          <div className="shrink-0 text-right">
+            <p className="text-xl font-semibold tabular-nums">{formatCurrency(currentPrice, asset.currency)}</p>
             {position?.latest_price_at && (
-              <p className="text-[11px] text-muted-foreground">
-                {formatDate(position.latest_price_at)}
-              </p>
+              <p className="text-[10px] text-muted-foreground">{formatDate(position.latest_price_at)}</p>
             )}
           </div>
         )}
@@ -137,28 +124,27 @@ export function AssetOverviewPanel({ asset, isFavorite, onToggleWatchlist }: Pro
         </Button>
       </div>
 
-      {/* Row 2: Position metrics (inline, compact) */}
+      {/* Position metrics — inline strip */}
       {!loadingPosition && position && totalUnits > 0 && (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
-          <Metric label="Units" value={formatUnits(position.total_units)} />
-          <Metric
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+          <MetricInline label="Units" value={formatUnits(position.total_units)} />
+          <MetricInline
             label="Invested"
             value={totalInvested != null ? formatCurrency(totalInvested, asset.currency) : "—"}
           />
-          <Metric
+          <MetricInline
             label="Value"
             value={currentValue != null ? formatCurrency(currentValue, asset.currency) : "—"}
           />
           {pnl != null && pnlPercent != null && (
-            <div className="flex items-center gap-1">
-              <span className="text-muted-foreground">P&L</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">P&L</span>
               <span
-                className={`font-mono tabular-nums font-medium ${
+                className={`text-sm font-mono tabular-nums font-medium ${
                   pnl >= 0 ? "text-positive" : "text-negative"
                 }`}
               >
-                {pnl >= 0 ? "+" : ""}
-                {formatCurrency(pnl, asset.currency)} ({pnlPercent >= 0 ? "+" : ""}{pnlPercent.toFixed(1)}%)
+                {pnl >= 0 ? "+" : ""}{formatCurrency(pnl, asset.currency)} ({pnlPercent >= 0 ? "+" : ""}{pnlPercent.toFixed(1)}%)
               </span>
             </div>
           )}
@@ -166,17 +152,17 @@ export function AssetOverviewPanel({ asset, isFavorite, onToggleWatchlist }: Pro
       )}
 
       {loadingPosition && (
-        <p className="text-[11px] text-muted-foreground">Loading…</p>
+        <p className="text-xs text-muted-foreground">Loading…</p>
       )}
     </div>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function MetricInline({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center gap-1">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono tabular-nums font-medium">{value}</span>
+    <div className="flex items-baseline gap-1">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="text-sm font-mono tabular-nums font-medium">{value}</span>
     </div>
   );
 }

@@ -135,10 +135,10 @@ export function FinancialProductsView({ initialAssets }: Props) {
   return (
     <div className="space-y-6">
       {/*
-        Row 1: Primary workspace — fits within the initial viewport.
-        Height = viewport minus nav (h-14) minus main padding (py-6 = 48px) minus gap to row 2.
+        Row 1: Primary workspace — viewport-fitted.
+        Height accounts for nav (h-14 = 56px) + main py-6 (48px) = 104px chrome.
       */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[300px_1fr] h-[calc(100vh-6.5rem)]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr] h-[calc(100vh-6.5rem)]">
         {/* Left column: Search + persistent watchlist */}
         <aside className="flex flex-col min-h-0">
           <WatchlistPanel
@@ -151,11 +151,11 @@ export function FinancialProductsView({ initialAssets }: Props) {
           />
         </aside>
 
-        {/* Right column: Unified analysis canvas (overview + chart) */}
+        {/* Right column: Unified analysis canvas */}
         {selectedAsset ? (
-          <div className="flex flex-col min-h-0 rounded-lg border overflow-hidden">
-            {/* Asset Overview — compact, ~1/3 of the canvas */}
-            <div className="shrink-0 p-4 pb-3">
+          <div className="flex flex-col min-h-0 rounded-lg border bg-card overflow-hidden">
+            {/* Asset overview — compact top section */}
+            <div className="shrink-0 px-5 pt-4 pb-3">
               <AssetOverviewPanel
                 asset={selectedAsset}
                 isFavorite={isFavorite}
@@ -163,12 +163,12 @@ export function FinancialProductsView({ initialAssets }: Props) {
               />
             </div>
 
-            {/* Subtle divider */}
-            <div className="mx-4 border-t" />
+            {/* Hairline divider */}
+            <div className="border-t mx-5" />
 
-            {/* Chart area — fills remaining ~2/3 */}
-            <div className="flex-1 flex flex-col min-h-0 p-4 pt-3">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            {/* Chart area — fills remaining space */}
+            <div className="flex-1 flex flex-col min-h-0 px-5 pt-3 pb-4">
+              <div className="shrink-0 flex flex-wrap items-center justify-between gap-2 mb-3">
                 <TimeframeSelector
                   value={timeframe}
                   onChange={handleTimeframeChange}
@@ -193,12 +193,12 @@ export function FinancialProductsView({ initialAssets }: Props) {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center rounded-lg border">
-            <div className="text-center space-y-2 p-12">
-              <p className="text-muted-foreground">
+          <div className="flex items-center justify-center rounded-lg border bg-card">
+            <div className="text-center space-y-1 p-12">
+              <p className="text-sm text-muted-foreground">
                 Select an asset from the watchlist to view its overview
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground/70">
                 Use the search bar to find and add assets to your watchlist.
               </p>
             </div>
@@ -206,7 +206,7 @@ export function FinancialProductsView({ initialAssets }: Props) {
         )}
       </div>
 
-      {/* Row 2: Full-width analytics (Exposure, Holdings, Dividends…) */}
+      {/* Row 2: Full-width analytics (below the fold) */}
       {selectedAsset && (
         <AssetAnalyticsPanel asset={selectedAsset} />
       )}
