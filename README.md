@@ -55,6 +55,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Monthly Budget per month (set a spending target) ✅
   - Monthly Splits across accounts (The splits planned at the beginning of the month) (recurrent transactions) 🟨
   - Investments in different products in these accounts [spec:investments] ✅
+  - Recurrent investments 🟨
 - View
   - Account details ✅
   - Current Month ✅
@@ -63,7 +64,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Current amount in each account ✅
   - Metrics page with basic data ✅
   - Monthly splits, planned and real 🟨
-  - Performance of these investments 🟨
+  - Performance of these investments ✅
   - Todo tab with pending todo recurrent expenses and recurrent transactions that are not marked as automated (bool attribute) 🟨
   - Sort, filter and search accounts, transactions, incomes and expenses 🟨
   - Sort, filter and paginate incomes, expenses and transactions by month ✅
@@ -121,7 +122,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Contribution history. When viewing an asset chart, overlay small markers showing when you bought [spec:contribution-history] ✅
   - Assets Background Sync [spec:assets-background-sync] 🟨
   - Portfolio exposure analysis [spec:portfolio-exposure] ✅
-  - Portfolio performance [spec:portfolio-performance] 🟨
+  - Portfolio performance [spec:portfolio-performance] ✅
 
 ### Status Legend
 🟨 Pending

@@ -532,6 +532,18 @@ This gives every card an identical `Label / Value / Context` rhythm — the dash
 - Center content vertically
 - Make the icon larger than the value, or give it equal visual weight to the metric
 
+### Selectable Table Rows
+
+When a table row acts as a toggle-selection target (e.g. selecting a position to show its detail panel below the table), apply the following pattern:
+
+- **Cursor:** `cursor-pointer` on all rows
+- **Selected row:** `bg-primary/10 hover:bg-primary/15` — a soft primary tint that clearly distinguishes the active selection without overwhelming the table
+- **Unselected rows:** standard zebra striping (`bg-muted/30` on odd rows) with `hover:bg-muted/50` / `hover:bg-muted/30`
+- **Transition:** `transition-colors` for smooth feedback
+- **Click behavior:** clicking the selected row deselects it (toggle)
+
+This pattern differs from `ListTable`'s `hover:bg-accent/40` navigation rows — selectable rows communicate *state* (which item is active), while navigation rows communicate *destination* (click to go somewhere).
+
 ### Investment Type Badges
 
 Investment operations (BUY / SELL) use directional type badges to distinguish cash-flow direction at a glance. These are **not** status badges — they indicate the transaction type, not its lifecycle state.
