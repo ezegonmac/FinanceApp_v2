@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import type { Asset } from "@repo/db";
 import { cn } from "@/lib/utils";
 import { AssetSearch } from "./AssetSearch";
+import { Sparkline } from "./Sparkline";
+import type { SparklineData } from "@/app/api/financial-products/assets/sparklines/route";
+
+type SparklinePoint = {
+  timestamp: string;
+  percentChange: number;
+};
 
 type WatchlistAsset = {
   id: number;
@@ -52,6 +59,7 @@ export function WatchlistPanel({
 }: Props) {
   const [watchlist, setWatchlist] = useState<WatchlistAsset[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sparklines, setSparklines] = useState<Map<number, SparklinePoint[]>>(new Map());
 
   useEffect(() => {
     let cancelled = false;
@@ -95,6 +103,34 @@ export function WatchlistPanel({
     fetchSummary();
     return () => { cancelled = true; };
   }, [refreshKey, allAssets]);
+
+  // Lazy-load sparklines after the watchlist is rendered
+  useEffect(() => {
+    if (watchlist.length === 0) return;
+
+    let cancelled = false;
+    const assetIds = watchlist.map((a) => a.id).join(",");
+
+    async function fetchSparklines() {
+      try {
+        const res = await fetch(`/api/financial-products/assets/sparklines?assetIds=${assetIds}`);
+        if (!res.ok) return;
+        const json: { data: SparklineData[] } = await res.json();
+        if (!cancelled) {
+          const map = new Map<number, SparklinePoint[]>();
+          for (const item of json.data) {
+            map.set(item.assetId, item.points);
+          }
+          setSparklines(map);
+        }
+      } catch {
+        // Sparkline fetch failure is non-critical — flat lines will show
+      }
+    }
+
+    fetchSparklines();
+    return () => { cancelled = true; };
+  }, [watchlist]);
 
   function handleSelect(item: WatchlistAsset) {
     const fullAsset = allAssets.find((a) => a.id === item.id);
@@ -143,6 +179,10 @@ export function WatchlistPanel({
                   {" · "}
                   {item.asset_type}
                 </p>
+              </div>
+
+              <div className="shrink-0">
+                <Sparkline points={sparklines.get(item.id) ?? []} />
               </div>
 
               <div className="shrink-0 text-right">

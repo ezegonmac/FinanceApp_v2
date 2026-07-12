@@ -114,7 +114,7 @@ Spec files live under `/specs`. See [Spec Workflow](#spec-workflow) for details.
   - Example database data for app testing ✅
   - Add native authentification layer with nextjs [spec:basic-authentication] ✅
   - Create a covering test suite 🟨
-  - Add sparklines (miniature plots) next to the different assets [spec:sparklines] 🟨
+  - Add sparklines (miniature plots) next to the different assets [spec:sparklines] ✅
   - Portfolio allocation drift [spec:portfolio-drift] 🟨
   - Asset comparison mode [spec:asset-comparison] ✅
   - Financial milestones. Track things like €10k invested, €25k net worth, or 1 year of expenses invested [spec:financial-milestones] 🟨

@@ -138,7 +138,7 @@ export function FinancialProductsView({ initialAssets }: Props) {
         Row 1: Primary workspace — viewport-fitted.
         Height accounts for nav (h-14 = 56px) + main py-6 (48px) = 104px chrome.
       */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px_1fr] h-[calc(100vh-6.5rem)]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] h-[calc(100vh-6.5rem)]">
         {/* Left column: Search + persistent watchlist */}
         <aside className="flex flex-col min-h-0">
           <WatchlistPanel
