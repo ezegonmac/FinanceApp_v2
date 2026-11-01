@@ -16,7 +16,7 @@ type Asset = {
   price_frequency: "DAILY" | "INTRADAY";
 };
 
-type InputMode = "manual" | "amount";
+type InputMode = "manual" | "amount" | "existing";
 
 type Props = {
   accountId: number;
@@ -33,6 +33,13 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
   const [unitPrice, setUnitPrice] = useState("");
   // Amount mode field
   const [totalAmount, setTotalAmount] = useState("");
+  // Existing position mode fields
+  const [existingUnits, setExistingUnits] = useState("");
+  const [existingAvgCost, setExistingAvgCost] = useState("");
+  const [existingTotal, setExistingTotal] = useState("");
+  const [existingCurrentValue, setExistingCurrentValue] = useState("");
+  const [existingManualPrice, setExistingManualPrice] = useState("");
+  const [existingKnows, setExistingKnows] = useState<"units_avg" | "units_total" | "value">("units_avg"); // what the user knows
   // Shared fields
   const [executedAt, setExecutedAt] = useState(() => {
     const now = new Date();
@@ -57,7 +64,17 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
   const [previewPrice, setPreviewPrice] = useState<number | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
+  // Price for existing position "current value" mode
+  const [existingPrice, setExistingPrice] = useState<number | null>(null);
+  const [existingPriceLoading, setExistingPriceLoading] = useState(false);
+
   // When the user switches asset, convert executedAt between date ↔ datetime format
+  useEffect(() => {
+    if (inputMode === "existing") {
+      setType("BUY");
+    }
+  }, [inputMode]);
+
   useEffect(() => {
     const pad = (n: number) => n.toString().padStart(2, "0");
     if (isIntraday && !executedAt.includes("T")) {
@@ -116,6 +133,34 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
     void fetchPricePreview();
   }, [fetchPricePreview]);
 
+  // Fetch price for existing position "current value" mode
+  const fetchExistingPrice = useCallback(async () => {
+    if (inputMode !== "existing" || existingKnows !== "value" || !assetId || !executedAt) {
+      setExistingPrice(null);
+      return;
+    }
+    setExistingPriceLoading(true);
+    try {
+      const response = await fetch(
+        `/api/accounts/${accountId}/investments/price-check?asset_id=${assetId}&date=${executedAt}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setExistingPrice(data.price);
+      } else {
+        setExistingPrice(null);
+      }
+    } catch {
+      setExistingPrice(null);
+    } finally {
+      setExistingPriceLoading(false);
+    }
+  }, [inputMode, existingKnows, assetId, executedAt, accountId]);
+
+  useEffect(() => {
+    void fetchExistingPrice();
+  }, [fetchExistingPrice]);
+
   const handleSubmit = async () => {
     setError(null);
     setSubmitting(true);
@@ -146,12 +191,64 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
         setSubmitting(false);
         return;
       }
-    } else {
+    } else if (inputMode === "amount") {
       const parsedAmount = parseFloat(totalAmount);
       if (!totalAmount.trim() || isNaN(parsedAmount) || parsedAmount <= 0) {
         setError("Amount must be a positive number");
         setSubmitting(false);
         return;
+      }
+    } else {
+      // existing mode
+      if (existingKnows === "units_avg") {
+        const parsedUnits = parseFloat(existingUnits);
+        if (!existingUnits.trim() || isNaN(parsedUnits) || parsedUnits <= 0) {
+          setError("Units held must be a positive number");
+          setSubmitting(false);
+          return;
+        }
+        const parsedAvg = parseFloat(existingAvgCost);
+        if (!existingAvgCost.trim() || isNaN(parsedAvg) || parsedAvg <= 0) {
+          setError("Average cost must be a positive number");
+          setSubmitting(false);
+          return;
+        }
+      } else if (existingKnows === "units_total") {
+        const parsedUnits = parseFloat(existingUnits);
+        if (!existingUnits.trim() || isNaN(parsedUnits) || parsedUnits <= 0) {
+          setError("Units held must be a positive number");
+          setSubmitting(false);
+          return;
+        }
+        const parsedTotal = parseFloat(existingTotal);
+        if (!existingTotal.trim() || isNaN(parsedTotal) || parsedTotal <= 0) {
+          setError("Total invested must be a positive number");
+          setSubmitting(false);
+          return;
+        }
+      } else {
+        // value mode
+        const parsedValue = parseFloat(existingCurrentValue);
+        if (!existingCurrentValue.trim() || isNaN(parsedValue) || parsedValue <= 0) {
+          setError("Current value must be a positive number");
+          setSubmitting(false);
+          return;
+        }
+        const parsedTotal = parseFloat(existingTotal);
+        if (!existingTotal.trim() || isNaN(parsedTotal) || parsedTotal <= 0) {
+          setError("Total invested must be a positive number");
+          setSubmitting(false);
+          return;
+        }
+        // Need either the fetched price or a manual price to derive units
+        if (existingPrice == null) {
+          const parsedManual = parseFloat(existingManualPrice);
+          if (!existingManualPrice.trim() || isNaN(parsedManual) || parsedManual <= 0) {
+            setError("No price found — please enter the current price per unit manually");
+            setSubmitting(false);
+            return;
+          }
+        }
       }
     }
 
@@ -174,8 +271,26 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
       if (inputMode === "manual") {
         payload.units = parseFloat(units);
         payload.unit_price = parseFloat(unitPrice);
-      } else {
+      } else if (inputMode === "amount") {
         payload.total_amount = parseFloat(totalAmount);
+      } else {
+        // existing mode — derive the missing value and send units + unit_price
+        let parsedUnits: number;
+        let avgCost: number;
+        if (existingKnows === "units_avg") {
+          parsedUnits = parseFloat(existingUnits);
+          avgCost = parseFloat(existingAvgCost);
+        } else if (existingKnows === "units_total") {
+          parsedUnits = parseFloat(existingUnits);
+          avgCost = parseFloat(existingTotal) / parsedUnits;
+        } else {
+          // value mode: units = currentValue / currentPrice, unit_price = totalInvested / units
+          const price = existingPrice ?? parseFloat(existingManualPrice);
+          parsedUnits = parseFloat(existingCurrentValue) / price;
+          avgCost = parseFloat(existingTotal) / parsedUnits;
+        }
+        payload.units = parsedUnits;
+        payload.unit_price = avgCost;
       }
 
       const response = await fetch(`/api/accounts/${accountId}/investments`, {
@@ -191,6 +306,12 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
         setUnits("");
         setUnitPrice("");
         setTotalAmount("");
+        setExistingUnits("");
+        setExistingAvgCost("");
+        setExistingTotal("");
+        setExistingCurrentValue("");
+        setExistingManualPrice("");
+        setExistingKnows("units_avg");
         setExecutedAt(() => {
           const now = new Date();
           const pad = (n: number) => n.toString().padStart(2, "0");
@@ -261,7 +382,7 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
               key={value}
               type="button"
               onClick={() => setType(value)}
-              disabled={submitting}
+              disabled={submitting || inputMode === "existing"}
               className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
                 type === value
                   ? "border-primary bg-primary text-primary-foreground"
@@ -272,6 +393,9 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
             </button>
           ))}
         </div>
+        {inputMode === "existing" && (
+          <p className="text-xs text-muted-foreground">Existing positions are always registered as a buy.</p>
+        )}
       </div>
 
       <div className="grid gap-2">
@@ -310,6 +434,7 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
           {([
             { value: "amount", label: "Amount invested" },
             { value: "manual", label: "Units + Price" },
+            { value: "existing", label: "Existing position" },
           ] as const).map(({ value, label }) => (
             <button
               key={value}
@@ -362,7 +487,7 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
             />
           </div>
         </div>
-      ) : (
+      ) : inputMode === "amount" ? (
         <div className="grid gap-2">
           <label htmlFor="investment-total-amount" className="text-sm font-medium">
             Amount invested
@@ -392,6 +517,215 @@ export default function AddInvestmentForm({ accountId, onAdded, onCancel }: Prop
             <p className="text-xs text-muted-foreground">
               Select an asset and date to see the price.
             </p>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">I know my…</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setExistingKnows("units_avg")}
+                disabled={submitting}
+                className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                  existingKnows === "units_avg"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input bg-background text-foreground hover:bg-muted"
+                }`}
+              >
+                Units + Avg cost
+              </button>
+              <button
+                type="button"
+                onClick={() => setExistingKnows("units_total")}
+                disabled={submitting}
+                className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                  existingKnows === "units_total"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input bg-background text-foreground hover:bg-muted"
+                }`}
+              >
+                Units + Total
+              </button>
+              <button
+                type="button"
+                onClick={() => setExistingKnows("value")}
+                disabled={submitting}
+                className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                  existingKnows === "value"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input bg-background text-foreground hover:bg-muted"
+                }`}
+              >
+                Current value
+              </button>
+            </div>
+          </div>
+
+          {existingKnows === "units_avg" ? (
+            <div className="grid gap-3">
+              <div className="grid gap-2">
+                <label htmlFor="existing-units" className="text-sm font-medium">
+                  Units held
+                </label>
+                <Input
+                  id="existing-units"
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={existingUnits}
+                  onChange={(e) => setExistingUnits(e.target.value)}
+                  placeholder="0"
+                  disabled={submitting}
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="existing-avg-cost" className="text-sm font-medium">
+                  Average cost per unit
+                </label>
+                <Input
+                  id="existing-avg-cost"
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={existingAvgCost}
+                  onChange={(e) => setExistingAvgCost(e.target.value)}
+                  placeholder="0.00"
+                  disabled={submitting}
+                />
+              </div>
+              {existingUnits && existingAvgCost && parseFloat(existingUnits) > 0 && parseFloat(existingAvgCost) > 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Total invested: <span className="font-medium tabular-nums">{(parseFloat(existingUnits) * parseFloat(existingAvgCost)).toFixed(2)} €</span>
+                </p>
+              ) : null}
+            </div>
+          ) : existingKnows === "units_total" ? (
+            <div className="grid gap-3">
+              <div className="grid gap-2">
+                <label htmlFor="existing-units-2" className="text-sm font-medium">
+                  Units held
+                </label>
+                <Input
+                  id="existing-units-2"
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={existingUnits}
+                  onChange={(e) => setExistingUnits(e.target.value)}
+                  placeholder="0"
+                  disabled={submitting}
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="existing-total" className="text-sm font-medium">
+                  Total invested
+                </label>
+                <Input
+                  id="existing-total"
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={existingTotal}
+                  onChange={(e) => setExistingTotal(e.target.value)}
+                  placeholder="0.00"
+                  disabled={submitting}
+                />
+              </div>
+              {existingUnits && existingTotal && parseFloat(existingUnits) > 0 && parseFloat(existingTotal) > 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  Average cost: <span className="font-medium tabular-nums">{(parseFloat(existingTotal) / parseFloat(existingUnits)).toFixed(6)} €</span> per unit
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              <div className="grid gap-2">
+                <label htmlFor="existing-current-value" className="text-sm font-medium">
+                  Current value of position
+                </label>
+                <Input
+                  id="existing-current-value"
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={existingCurrentValue}
+                  onChange={(e) => setExistingCurrentValue(e.target.value)}
+                  placeholder="0.00"
+                  disabled={submitting}
+                />
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="existing-total-from-value" className="text-sm font-medium">
+                  Total invested
+                </label>
+                <Input
+                  id="existing-total-from-value"
+                  type="number"
+                  inputMode="decimal"
+                  step="any"
+                  value={existingTotal}
+                  onChange={(e) => setExistingTotal(e.target.value)}
+                  placeholder="0.00"
+                  disabled={submitting}
+                />
+              </div>
+              {existingPriceLoading ? (
+                <p className="text-xs text-muted-foreground">Looking up price…</p>
+              ) : existingPrice != null ? (
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  <p>
+                    Price on {executedAt}: <span className="font-medium tabular-nums">{existingPrice.toFixed(6)} €</span>
+                  </p>
+                  {existingCurrentValue && parseFloat(existingCurrentValue) > 0 ? (
+                    <>
+                      <p>
+                        Derived units: <span className="font-medium tabular-nums">{(parseFloat(existingCurrentValue) / existingPrice).toFixed(6)}</span>
+                      </p>
+                      {existingTotal && parseFloat(existingTotal) > 0 ? (
+                        <p>
+                          Avg cost: <span className="font-medium tabular-nums">{(parseFloat(existingTotal) / (parseFloat(existingCurrentValue) / existingPrice)).toFixed(6)} €</span> per unit
+                        </p>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
+              ) : assetId && executedAt ? (
+                <div className="grid gap-2">
+                  <label htmlFor="existing-manual-price" className="text-sm font-medium">
+                    Current price per unit
+                  </label>
+                  <Input
+                    id="existing-manual-price"
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    value={existingManualPrice}
+                    onChange={(e) => setExistingManualPrice(e.target.value)}
+                    placeholder="0.00"
+                    disabled={submitting}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    No price found for this date — enter the current price manually to derive units.
+                  </p>
+                  {existingManualPrice && parseFloat(existingManualPrice) > 0 && existingCurrentValue && parseFloat(existingCurrentValue) > 0 ? (
+                    <div className="text-xs text-muted-foreground space-y-0.5">
+                      <p>
+                        Derived units: <span className="font-medium tabular-nums">{(parseFloat(existingCurrentValue) / parseFloat(existingManualPrice)).toFixed(6)}</span>
+                      </p>
+                      {existingTotal && parseFloat(existingTotal) > 0 ? (
+                        <p>
+                          Avg cost: <span className="font-medium tabular-nums">{(parseFloat(existingTotal) / (parseFloat(existingCurrentValue) / parseFloat(existingManualPrice))).toFixed(6)} €</span> per unit
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Select an asset and date to look up the price.</p>
+              )}
+            </div>
           )}
         </div>
       )}

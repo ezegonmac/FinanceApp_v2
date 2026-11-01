@@ -145,15 +145,29 @@ export function groupMarkers(
   const result: MarkerOrGroup[] = [];
 
   for (const group of groups) {
-    const y = findNearestPrice(group.anchorTimestamp, priceData);
-
     if (group.markers.length === 1) {
+      const marker = group.markers[0]!;
+      // Place single markers at their unit_price so the user can see
+      // if they bought above or below the price line.
+      const y = parseFloat(marker.unit_price);
+
       result.push({
         kind: "single",
-        marker: group.markers[0]!,
-        position: { x: group.markers[0]!.processed_at, y },
+        marker,
+        position: { x: marker.processed_at, y },
       });
     } else {
+      // For groups, use the average unit_price across all markers in the group
+      const totalUnits = group.markers.reduce(
+        (sum, m) => sum + parseFloat(m.units),
+        0,
+      );
+      const weightedPrice = group.markers.reduce(
+        (sum, m) => sum + parseFloat(m.units) * parseFloat(m.unit_price),
+        0,
+      );
+      const y = totalUnits > 0 ? weightedPrice / totalUnits : findNearestPrice(group.anchorTimestamp, priceData);
+
       const totalAmount = group.markers.reduce(
         (sum, m) => sum + parseFloat(m.total_amount),
         0,

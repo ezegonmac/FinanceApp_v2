@@ -410,14 +410,16 @@ export function PriceChart({ asset, timeframe, contributions, showMarkers, start
   }
 
   return (
-    <div className={chartClassName ? "flex flex-col h-full" : "space-y-3"}>
-      <div ref={chartRef} className={chartClassName ?? "h-96 w-full"} />
+    <div className="flex flex-col h-full min-h-0 overflow-y-auto">
+      <div ref={chartRef} className={chartClassName ?? "h-96 w-full"} style={{ flexShrink: 0 }} />
       {selectedDetail && (
-        <MarkerDetailCard
-          detail={selectedDetail}
-          currency={asset?.currency ?? "USD"}
-          onDismiss={() => setSelectedDetail(null)}
-        />
+        <div className="shrink-0 pt-3">
+          <MarkerDetailCard
+            detail={selectedDetail}
+            currency={asset?.currency ?? "USD"}
+            onDismiss={() => setSelectedDetail(null)}
+          />
+        </div>
       )}
     </div>
   );
@@ -450,7 +452,7 @@ function MarkerDetailCard({
   const avgPrice = totalUnits > 0 ? totalAmount / totalUnits : 0;
 
   return (
-    <div className="rounded-lg border bg-card p-4 text-card-foreground space-y-4">
+    <div className="shrink-0 rounded-lg border bg-card p-4 text-card-foreground space-y-4">
       {/* Header row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
