@@ -133,13 +133,17 @@ Canonical requirements live at `openspec/specs/monthly-model/spec.md` and the
 
 ## Investments & Positions (`INV`)
 
+Canonical requirements live at `openspec/specs/investments/spec.md`.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| INV-001 | Buy/Sell operations | Implemented & tested | investments.md |
-| INV-002 | Positions per account | Implemented & tested | investments.md |
-| INV-003 | Price check on create | Implemented | investments.md |
-| INV-004 | Pending investment processing | Implemented & tested | investments.md |
-| INV-005 | Sell-units validation | Unverified | investments.md |
+| INV-001 | Create a BUY or SELL (manual / amount mode) | Implemented & tested | openspec specs |
+| INV-002 | Operation lifecycle and balance effect | Implemented & tested | openspec specs |
+| INV-003 | Sell unit validation | Implemented & tested | openspec specs |
+| INV-004 | Cancel an operation (balance reversal) | Implemented & tested | openspec specs |
+| INV-005 | Process pending investments via daily job | Implemented & tested | openspec specs |
+| INV-006 | View positions per account | Implemented & tested | openspec specs |
+| INV-007 | List operations (paginated, asset filter) | Implemented (untested) | openspec specs |
 
 ## Portfolio Analytics (`PFA`)
 

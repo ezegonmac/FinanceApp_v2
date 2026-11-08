@@ -2300,3 +2300,75 @@ history view, and debug toggle are untested.
   implemented. Exposure re-sync's canonical ID is `ADM-004` (classified as an
   admin operation; referenced from Portfolio Analytics). No OpenSpec change. No
   business-rule guesses required.
+
+
+---
+
+## Detailed Functional Analysis — Area F: Investments & Positions
+
+> **Status:** Evidence-based analysis traced from source. This area is
+> **property-tested** (`investments.property.test.ts`,
+> `positions.property.test.ts`, `pendingInvestments.test.ts`) and matches the
+> legacy `specs/investments.md`. Files: `Investment` model;
+> `app/api/accounts/[id]/investments/route.ts` (GET, POST, PATCH);
+> `.../positions/route.ts`; `.../price-check/route.ts`;
+> `_lib/jobs/processors/pendingInvestments.ts`.
+
+### 1. Functional Overview
+
+Records BUY/SELL operations of tracked assets per account, with cash impact on
+the account balance and the same PENDING→COMPLETED monthly lifecycle as the
+ledger. Positions are derived per account+asset.
+
+### 2. Behavior (all [Verified])
+
+- **Create (POST):** two input modes — **manual** (`units` + `unit_price` →
+  `total_amount = units × unit_price`) or **amount** (`total_amount` +
+  `executed_at` → looks up/syncs the asset price at that date to derive
+  `units`/`unit_price`). Verifies account and asset exist (404 otherwise).
+- **Lifecycle:** current/past month → COMPLETED with balance effect (BUY
+  decrements, SELL increments) + snapshot recalc; future month → PENDING, no
+  balance effect.
+- **SELL validation:** rejects a SELL exceeding net held units (sum COMPLETED
+  BUY − SELL) with 400.
+- **Cancel (PATCH, `action: "cancel"`):** PENDING → CANCELLED (no balance
+  change); COMPLETED → CANCELLED with reversed balance (BUY reversal increments,
+  SELL reversal decrements) + snapshot recalc; already-CANCELLED → 400.
+- **Pending processing:** `pendingInvestments.ts` applies future-month
+  investments on the daily job (status-guarded claim), consistent with LED-009.
+- **Positions (GET .../positions):** aggregates net units, invested amount, and
+  current value (latest price) per asset; excludes zero-unit positions.
+- **Exposure side-effect:** on BUY, best-effort `syncAssetExposure` for the
+  current period (non-blocking; errors swallowed) — feeds Portfolio Analytics.
+- **List (GET):** paginated (cursor), optional `asset_id` filter.
+
+### 3. Interactions
+
+- **Accounts (A):** balance mutation (existence checked).
+- **Market Data (E):** price lookup/sync for amount-mode and positions valuation.
+- **Monthly Model (D):** snapshot recalc; `total_investments_in/out`.
+- **Scheduled Jobs (X-Jobs):** pending-investment processing.
+- **Portfolio Analytics (G):** positions + the BUY exposure-sync feed it.
+
+### 4. Edge Cases / Notes
+
+- **[Verified] executed_at handling** differs by asset price frequency (DAILY
+  aligns to the price-point timestamp; intraday uses the full datetime) so chart
+  markers line up.
+- **[Verified] Negative balance allowed on BUY** (no balance check), consistent
+  with the ledger.
+- **[Verified] CANCELLED is a real, used lifecycle here** (unlike the ledger,
+  where it is reserved for a future soft-delete).
+- **[Unverified] Rounding:** `total_amount` rounded to 2 dp, derived units to 6
+  dp; exact rounding edge behavior not exhaustively traced (but property-tested).
+
+### 5. Test Coverage
+
+**[Verified] Good.** Property tests cover create/cancel balance effects,
+positions aggregation, and pending processing. Among the strongest-covered areas.
+
+### 6. Decisions (applied; code is source of truth)
+
+- Documented investments as implemented and tested. No OpenSpec change (behavior
+  matches the legacy spec and tests; no agreed-target cleanup identified). No
+  business-rule guesses required.

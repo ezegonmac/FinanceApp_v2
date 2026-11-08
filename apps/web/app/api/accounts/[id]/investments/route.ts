@@ -46,6 +46,7 @@ interface RouteContext {
 }
 
 // GET /api/accounts/:id/investments
+// INV-007 List Operations
 export async function GET(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
@@ -96,6 +97,9 @@ export async function GET(request: Request, { params }: RouteContext) {
 }
 
 // POST /api/accounts/:id/investments
+// INV-001 Create a BUY or SELL Operation
+// INV-002 Operation Lifecycle and Balance Effect
+// INV-003 Sell Unit Validation
 export async function POST(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
@@ -395,6 +399,7 @@ export function OPTIONS() {
 
 
 // PATCH /api/accounts/:id/investments (cancel)
+// INV-004 Cancel an Operation
 export async function PATCH(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;

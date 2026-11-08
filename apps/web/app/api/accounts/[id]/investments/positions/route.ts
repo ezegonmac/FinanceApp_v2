@@ -10,6 +10,7 @@ interface RouteContext {
 }
 
 // GET /api/accounts/:id/investments/positions
+// INV-006 View Positions
 export async function GET(_request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
