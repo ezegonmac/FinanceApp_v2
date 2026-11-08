@@ -18,7 +18,12 @@ Domain model (UML)
 
 # Features
 
-This section is the project backlog and single source of truth for feature status.
+> **Legacy note.** This Features list is **legacy** and retained for historical
+> reference. The canonical functional backlog is now
+> [`docs/product-backlog.md`](docs/product-backlog.md), which carries permanent
+> requirement IDs and status. This list has not been fully migrated or
+> re-validated; prefer the backlog and OpenSpec specs for current status. See
+> [Development Workflow](#development-workflow).
 
 Features that need further clarification can reference a spec file using `[spec:name]`:
 
@@ -339,21 +344,61 @@ npm install zod --workspace=apps/web
 
 # Spec Workflow
 
-The Features section acts as the project backlog. Spec files are optional — only create one when a feature needs more thought before implementation.
+> **Deprecated / Legacy.** The free-form spec workflow below (the Features list
+> above plus one-page files under `/specs/<feature-name>.md` linked via
+> `[spec:name]`) is **no longer the recommended workflow**. It is kept for
+> historical reference only. New functional work follows
+> [Development Workflow](#development-workflow) (OpenSpec). The `/specs/` files
+> have not been migrated or validated and are not the source of truth.
+>
+> <details><summary>Legacy spec workflow (historical)</summary>
+>
+> The Features section acted as the project backlog. Spec files were optional —
+> created only when a feature needed more thought before implementation.
+> Convention: append `[spec:feature-name]` to a backlog entry to link its spec
+> (e.g. `- Monthly Splits across accounts 🟨 [spec:monthly-splits]`). Specs lived
+> under `/specs/<feature-name>.md`; see `/specs/_example.md` for the structure.
+>
+> </details>
 
-**Convention:** append `[spec:feature-name]` to a backlog entry to link its spec.
+# Development Workflow
 
-```
-- Monthly Splits across accounts 🟨 [spec:monthly-splits]
-```
+We are currently in a **documentation and discovery phase**: documenting existing
+functionality, reviewing the current implementation, and establishing reliable
+specifications **before** starting new feature development. We have adopted
+**OpenSpec** as the canonical, spec-driven workflow for all future functional
+changes.
 
-**Rules:**
-- Specs live under `/specs/<feature-name>.md`.
-- Write a spec before starting implementation when the requirements aren't obvious.
-- A feature can be marked ✅ once its acceptance criteria are all met.
-- Keep specs short. One page is usually enough.
+### Where things live
 
-See `/specs/example.md` for the standard structure.
+| Location | Responsibility |
+|---|---|
+| [`docs/product-backlog.md`](docs/product-backlog.md) | Central functional **backlog** and ID registry — including ideas not yet approved. Permanent IDs follow the project's [ID conventions](docs/project-documentation-and-sdd-plan.md). |
+| `openspec/specs/` | **Canonical approved** functional specifications (what the system is agreed to do). |
+| `openspec/changes/` | Proposed and approved **changes** currently being specified or implemented. |
+| [`docs/`](docs/) | Project documentation: the SDD plan, the current-state assessment, discovery reports, and methodology. |
+| `.kiro/steering/` | Persistent instructions and project context for Kiro. |
+| `/specs/` | **Legacy** free-form feature notes, retained for reference (see note above). |
+
+### Creating a new feature
+
+1. **Capture the idea** — record a sufficiently defined idea in
+   [`docs/product-backlog.md`](docs/product-backlog.md) and assign it a permanent
+   ID per the ID conventions.
+2. **Explore and clarify** — investigate the existing implementation and clarify
+   requirements before proposing changes.
+3. **Specify the change** — create an OpenSpec change proposal with requirements
+   and scenarios (`/opsx-propose`).
+4. **Review and approve** — review the proposal before implementation begins.
+5. **Implement** — develop the feature from the approved change and its tasks.
+6. **Validate** — run the relevant tests and verify the implementation satisfies
+   the approved requirements.
+7. **Complete** — update the canonical `openspec/specs/` to reflect the
+   implemented behavior and archive the completed change per the OpenSpec
+   workflow.
+
+The methodology behind this is documented in
+[`docs/project-documentation-and-sdd-plan.md`](docs/project-documentation-and-sdd-plan.md).
 
 # Screenshots
 

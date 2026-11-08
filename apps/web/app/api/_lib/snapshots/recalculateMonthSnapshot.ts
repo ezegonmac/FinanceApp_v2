@@ -17,6 +17,8 @@ type RecalculateAllOptions = {
  * @param accountId - The account to recalculate for
  * @param monthId   - The Month.id to recalculate
  */
+// LED-011 MonthSnapshot Aggregation
+// LED-012 Edits in Current and Past Months
 export async function recalculateMonthSnapshot(
   accountId: number,
   monthId: number,

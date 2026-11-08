@@ -36,6 +36,21 @@
 - `clsx` + `tailwind-merge` via `cn()` utility (`apps/web/lib/utils.ts`)
 - **Inter** (sans) + **JetBrains Mono** (mono) fonts via `next/font/google`
 
+## Authentication
+
+- **Auth.js / NextAuth v5** (`next-auth` v5 beta in `apps/web`) — single-user, credential-based authentication.
+- Credentials and signing secret are provided via environment variables (see Environment Variables below).
+
+## Market Data
+
+- **`yahoo-finance2`** (in `apps/web`) — source for asset search, historical prices, and portfolio exposure data.
+
+## Testing
+
+- **Vitest** — test runner for `apps/web` (`test` / `test:watch` scripts).
+- **`@vitest/coverage-v8`** — coverage reporting.
+- **fast-check** — property-based testing (e.g. `apps/web/app/api/admin/exposure-resync/resync.property.test.ts`).
+
 ## Database
 
 - **MariaDB** (MySQL-compatible) running in Docker on port 3309
@@ -46,38 +61,45 @@
 
 ## Common Commands
 
+Root-level scripts (defined in the root `package.json`, mostly turbo wrappers):
+
 ```bash
-# Development
-npm run dev           # Start all apps (turbo)
-
-# Build & Quality
-npm run build         # Build all apps (turbo)
-npm run lint          # Lint all packages
-npm run check-types   # Type-check all packages
+npm run dev           # Start all apps (turbo run dev)
+npm run build         # Build all apps (turbo run build)
+npm run lint          # Lint all packages (turbo run lint)
+npm run check-types   # Type-check all packages (turbo run check-types)
 npm run format        # Prettier format all .ts/.tsx/.md
-
-# Database (run from repo root)
 npm run db:start      # docker compose up -d
 npm run db:stop       # docker compose down
-npm run db:reset      # Wipe DB volumes and restart
-
-# Database migrations (run from packages/db)
-npm run db:generate   # prisma generate (auto-runs before dev/build)
-npm run db:migrate    # prisma migrate dev
-npm run db:deploy     # prisma migrate deploy
-npm run db:force_reset  # prisma migrate reset --force
+npm run db:reset      # docker compose down -v && docker compose up -d
 ```
+
+Package-level database scripts live in `packages/db` and are typically run via turbo (e.g. `npx turbo db:migrate -- --name <name>`):
+
+```bash
+db:generate    # prisma generate (turbo runs it before dev/build)
+db:migrate     # prisma migrate dev
+db:deploy      # prisma migrate deploy
+db:force_reset # prisma migrate reset --force
+```
+
+Per-app test scripts live in `apps/web` (`npm run test`, `npm run test:watch`).
+
+For full setup and run instructions, see `README.md` rather than duplicating them here.
 
 ## Environment Variables
 
 Root `.env` / `.env.example` (Docker compose + Prisma client):
 ```
-DB_HOST=localhost, DB_PORT=3309, DB_NAME, DB_USER, DB_PASSWORD, DB_ROOT_PASSWORD, CRON_SECRET, WEB_PORT=3000
+DB_HOST, DB_PORT=3309, DB_NAME, DB_USER, DB_PASSWORD, DB_ROOT_PASSWORD, CRON_SECRET, WEB_PORT
 ```
 
-`apps/web/.env`:
+`apps/web/.env` / `.env.example`:
 ```
-CRON_SECRET   # Used to authorize the internal cron endpoint
+CRON_SECRET          # Authorizes the internal cron endpoint
+AUTH_SECRET          # Signs/encrypts Auth.js session tokens
+AUTH_USER_EMAIL      # The single user's login email
+AUTH_USER_PASSWORD   # The single user's login password
 ```
 
 `packages/db` uses a separate `.env` with `DATABASE_URL` for Prisma migrations.
@@ -87,3 +109,15 @@ CRON_SECRET   # Used to authorize the internal cron endpoint
 - Strict TypeScript throughout; all packages use `@repo/typescript-config`
 - ESM modules (`"type": "module"` in package.json)
 - Path alias `@/` maps to `apps/web/` root
+
+## Shell and Command Conventions
+
+- On Windows, use Git Bash as the preferred shell.
+- Prefer Bash and standard Unix utilities over PowerShell-specific commands.
+- Use POSIX-compatible command syntax.
+- Prefer simple, readable commands over complex command chains.
+- Use existing project scripts for build, test, lint, and database operations.
+- Prefer read-only commands during discovery and analysis.
+- Avoid destructive commands unless explicitly authorized.
+- Do not install dependencies, reset databases, delete files, or modify Git history without explicit authorization.
+- When a command fails, investigate the cause rather than automatically switching shells or trying unrelated alternatives.

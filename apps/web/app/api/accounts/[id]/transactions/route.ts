@@ -10,6 +10,7 @@ interface RouteContext {
 }
 
 // GET /api/accounts/:id/transactions
+// LED-013 Canonical Ledger Endpoints
 export async function GET(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;

@@ -23,6 +23,7 @@ interface RouteContext {
 }
 
 // GET /api/accounts/:id/expenses
+// LED-013 Canonical Ledger Endpoints
 export async function GET(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
@@ -81,6 +82,10 @@ export async function GET(request: Request, { params }: RouteContext) {
 }
 
 // POST /api/accounts/:id/expenses
+// LED-002 Create an Expense
+// LED-010 Balance Mutation Semantics
+// LED-011 MonthSnapshot Aggregation
+// LED-014 Analytics-Adjusted Expense Value
 export async function POST(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;

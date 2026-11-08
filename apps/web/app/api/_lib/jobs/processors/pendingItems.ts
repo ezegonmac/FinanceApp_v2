@@ -2,6 +2,7 @@ import { prisma } from "@repo/db";
 import type { ProcessCounts } from "../types";
 import { getErrorMessage } from "../utils";
 
+// LED-009 Process Pending Items via the Daily Job
 export async function applyPendingTransactionsForMonth(
   monthId: number,
   jobRunId: number
@@ -72,6 +73,7 @@ export async function applyPendingTransactionsForMonth(
   return counts;
 }
 
+// LED-009 Process Pending Items via the Daily Job
 export async function applyPendingIncomesForMonth(
   monthId: number,
   jobRunId: number
@@ -137,6 +139,7 @@ export async function applyPendingIncomesForMonth(
   return counts;
 }
 
+// LED-009 Process Pending Items via the Daily Job
 export async function applyPendingExpensesForMonth(
   monthId: number,
   jobRunId: number

@@ -3,7 +3,7 @@
 ## Root Layout
 
 ```
-FinanceApp_v2/
+<repo-root>/
 ├── apps/
 │   ├── web/          # Main Next.js application
 │   └── docs/         # Placeholder docs app (boilerplate)
@@ -13,6 +13,10 @@ FinanceApp_v2/
 │   ├── utils/        # Shared utilities
 │   ├── eslint-config/
 │   └── typescript-config/
+├── docs/             # Project documentation (SDD plan, assessments)
+├── specs/            # Feature specs (backlog-linked)
+├── docker/           # Docker support files
+├── docker-compose.yml # Local MariaDB service (used by db:start/db:stop)
 ├── package.json      # Root workspace scripts
 ├── turbo.json        # Turbo pipeline config
 └── design.md         # Brand tokens, design system reference
@@ -25,12 +29,15 @@ apps/web/
 ├── app/
 │   ├── layout.tsx              # Root layout: nav, fonts, DebugProvider
 │   ├── page.tsx                # Home/dashboard
+│   ├── login/                  # Login page (Auth.js credentials)
 │   ├── accounts/               # Account list + [id] detail
 │   ├── admin/                  # Admin panel (job trigger, debug)
 │   ├── expenses/[id]/          # Expense detail
 │   ├── incomes/[id]/           # Income detail
 │   ├── transactions/[id]/      # Transaction detail
 │   ├── recurrent/              # Recurrent items overview
+│   ├── investments/            # Investments & portfolio views
+│   ├── financial-products/     # Tracked assets / price charts
 │   ├── months/
 │   │   ├── current/            # Redirect to current month
 │   │   └── [year]/[month]/     # Month detail breakdown
@@ -41,15 +48,20 @@ apps/web/
 │       ├── _lib/               # Server-side logic (NOT route handlers)
 │       │   ├── jobs/           # Daily job + per-type processors
 │       │   └── snapshots/      # MonthSnapshot recalculation
-│       ├── accounts/           # GET, POST + nested [id]/expenses|incomes|transactions
+│       ├── auth/               # Auth.js (NextAuth) handler
+│       ├── accounts/           # GET, POST + nested [id]/expenses|incomes|transactions|investments
 │       ├── expenses/           # GET, POST, PATCH, DELETE
 │       ├── incomes/
 │       ├── transactions/
+│       ├── investments/        # Investment operations + portfolio endpoints
+│       ├── financial-products/ # Asset search, prices, tracking
 │       ├── recurrent-expenses/
 │       ├── recurrent-incomes/
 │       ├── recurrent-transactions/
+│       ├── recurrent-investments/
 │       ├── months/             # Month upsert + nested queries
 │       ├── metrics/            # Balances, monthly-summary, balance-series
+│       ├── admin/              # Admin operations (e.g. exposure re-sync)
 │       ├── todos/
 │       └── internal/jobs/      # Cron-only endpoint (Bearer auth)
 ├── components/

@@ -1,0 +1,5 @@
+schema: spec-driven
+created: 2026-11-02
+goal: "Harden create-time ledger validation to match edit: reject non-positive
+  amounts, require expense kind, validate account existence, and reject
+  self-transfers"

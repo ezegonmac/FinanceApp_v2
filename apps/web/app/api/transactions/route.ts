@@ -31,6 +31,9 @@ export async function GET() {
 }
 
 // POST /api/transactions
+// LED-003 Create a Transaction (Transfer)
+// LED-010 Balance Mutation Semantics
+// LED-011 MonthSnapshot Aggregation
 export async function POST(request: Request) {
   try {
     const body = await request.json();

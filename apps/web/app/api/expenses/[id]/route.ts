@@ -62,6 +62,7 @@ export async function GET(request: Request, { params }: RouteContext) {
   }
 }
 
+// LED-007 Edit a Ledger Item
 export async function PUT(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
@@ -163,6 +164,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
   }
 }
 
+// LED-008 Delete a Ledger Item
 export async function DELETE(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;

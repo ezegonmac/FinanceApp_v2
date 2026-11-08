@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-11-02
+goal: Preserve finalized status when a ledger write recomputes an
+  already-finalized MonthSnapshot

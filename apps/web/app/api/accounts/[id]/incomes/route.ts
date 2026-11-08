@@ -20,6 +20,7 @@ interface RouteContext {
 }
 
 // GET /api/accounts/:id/incomes
+// LED-013 Canonical Ledger Endpoints
 export async function GET(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
@@ -78,6 +79,9 @@ export async function GET(request: Request, { params }: RouteContext) {
 }
 
 // POST /api/accounts/:id/incomes
+// LED-001 Create an Income
+// LED-010 Balance Mutation Semantics
+// LED-011 MonthSnapshot Aggregation
 export async function POST(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
