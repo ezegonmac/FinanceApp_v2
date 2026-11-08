@@ -183,6 +183,7 @@ export async function recalculateAllSnapshotsForMonth(
   );
 }
 
+// MON-005 Snapshot Finalization Lifecycle
 export async function finalizeMonthSnapshots(
   year: number,
   month: number

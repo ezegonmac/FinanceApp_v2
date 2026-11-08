@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-11-08
+goal: Make month endpoints side-effect-free on read and advertise accurate Allow
+  headers

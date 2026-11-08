@@ -11,6 +11,7 @@ const budgetSchema = z.object({
 });
 
 // GET /api/months/:year/:month/budget
+// MON-003 Monthly Budget
 export async function GET(_request: Request, { params }: Params) {
   const { year: yearStr, month: monthStr } = await params;
   const year = parseInt(yearStr, 10);

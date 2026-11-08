@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 // GET /api/months/:year/:month
+// MON-002 Month Detail Read
 export async function GET(
     request: Request,
   { params }: { params: Promise<{ year: string; month: string }> }

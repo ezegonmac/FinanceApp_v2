@@ -6,6 +6,7 @@ import { recalculateAllSnapshotsForMonth } from "@/app/api/_lib/snapshots/recalc
 export const dynamic = "force-dynamic";
 
 // GET /api/months/:year/:month/snapshots
+// MON-004 Month Snapshots
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ year: string; month: string }> }

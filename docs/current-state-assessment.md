@@ -1756,3 +1756,107 @@ All resolved by human review:
    type-check failures). (Target.)
 6. ~~**Backlog correction**~~ → **Yes**, move ACC-004 (enable/disable) from
    Planned to Implemented in `docs/product-backlog.md`.
+
+
+---
+
+## Detailed Functional Analysis — Area D: Monthly Model & Snapshots
+
+> **Status:** Evidence-based behavioral analysis traced from source. Tags:
+> **[Verified]** (read from code), **[Unverified]**, or open question. No
+> automated tests exist for this area. Snapshot mutation mechanics overlap with
+> Ledger (LED-011/LED-012) and are not re-specified here — this area owns the
+> Month entity, the budget, and the snapshot lifecycle/read surface.
+>
+> Files traced: `Month`, `MonthSnapshot`, `MonthBudget` models; `app/api/months/route.ts`;
+> `app/api/months/[year]/[month]/route.ts`; `.../budget/route.ts`;
+> `.../snapshots/route.ts`; `.../{incomes,expenses,transactions}/route.ts`;
+> `app/api/_lib/snapshots/recalculateMonthSnapshot.ts` (incl.
+> `recalculateAllSnapshotsForMonth`, `finalizeMonthSnapshots`).
+
+### 1. Functional Overview
+
+The monthly model anchors every financial item to a `Month` (year + month,
+unique). A `MonthBudget` (optional, one per month) stores a spending target. A
+`MonthSnapshot` (one per account+month) aggregates completed totals — incomes,
+expenses, transfers in/out, investments in/out — plus an `is_final` finalized
+flag and `closed_at`. The area provides month creation/listing, a month detail
+read, budget get/set, month-scoped item listings, and the snapshot read surface.
+
+### 2. Main Components and Execution Flow
+
+- **`GET /api/months`** — all months, newest first. **`POST /api/months`** —
+  upserts a (year, month). (OPTIONS advertises only `POST` — see defects.)
+- **`GET /api/months/[year]/[month]`** — returns the month, **upserting it if
+  absent** (a read with a create side effect).
+- **`GET/PUT /api/months/[year]/[month]/budget`** — read / upsert the month's
+  budget amount (nonnegative).
+- **`GET /api/months/[year]/[month]/snapshots`** — returns per-account snapshots;
+  for the **current** month it recalculates all active-account snapshots first
+  (live values) before returning.
+- **`GET /api/months/[year]/[month]/{incomes,expenses,transactions}`** —
+  month-scoped item reads.
+- **Snapshot service (`_lib/snapshots`)**: `recalculateMonthSnapshot`
+  (per account+month, from COMPLETED rows), `recalculateAllSnapshotsForMonth`
+  (all active accounts), `finalizeMonthSnapshots` (sets `is_final`/`closed_at`).
+
+### 3. Snapshot Lifecycle
+
+- **[Verified]** The daily job recalculates the **current** month's snapshots as
+  provisional (`is_final = false`) and calls `finalizeMonthSnapshots(previous)`
+  to lock the prior month (`is_final = true`, `closed_at` set).
+- **[Verified]** Snapshot GET refreshes only the **current** month before
+  returning; past months are served as stored.
+- **[Verified]** Snapshots are derived — recomputed from COMPLETED items, never
+  hand-edited. (Mutation detail is owned by Ledger LED-011; the finalized-status
+  preservation gap is tracked by the Ledger change
+  `ledger-finalized-snapshot-preservation`, LED-012.)
+
+### 4. Budget
+
+- **[Verified]** One optional `MonthBudget` per month (`month_id @unique`),
+  `amount` `Decimal(18,2)` nonnegative. `PUT` upserts; `GET` returns `{budget:
+  null}` when absent. Consumed by `metrics/expenses-by-kind` (Area H).
+
+### 5. Monthly Splits
+
+- **[Verified] Not implemented.** No model, route, or logic exists (confirmed by
+  full-source search — only `String.split`). Remains a backlog idea
+  (`MON` area, Planned). Per earlier decision it belongs to this area, as a
+  single feature (planned + real) with a Recurrent (C) execution dependency.
+
+### 6. Interactions with Other Areas
+
+- **Ledger (B) / Investments (F):** produce the COMPLETED rows snapshots
+  aggregate; they call `recalculateMonthSnapshot` after mutations.
+- **Scheduled Jobs (X-Jobs):** drives current-month recalculation and
+  previous-month finalization.
+- **Metrics (H):** reads budgets and snapshots.
+- **Accounts (A):** snapshots are per active account.
+
+### 7. Edge Cases and Potential Defects
+
+- **[Verified — defect] `GET /api/months/[year]/[month]` upserts on read** — a
+  GET has the side effect of creating a Month row. Convenient but surprising;
+  means merely viewing a month materializes it.
+- **[Verified — defect] `POST /api/months` OPTIONS advertises only `Allow:
+  POST`** though `GET` is also implemented; `[year]/[month]` OPTIONS advertises
+  only `GET`. Minor `Allow`-header inaccuracies.
+- **[Verified] No pagination on `GET /api/months`** (returns all).
+- **[Unverified] Finalized-status downgrade on past-month edits** — the known
+  LED-012 behavior; tracked under the Ledger change, noted here for the lifecycle.
+- **[Verified] Monthly splits** entirely unbuilt (Section 5).
+
+### 8. Test Coverage and Gaps
+
+**[Verified] Zero automated tests** for months/budget/snapshots. Snapshot
+aggregation correctness and finalization are the highest-value untested paths
+(partly covered conceptually by the Ledger area's intent).
+
+### 9. Decisions (applied; code is source of truth)
+
+- Documented the month/budget/snapshot behavior as implemented. The two
+  `Allow`-header inaccuracies and the GET-upserts-on-read behavior are recorded
+  as **target** cleanups (small), proposed as an OpenSpec change. Monthly splits
+  stays **Planned** (not specified as current behavior). No business-rule
+  guesses were required.

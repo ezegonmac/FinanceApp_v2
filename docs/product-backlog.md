@@ -98,13 +98,18 @@ that spec.
 
 ## Monthly Model & Snapshots (`MON`)
 
+Canonical requirements live at `openspec/specs/monthly-model/spec.md` and the
+`monthly-model-*` OpenSpec changes.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| MON-001 | Month model & detail view | Implemented (untested) | assessment inventory, README |
-| MON-002 | Monthly budget | Implemented (untested) | assessment inventory, README |
-| MON-003 | Month snapshots (aggregation) | Implemented (untested) | assessment inventory |
-| MON-004 | Snapshot finalization lifecycle | Unverified | README (documented) |
-| MON-005 | Monthly splits (planned + real) | Planned | README 🟨 |
+| MON-001 | Month entity (list + upsert) | Implemented (untested; Allow-header fix Proposed) | openspec specs/changes |
+| MON-002 | Month detail read | Implemented (untested; side-effect-free read Proposed) | openspec specs/changes |
+| MON-003 | Monthly budget | Implemented (untested) | openspec specs |
+| MON-004 | Month snapshots (aggregation + read) | Implemented (untested) | openspec specs |
+| MON-005 | Snapshot finalization lifecycle | Implemented (untested) | openspec specs |
+| MON-006 | Month-scoped item reads | Implemented (untested) | openspec specs |
+| MON-007 | Monthly splits (planned + real) | Planned | README 🟨 (not yet specified) |
 
 ## Market Data & Assets (`MKT`)
 

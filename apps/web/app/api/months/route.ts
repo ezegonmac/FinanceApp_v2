@@ -10,6 +10,7 @@ const monthSchema = z.object({
 });
 
 // GET /api/months
+// MON-001 Month Entity
 export async function GET() {
   try {
     const months = await prisma.month.findMany({
