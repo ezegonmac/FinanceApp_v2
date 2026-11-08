@@ -12,6 +12,7 @@ const resyncSchema = z.object({
 });
 
 // POST /api/admin/exposure-resync
+// ADM-004 Admin Exposure Re-sync
 export async function POST(request: Request) {
   try {
     const body = await request.json();

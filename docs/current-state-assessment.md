@@ -2241,3 +2241,62 @@ investment processors are untested.
 - Documented the daily job as implemented. The dedicated price-sync cron and
   external cron automation stay **Planned** (not specified as current behavior).
   No OpenSpec change. No business-rule guesses required.
+
+
+---
+
+## Detailed Functional Analysis — Cross-cutting: Administration & Debug (`ADM`)
+
+> **Status:** Evidence-based analysis traced from source. The exposure re-sync
+> route has property tests; the rest is untested. Files: `app/admin/`
+> (`actions.ts`, `jobs-panel.tsx`, `jobs-table.tsx`, `page.tsx`);
+> `components/debug/DebugContext.tsx` (+ indicator); `app/api/admin/exposure-resync/route.ts`.
+
+### 1. Functional Overview
+
+Operational surface for running and inspecting the daily job, re-syncing
+exposure data, and toggling a debug UI mode. It operates the domains rather than
+owning financial rules.
+
+### 2. Behavior (all [Verified])
+
+- **Trigger daily job:** `runPendingJobAction` server action
+  (`"use server"`) calls the same orchestrator as the cron endpoint
+  (`applyPendingTransactionsForCurrentMadridMonth`) and returns processed/failed/
+  skipped counts and `alreadyRun`. Used by the admin panel.
+- **Job run history:** the admin page renders past `JobRun` records
+  (`jobs-table.tsx`).
+- **Debug mode:** `DebugContext` is a client-side toggle persisted in
+  `localStorage` (`debugMode`); when on, tables render extra columns
+  (e.g. ids, timestamps). Purely presentational.
+- **Admin exposure re-sync:** `POST /api/admin/exposure-resync` overwrites an
+  asset's exposure snapshot for a period (fetches fresh data from the provider).
+  Has property tests. (Cross-listed with Portfolio Analytics; canonical ID here.)
+
+### 3. Interactions
+
+- **X-Jobs:** admin trigger invokes the same orchestrator as the cron endpoint
+  (via a server action rather than the Bearer endpoint).
+- **Portfolio Analytics (G):** exposure re-sync writes `AssetExposureSnapshot`.
+- **All tables:** debug mode toggles extra columns across the app.
+
+### 4. Edge Cases / Notes
+
+- **[Verified] Admin trigger bypasses the Bearer check** — it runs as a server
+  action behind the app's session auth (X-Auth), not the cron endpoint. Both
+  reach the same idempotent orchestrator, so double-run is still guarded by the
+  JobRun idempotency (JOB-003).
+- **[Verified] Debug mode is per-browser** (localStorage), not a server setting;
+  not shared across devices.
+
+### 5. Test Coverage
+
+**[Verified] Partial.** Exposure re-sync has tests; the job-trigger action, job
+history view, and debug toggle are untested.
+
+### 6. Decisions (applied; code is source of truth)
+
+- Documented admin trigger, job history, debug mode, and exposure re-sync as
+  implemented. Exposure re-sync's canonical ID is `ADM-004` (classified as an
+  admin operation; referenced from Portfolio Analytics). No OpenSpec change. No
+  business-rule guesses required.

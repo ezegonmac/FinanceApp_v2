@@ -11,6 +11,7 @@ export type RunPendingJobState = {
   alreadyRun?: boolean;
 };
 
+// ADM-001 Trigger the Daily Job
 export async function runPendingJobAction(): Promise<RunPendingJobState> {
   try {
     const result = await applyPendingTransactionsForCurrentMadridMonth();

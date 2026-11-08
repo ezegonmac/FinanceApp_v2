@@ -12,6 +12,7 @@ const DebugContext = createContext<DebugContextType>({
   toggleDebug: () => {},
 });
 
+// ADM-003 Debug Mode
 export function DebugProvider({ children }: { children: React.ReactNode }) {
   const [debug, setDebug] = useState(false);
 

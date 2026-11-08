@@ -214,12 +214,14 @@ Canonical requirements live at `openspec/specs/scheduled-jobs/spec.md`.
 
 ## Administration & Debug (`ADM`)
 
+Canonical requirements live at `openspec/specs/admin/spec.md`.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| ADM-001 | Admin panel: trigger daily job | Implemented (untested) | README ✅ |
-| ADM-002 | Job run history view | Implemented (untested) | README ✅ |
-| ADM-003 | Debug mode (extra columns) | Implemented (untested) | README ✅ |
-| ADM-004 | Admin exposure re-sync | Implemented & tested | portfolio-exposure.md (also PFA-004) |
+| ADM-001 | Trigger the daily job (admin panel) | Implemented (untested) | openspec specs |
+| ADM-002 | View job run history | Implemented (untested) | openspec specs |
+| ADM-003 | Debug mode (extra columns, per-browser) | Implemented (untested) | openspec specs |
+| ADM-004 | Admin exposure re-sync | Implemented & tested | openspec specs (serves Portfolio Analytics) |
 
 ## Cross-cutting / Unclassified (`GEN`)
 
