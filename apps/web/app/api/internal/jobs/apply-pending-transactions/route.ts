@@ -15,6 +15,7 @@ function isAuthorized(request: Request) {
   return authorizationHeader === `Bearer ${cronSecret}`;
 }
 
+// JOB-001 Daily Job Endpoint
 export async function POST(request: Request) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

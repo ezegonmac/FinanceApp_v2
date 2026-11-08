@@ -201,12 +201,16 @@ Canonical requirements live at `openspec/specs/authentication/spec.md`.
 
 ## Scheduled / Background Jobs (`JOB`)
 
+Canonical requirements live at `openspec/specs/scheduled-jobs/spec.md`.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| JOB-001 | Daily "apply pending" job | Implemented (partially tested) | README, assessment inventory |
-| JOB-002 | Job run log (idempotent per job/day) | Unverified | README |
-| JOB-003 | Dedicated price-sync cron | Planned | assets-background-sync.md (stub) |
-| JOB-004 | Server cron automation (ops) | Planned | README 🟨 |
+| JOB-001 | Daily job endpoint (Bearer authorized) | Implemented (untested) | openspec specs |
+| JOB-002 | Daily orchestration (recurrents, pending, exposure, snapshots) | Implemented (partially tested) | openspec specs |
+| JOB-003 | Idempotent daily run (one per job/day) | Implemented (untested) | openspec specs |
+| JOB-004 | Run record (status + counts) | Implemented (untested) | openspec specs |
+| JOB-005 | Dedicated price-sync cron | Planned | assets-background-sync.md (stub) |
+| JOB-006 | Server cron automation (ops) | Planned | README 🟨 |
 
 ## Administration & Debug (`ADM`)
 

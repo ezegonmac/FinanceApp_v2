@@ -19,6 +19,7 @@ import { applyRecurrentTransactionsForMonth } from "./processors/recurrentTransa
 import type { ApplyPendingTransactionsResult, ProcessCounts } from "./types";
 import { addCounts, getPreviousYearMonth } from "./utils";
 
+// JOB-002 Daily Orchestration
 export async function applyPendingTransactionsForCurrentMadridMonth(): Promise<ApplyPendingTransactionsResult> {
   const madridDate = getEuropeMadridDateKey();
   const { year, month } = getEuropeMadridDateParts();

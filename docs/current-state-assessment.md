@@ -2171,3 +2171,73 @@ bypass) is the highest-value untested path.
 - Documented auth as implemented. No OpenSpec change (behavior matches intent;
   bcrypt hashing and multi-user are future enhancements, not agreed-target
   cleanups). Recorded raw-comparison and env-validation as notes. No code changed.
+
+
+---
+
+## Detailed Functional Analysis — Cross-cutting: Scheduled / Background Jobs (`JOB`)
+
+> **Status:** Evidence-based analysis traced from source. The pending-investments
+> and exposure-sync processors have tests; the orchestrator and `jobRun` do not.
+> Files: `JobRun` model; `app/api/internal/jobs/apply-pending-transactions/route.ts`;
+> `_lib/jobs/applyPendingTransactions.ts`; `_lib/jobs/jobRun.ts`; the
+> `_lib/jobs/processors/*`.
+
+### 1. Functional Overview
+
+A single daily job orchestrates end-of-day processing for the current
+Europe/Madrid month: apply recurrent items (income/expense/transaction/
+investment), apply pending items (transaction/income/expense/investment), sync
+exposure data, recalculate current-month snapshots (provisional), and finalize
+the previous month's snapshots. It is idempotent per day and tracked via a
+`JobRun` record.
+
+### 2. Behavior (all [Verified])
+
+- **Endpoint:** `POST /api/internal/jobs/apply-pending-transactions`, Bearer
+  `CRON_SECRET` authorized (AUT-004); 401 otherwise.
+- **Idempotency (`jobRun.ts`):** `JobRun` is unique on `(job_name,
+  madrid_date)`. A COMPLETED or RUNNING run for today → exit early (reports
+  already-run); a FAILED run → reset and retry; a create race (unique
+  constraint) is caught and treated as already-running. So the job runs at most
+  once to completion per Madrid day.
+- **Orchestration (`applyPendingTransactions.ts`):** upserts the current month,
+  runs the recurrent processors, then the pending processors, then exposure
+  sync, then `recalculateAllSnapshotsForMonth(current, isFinal:false)`, then
+  `finalizeMonthSnapshots(previous)`. Aggregates processed/failed/skipped counts;
+  marks the run COMPLETED or FAILED.
+- **Per-item error isolation:** individual processor failures are counted and
+  recorded without aborting the batch (per LED-009 / REC-003 behavior).
+
+### 3. Interactions
+
+- Drives **Ledger (B)**, **Recurrent (C)**, **Investments (F)**, **Portfolio
+  Analytics (G, exposure sync)**, and **Monthly Model (D, finalization)**.
+- **Auth (X-Auth):** endpoint uses the Bearer bypass (AUT-004).
+
+### 4. Planned / Not Implemented
+
+- **[Verified] Dedicated price-sync cron** (`assets-background-sync.md`) — not
+  implemented (a TODO stub). Planned.
+- **[Verified] Server cron automation** (external scheduler hitting the endpoint)
+  — operational, not app code; Planned.
+
+### 5. Edge Cases / Notes
+
+- **[Verified] Robust idempotency** incl. the create-race path.
+- **[Unverified] Partial-failure semantics:** a mid-run exception marks the whole
+  JobRun FAILED (then retryable), but processors that already committed their
+  own transactions are not rolled back — re-run relies on each processor's own
+  idempotency (run-log / status-guarded claims).
+
+### 6. Test Coverage
+
+**[Verified] Partial.** `pendingInvestments` and `exposureSync` processors have
+property/unit tests; the orchestrator, `jobRun` idempotency, and the non-
+investment processors are untested.
+
+### 7. Decisions (applied; code is source of truth)
+
+- Documented the daily job as implemented. The dedicated price-sync cron and
+  external cron automation stay **Planned** (not specified as current behavior).
+  No OpenSpec change. No business-rule guesses required.

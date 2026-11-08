@@ -15,6 +15,8 @@ type PrepareJobRunResult =
       jobRun: JobRun;
     };
 
+// JOB-003 Idempotent Daily Run
+// JOB-004 Run Record
 export async function prepareDailyJobRun(
   madridDate: string
 ): Promise<PrepareJobRunResult> {
