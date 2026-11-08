@@ -28,50 +28,60 @@ here.
 `Unverified` · `Candidate` (idea kept, not approved for implementation) ·
 `Proposed` (agreed target, not yet built).
 
-> **Granularity note.** Ledger (`LED`) has been analyzed in detail, so its IDs
-> are at the **requirement** level and match `.kiro/specs/ledger/requirements.md`
-> exactly (preserved verbatim — not renumbered). Other areas have not yet had
-> detailed functional analysis, so they are registered here at the **feature /
-> backlog-item** level from the Functional Inventory. Those items keep their IDs
-> when later decomposed into finer requirements.
+> **Granularity note.** Analyzed areas have their canonical, requirement-level
+> IDs in the OpenSpec specs under `openspec/specs/<area>/spec.md` (Ledger and
+> Accounts so far). Areas not yet analyzed are registered here at the **feature /
+> backlog-item** level from the Functional Inventory; those items keep their IDs
+> when later decomposed into finer requirements in OpenSpec.
+>
+> **Workflow note.** The intermediate `.kiro/specs/<area>/requirements.md` step
+> has been dropped. The canonical EARS requirements live in OpenSpec; the
+> readable functional analysis lives in `docs/current-state-assessment.md`.
 
 ---
 
 ## Ledger (`LED`)
 
-IDs preserved verbatim from `.kiro/specs/ledger/requirements.md`. The
-**implemented** baseline is now the canonical spec at
-`openspec/specs/ledger/spec.md`. The `Proposed` items are tracked as OpenSpec
-change(s); `LED-016` is a `Candidate` only (not approved). Status below reflects
-the requirements document's per-requirement tags.
+Canonical requirements live at `openspec/specs/ledger/spec.md` (implemented
+baseline) and the `ledger-*` OpenSpec changes (`Proposed` items). `LED-016` is a
+`Candidate` only (not approved). Statuses below summarize those sources.
 
 | ID | Item | Status | Source |
 |---|---|---|---|
-| LED-001 | Create an Income | Implemented | ledger/requirements.md |
-| LED-002 | Create an Expense | Partially implemented (002.3 analytics default is Proposed) | ledger/requirements.md |
-| LED-003 | Create a Transaction (Transfer) | Implemented | ledger/requirements.md |
-| LED-004 | Amount validation (> 0) | Proposed (edit done; create to align) | ledger/requirements.md |
-| LED-005 | Expense kind required | Proposed (edit done; create to align) | ledger/requirements.md |
-| LED-006 | Account existence & self-transfer validation | Proposed | ledger/requirements.md |
-| LED-007 | Edit a ledger item (balance reversal) | Implemented | ledger/requirements.md |
-| LED-008 | Delete a ledger item | Implemented | ledger/requirements.md |
-| LED-009 | Process pending items via daily job | Implemented | ledger/requirements.md |
-| LED-010 | Balance mutation semantics | Implemented | ledger/requirements.md |
-| LED-011 | MonthSnapshot aggregation | Implemented | ledger/requirements.md |
-| LED-012 | Edits to finalized months (re-finalize) | Partially implemented (012.2 re-finalize is Proposed) | ledger/requirements.md |
-| LED-013 | Supported ledger endpoints (remove dead routes) | Partially implemented (013.2 removal is Proposed) | ledger/requirements.md |
-| LED-014 | Analytics-adjusted expense value (expense-only) | Implemented | ledger/requirements.md |
-| LED-015 | Prevent accidental duplicate submission | Proposed | ledger/requirements.md |
-| LED-016 | Soft delete via CANCELLED | Candidate (not approved for implementation) | ledger/requirements.md |
+| LED-001 | Create an Income | Implemented | openspec specs/changes |
+| LED-002 | Create an Expense | Partially implemented (002.3 analytics default is Proposed) | openspec specs/changes |
+| LED-003 | Create a Transaction (Transfer) | Implemented | openspec specs/changes |
+| LED-004 | Amount validation (> 0) | Proposed (edit done; create to align) | openspec specs/changes |
+| LED-005 | Expense kind required | Proposed (edit done; create to align) | openspec specs/changes |
+| LED-006 | Account existence & self-transfer validation | Proposed | openspec specs/changes |
+| LED-007 | Edit a ledger item (balance reversal) | Implemented | openspec specs/changes |
+| LED-008 | Delete a ledger item | Implemented | openspec specs/changes |
+| LED-009 | Process pending items via daily job | Implemented | openspec specs/changes |
+| LED-010 | Balance mutation semantics | Implemented | openspec specs/changes |
+| LED-011 | MonthSnapshot aggregation | Implemented | openspec specs/changes |
+| LED-012 | Edits to finalized months (re-finalize) | Partially implemented (012.2 re-finalize is Proposed) | openspec specs/changes |
+| LED-013 | Supported ledger endpoints (remove dead routes) | Partially implemented (013.2 removal is Proposed) | openspec specs/changes |
+| LED-014 | Analytics-adjusted expense value (expense-only) | Implemented | openspec specs/changes |
+| LED-015 | Prevent accidental duplicate submission | Proposed | openspec specs/changes |
+| LED-016 | Soft delete via CANCELLED | Candidate (not approved for implementation) | product-backlog |
 
 ## Accounts (`ACC`)
 
 | ID | Item | Status | Source |
 |---|---|---|---|
-| ACC-001 | Create / list / edit account | Implemented (untested) | assessment inventory, README |
-| ACC-002 | Live balance tracking | Unverified | assessment inventory |
-| ACC-003 | Account icon | Unverified | README "Design" |
-| ACC-004 | Enable / disable account | Planned | README 🟨 |
+Canonical requirements live at `openspec/specs/accounts/spec.md` and the
+`accounts-*` OpenSpec changes. IDs below are the requirement-level ACC IDs from
+that spec.
+
+| ID | Item | Status | Source |
+|---|---|---|---|
+| ACC-001 | Create an Account | Implemented (untested) | openspec specs |
+| ACC-002 | List Accounts (exclude inactive by default — Proposed) | Partially implemented (002 default-filter is Proposed) | openspec specs/changes |
+| ACC-003 | Read a Single Account | Implemented (untested) | openspec specs |
+| ACC-004 | Edit Account Details | Implemented (untested) | openspec specs |
+| ACC-005 | Enable or Disable an Account | Implemented (untested) — corrected from Planned | openspec specs |
+| ACC-006 | Balance derived; accounts retained (no delete) | Implemented (untested) | openspec specs |
+| ACC-007 | Validation Error Reporting (error.errors fix — Proposed) | Partially implemented (007 details fix is Proposed) | openspec specs/changes |
 
 ## Recurrent Items (`REC`)
 

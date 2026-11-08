@@ -12,6 +12,7 @@ const accountSchema = z.object({
 });
 
 // GET /api/accounts
+// ACC-002 List Accounts
 export async function GET() {
   try {
     const accounts = await prisma.account.findMany();
@@ -27,6 +28,8 @@ export async function GET() {
 }
 
 // POST /api/accounts
+// ACC-001 Create an Account
+// ACC-007 Validation Error Reporting
 export async function POST(request: Request) {
   try {
     const body = await request.json();

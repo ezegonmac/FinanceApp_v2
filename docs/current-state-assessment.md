@@ -1630,3 +1630,129 @@ functional cohesion and dependency:
 > 3. Priority/order (suggested: 1 → 2 → 3 → 4; all are independent).
 > 4. These are code-affecting changes; creating the OpenSpec changes is a
 >    separate authorized step — none are created yet.
+
+
+---
+
+## Detailed Functional Analysis — Area A: Accounts
+
+> **Status:** Evidence-based behavioral analysis of the current implementation,
+> traced from source. Describes **what the code does**, not necessarily the
+> intended rule. Findings are tagged **[Verified]** (read from code),
+> **[Unverified]**, or raised as open questions. There are **no automated tests**
+> for the Accounts area.
+>
+> Files traced: `packages/db/prisma/schema.prisma` (`Account` model);
+> `app/api/accounts/route.ts` (GET, POST); `app/api/accounts/[id]/route.ts`
+> (GET, PATCH); `app/accounts/page.tsx`; `components/AccountsTable.tsx`;
+> `components/accounts/EditAccountForm.tsx` (+ `IconPicker`, `AccountIcon`).
+
+### 1. Functional Overview
+
+Accounts are the root entity of the app: every ledger item, investment, and
+snapshot attaches to one. An account has `name`, optional `description`,
+optional `icon`, a `Decimal(18,2)` `balance` (default 0), `created_at`, and an
+`active` boolean (default true). The area supports **create, list, read, edit,
+and enable/disable** — but **not deletion**.
+
+### 2. Main Components and Execution Flow
+
+- **`GET /api/accounts`** — returns **all** accounts (no `active` filter, no
+  pagination).
+- **`POST /api/accounts`** — creates an account; accepts `name` (required),
+  `description`, `icon`, and an optional initial `balance` (nonnegative).
+- **`GET /api/accounts/[id]`** — single account; 400 on non-numeric id, 404 if
+  missing.
+- **`PATCH /api/accounts/[id]`** — partial update of `name`, `description`,
+  `icon`, and `active`. Does **not** allow editing `balance`.
+- **UI:** `AccountsTable` (create dialog via POST, list via GET, status badge,
+  per-row "Edit"); `EditAccountForm` (PATCH, includes an "Active" switch);
+  `app/accounts/page.tsx` (header KPIs; aggregates balances filtered to
+  `active: true`).
+
+### 3. Operations and Lifecycle
+
+- **[Verified] Create:** balance starts at the provided initial value or 0.
+- **[Verified] Enable/disable:** `active` is a first-class boolean, toggled via
+  the PATCH route and the "Active" switch in `EditAccountForm`; the table shows
+  an Active/Inactive status badge. **This contradicts the backlog**, which marks
+  "Enable/Disable account" as Planned (🟨) — it is actually **implemented
+  end-to-end** (doc-vs-reality mismatch, like Todos and recurrent investments).
+- **[Verified] No deletion:** there is no DELETE handler and no delete UI.
+  Disabling (`active = false`) is the only way to retire an account.
+
+### 4. Balance Handling
+
+- **[Verified] Balance is owned by the Ledger/Investment areas, not Accounts.**
+  The only place Accounts sets balance is the **initial** value at creation. The
+  edit PATCH schema deliberately omits `balance`, so it cannot be edited directly
+  through the account API — balance changes only via completed ledger/investment
+  operations (see Area B).
+- **[Verified] Active filtering is a consumer concern.** `GET /api/accounts`
+  returns inactive accounts too; it is the **accounts page aggregates** and
+  snapshot queries that filter `active: true`. The table itself lists all
+  accounts (active and inactive) with a status badge.
+
+### 5. Validation and Error Handling
+
+- **[Verified] Create:** `name` min length 1; `balance` nonnegative if provided;
+  `description`/`icon` nullable-optional. ZodError → 400, else 500.
+- **[Verified] Edit:** all fields optional; a `.refine` rejects a `name` that is
+  empty/whitespace-only. Non-numeric id → 400; missing account → 404.
+- **[Verified — potential defect] `POST /api/accounts` references
+  `error.errors`** on the ZodError (`details: error.errors`). This is the same
+  property the repo-wide type-check flags as non-existent on `ZodError` in the
+  installed Zod v4 — so the 400 branch may be constructing `details` from an
+  undefined property. Worth verifying at implementation time.
+
+### 6. Interactions with Other Areas
+
+- **Ledger (B) / Investments (F):** own all post-creation balance mutation.
+- **Monthly Model (D):** the accounts page reads `MonthSnapshot` to compute the
+  balance delta KPI; snapshot queries filter `active: true`.
+- **Recurrent (C), Todos (I):** reference accounts via FKs (see `Account`
+  relations in the schema).
+- **Debug (ADM):** `AccountsTable` shows extra `id`/`created_at` columns when
+  debug mode is on.
+
+### 7. Edge Cases and Potential Defects
+
+- **[Verified] No account deletion path at all** — intentional? (disable-only).
+- **[Verified] `GET /api/accounts` is unfiltered and unpaginated** — inactive
+  accounts are returned; the table shows them. Consumers must filter themselves.
+- **[Verified] Balance not editable post-creation** via the account API — a
+  correction to a wrong initial balance has no direct account-level path (would
+  require a ledger entry). Intended?
+- **[Verified — potential defect] `error.errors` on ZodError** in the POST 400
+  branch (Section 5).
+- **[Unverified] Initial balance semantics:** an account created with a non-zero
+  initial balance does not create any ledger row or snapshot for that opening
+  amount; how opening balances are meant to reconcile with monthly metrics is
+  not traced.
+
+### 8. Test Coverage and Gaps
+
+**[Verified] Zero automated tests** for the Accounts area. Highest-value
+untested behaviors: create validation, enable/disable via PATCH, and the
+unfiltered list.
+
+### 9. Open Questions and Decisions Requiring Human Review
+
+All resolved by human review:
+
+1. ~~**Account deletion**~~ → **Keep disable-only.** No DELETE path; retiring an
+   account is done via `active = false`. (Avoids broad FK/history impact.)
+2. ~~**`GET /api/accounts` filtering**~~ → **Exclude inactive by default**, with
+   an opt-in `includeInactive` (or equivalent) to return all. (Target — current
+   code returns all unconditionally.)
+3. ~~**Editable balance**~~ → **Balance is derived-only.** No account-level
+   balance correction; balance changes only via completed ledger/investment
+   activity (plus the initial value at creation). (Confirms current behavior.)
+4. ~~**Opening balance reconciliation**~~ → **Leave the initial balance as a
+   standalone starting value** for now; it does not create a ledger entry or
+   snapshot. (Confirms current behavior; revisit later if needed.)
+5. ~~**`error.errors` defect**~~ → **Fix** the ZodError property usage in
+   `POST /api/accounts` as part of the Accounts work (ties into the repo-wide
+   type-check failures). (Target.)
+6. ~~**Backlog correction**~~ → **Yes**, move ACC-004 (enable/disable) from
+   Planned to Implemented in `docs/product-backlog.md`.

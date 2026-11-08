@@ -1,0 +1,5 @@
+schema: spec-driven
+created: 2026-11-08
+goal: Exclude inactive accounts from the list by default (opt-in
+  includeInactive) and fix the validation-error details construction in account
+  creation

@@ -18,6 +18,7 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+// ACC-003 Read a Single Account
 export async function GET(request: Request, { params }: RouteContext) {
   const { id } = await params;
 
@@ -58,6 +59,9 @@ export async function GET(request: Request, { params }: RouteContext) {
   }
 }
 
+// ACC-004 Edit Account Details
+// ACC-005 Enable or Disable an Account
+// ACC-006 Balance Is Derived and Accounts Are Retained (balance intentionally not editable here)
 export async function PATCH(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;

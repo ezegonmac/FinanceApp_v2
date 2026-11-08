@@ -48,6 +48,18 @@ in this project. They hold regardless of which AI coding assistant is being used
 - Use Given / When / Then scenarios where they add clarity and enable
   verification.
 
+### Where requirements live
+
+- The **canonical** functional requirements (EARS, with stable IDs) live in
+  OpenSpec: `openspec/specs/<area>/spec.md` for approved/implemented behavior,
+  and `openspec/changes/<change>/` for proposed changes.
+- The **readable functional analysis** of how an area works lives in
+  `docs/current-state-assessment.md`.
+- Do **not** create an intermediate `.kiro/specs/<area>/requirements.md`. That
+  step is retired: author EARS requirements directly into OpenSpec, using the
+  analysis doc and resolved decisions as the source. `.kiro/specs/` is reserved
+  for Kiro-managed implementation specs only when explicitly needed.
+
 ### Keep canonical specs behavior-only
 
 A canonical specification (for example an `openspec/specs/<area>/spec.md` and
