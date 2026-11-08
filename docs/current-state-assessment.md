@@ -2018,3 +2018,70 @@ is the highest-value untested logic.
   Planned (not specified). No OpenSpec change (no agreed-target cleanup of
   existing behavior; the missing OPTIONS handlers are too minor to warrant a
   change on their own). No business-rule guesses required.
+
+
+---
+
+## Detailed Functional Analysis — Area I: Todos
+
+> **Status:** Evidence-based analysis traced from source. No automated tests.
+> Files: `Todo` model; `app/api/todos/route.ts` (GET);
+> `app/api/todos/[id]/{complete,skip,reopen}/route.ts`.
+
+### 1. Functional Overview
+
+Todos are the manual-action workflow for non-automated recurrent items (and
+manual one-offs). A `Todo` has a type (EXPENSE | TRANSACTION), origin (MANUAL |
+RECURRENT), status (OPEN | DONE), a due year/month, title/description, optional
+amount, and account references. Unique on
+`(recurrent_expense_id, due_year, due_month)` and the transaction equivalent, so
+a recurrent item yields at most one todo per due month.
+
+### 2. Operations (all [Verified])
+
+- **`GET /api/todos`** — paginated (limit/skip), status-filtered (default OPEN,
+  `includeDone` option), **gated to due ≤ current month**, newest-due first,
+  with account names included; returns `{data, total}`.
+- **`POST /api/todos/[id]/complete`** — status-guarded claim OPEN→DONE; on first
+  completion it **creates the real ledger entry** (expense, or transfer for
+  TRANSACTION type), mutates balance(s), recalculates snapshot(s). Reopen-aware:
+  a previously-completed todo re-marked DONE does **not** re-create the movement.
+  Returns 404 if not open, 409 if the claim is lost.
+- **`POST /api/todos/[id]/skip`** and **`/reopen`** — status transitions
+  (skip with reason; reopen back to OPEN).
+
+### 3. Doc-vs-Reality
+
+- **[Verified] Todos is fully implemented**, not "pending". The README marks the
+  "Todo tab" 🟨, but the model, list, and complete/skip/reopen actions all exist
+  and the complete action performs real ledger movements. This is another
+  backlog mismatch (like Accounts enable/disable) — corrected in the backlog.
+
+### 4. Interactions
+
+- **Recurrent (C):** non-automated recurrents create RECURRENT-origin todos
+  (backfill + daily job).
+- **Ledger (B) / Accounts (A) / Monthly Model (D):** completing a todo creates a
+  COMPLETED expense/transfer, mutates balance, recalculates the snapshot.
+
+### 5. Edge Cases / Defects
+
+- **[Verified] Idempotent completion** via the status-guarded claim (409 on
+  lost claim).
+- **[Verified] Reopen→complete does not double-apply** the movement (guarded by
+  `completed_at`).
+- **[Verified] `complete` upserts the Month** for the due period (same
+  read/write-materialization pattern seen elsewhere).
+- **[Unverified] skip/reopen** internal detail not fully traced (status-only by
+  design; no balance effect expected).
+
+### 6. Test Coverage
+
+**[Verified] Zero automated tests.** The complete action's ledger-creation +
+idempotency is the highest-value untested path.
+
+### 7. Decisions (applied; code is source of truth)
+
+- Documented list + complete/skip/reopen as implemented. Corrected the backlog
+  (Todos is Implemented, not Planned). No OpenSpec change (no agreed-target
+  cleanup of existing behavior). No business-rule guesses required.

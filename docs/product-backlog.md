@@ -169,9 +169,14 @@ Canonical requirements live at `openspec/specs/metrics/spec.md`.
 
 ## Todos (`TOD`)
 
+Canonical requirements live at `openspec/specs/todos/spec.md`. Fully implemented
+(corrected from the README's 🟨 "pending").
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| TOD-001 | Todo list & lifecycle (manual workflow) | Partially implemented | README 🟨, assessment inventory |
+| TOD-001 | List todos (filtered, due-gated, paginated) | Implemented (untested) | openspec specs |
+| TOD-002 | Complete a todo (performs ledger movement, idempotent) | Implemented (untested) | openspec specs |
+| TOD-003 | Skip and reopen a todo | Implemented (untested) | openspec specs |
 
 ## Financial Milestones (`MIL`)
 

@@ -9,6 +9,7 @@ interface RouteContext {
 }
 
 // POST /api/todos/:id/complete
+// TOD-002 Complete a Todo
 export async function POST(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
