@@ -173,6 +173,7 @@ function buildScatterSeries(
   return series;
 }
 
+// MKT-007 Contribution Markers on Price Charts
 export function PriceChart({ asset, timeframe, contributions, showMarkers, startDate, endDate, chartClassName }: Props) {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);

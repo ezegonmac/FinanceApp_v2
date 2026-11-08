@@ -119,17 +119,18 @@ Canonical requirements live at `openspec/specs/monthly-model/spec.md` and the
 
 ## Market Data & Assets (`MKT`)
 
+Canonical requirements live at `openspec/specs/market-data/spec.md`.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| MKT-001 | Asset catalog & tracking | Implemented & tested | assessment inventory, specs |
-| MKT-002 | Provider mapping (ISIN) | Implemented & tested | assets-provider.md |
-| MKT-003 | Price history storage & sync | Implemented & tested | financial-product-data.md |
-| MKT-004 | Asset search | Implemented & tested | financial-product-data.md |
-| MKT-005 | Price charts & timeframes | Implemented & tested | README ✅ |
-| MKT-006 | Asset comparison | Implemented & tested | asset-comparison.md |
-| MKT-007 | Sparklines | Implemented | sparklines.md |
-| MKT-008 | Contribution-history markers (chart overlay) | Implemented (untested) | contribution-history.md |
-| MKT-009 | Currency conversion on asset plots | Partially implemented (bug) | README 🟨 |
+| MKT-001 | Asset catalog + provider mapping (ISIN dedup) | Implemented & tested | openspec specs |
+| MKT-002 | Price history storage & sync | Implemented & tested | openspec specs |
+| MKT-003 | Asset search | Implemented & tested | openspec specs |
+| MKT-004 | Timeframe price queries | Implemented & tested | openspec specs |
+| MKT-005 | Asset comparison | Implemented & tested | openspec specs |
+| MKT-006 | Sparklines | Implemented (untested) | openspec specs |
+| MKT-007 | Contribution markers (chart overlay) | Implemented (untested) | openspec specs |
+| MKT-008 | Currency conversion on asset plots | Partially implemented (bug) | README 🟨 (defect; future change) |
 
 ## Investments & Positions (`INV`)
 

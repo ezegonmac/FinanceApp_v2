@@ -33,6 +33,7 @@ export async function GET() {
 }
 
 // POST /api/financial-products/assets
+// MKT-001 Asset Catalog and Provider Mapping
 export async function POST(request: Request) {
   try {
     const body = await request.json();

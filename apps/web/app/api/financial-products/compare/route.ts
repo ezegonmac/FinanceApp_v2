@@ -38,6 +38,7 @@ const compareQuerySchema = z
   );
 
 // GET /api/financial-products/compare?assetIds=1,2&timeframe=1Y
+// MKT-005 Asset Comparison
 export async function GET(request: Request) {
   try {
     // 1. Validate query params — 400 on ZodError

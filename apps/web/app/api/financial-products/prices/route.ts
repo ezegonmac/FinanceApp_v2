@@ -30,6 +30,8 @@ const pricesQuerySchema = z.object({
 
 // GET /api/financial-products/prices?assetId=<id>&timeframe=<timeframe>
 // GET /api/financial-products/prices?assetId=<id>&startDate=<iso>&endDate=<iso>
+// MKT-002 Price History and Synchronization
+// MKT-004 Timeframe Price Queries
 export async function GET(request: Request) {
   try {
     // 1. Validate query params — 400 on ZodError

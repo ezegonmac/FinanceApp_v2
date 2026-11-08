@@ -35,6 +35,7 @@ export type SparklineData = {
  * If data is missing, attempts a sync. If still insufficient, returns
  * an empty points array (client renders a flat line).
  */
+// MKT-006 Sparklines
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

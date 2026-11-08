@@ -2372,3 +2372,81 @@ positions aggregation, and pending processing. Among the strongest-covered areas
 - Documented investments as implemented and tested. No OpenSpec change (behavior
   matches the legacy spec and tests; no agreed-target cleanup identified). No
   business-rule guesses required.
+
+
+---
+
+## Detailed Functional Analysis — Area E: Market Data & Assets
+
+> **Status:** Evidence-based analysis traced from source. This area is the
+> **most heavily tested** in the project (`_lib/financialProducts/*` has many
+> property tests: sync, missing-range detection, idempotency, granularity,
+> normalization, comparison; plus `assets` and `search` route tests) and matches
+> the legacy `specs/{financial-product-data,assets-provider,asset-comparison,sparklines,contribution-history}.md`.
+> Files: `Asset`, `AssetProviderMapping`, `AssetPrice`, `AssetPriceSyncRange`
+> models; `app/api/financial-products/{assets,prices,search,compare}/...`;
+> `_lib/financialProducts/*`; `components/financial-products/PriceChart.tsx`;
+> `lib/groupMarkers.ts`.
+
+### 1. Functional Overview
+
+Catalogs tracked financial products and maintains their historical price data
+from Yahoo Finance, with identity de-duplicated by ISIN and provider symbols
+mapped separately. Provides search, timeframe price queries with on-demand sync,
+asset comparison, sparklines, and contribution-history chart markers.
+
+### 2. Behavior (all [Verified])
+
+- **Asset catalog + provider mapping (assets route):** create de-duplicates by
+  **ISIN first** (adds a provider mapping to the existing asset), then by
+  provider symbol, else creates a new asset + Yahoo mapping atomically. List
+  returns assets with mappings. (Matches `assets-provider.md`.)
+- **Price history & sync (prices route, `_lib/financialProducts`):** stores
+  prices in `AssetPrice` with granularity; tracks covered ranges in
+  `AssetPriceSyncRange`; detects missing ranges and fetches only those from
+  Yahoo; idempotent (range-coverage, not row-presence, drives sync). Heavily
+  property-tested.
+- **Search:** queries the provider for trackable assets.
+- **Timeframe queries:** price endpoint maps timeframe → granularity and syncs
+  missing data before returning; long ranges downsampled via display granularity.
+- **Comparison (compare route):** normalizes 2–5 assets to 0% at a common start
+  date; reuses sync/coverage; property-tested across date-range, duplicates,
+  granularity, insufficient-data, sync-failure, colors.
+- **Sparklines (assets/sparklines):** batch 1-month normalized mini-series per
+  asset.
+- **Contribution markers (`PriceChart.tsx`, `groupMarkers.ts`):** BUY/SELL
+  overlay on the asset price chart (data from Investments), with grouping for
+  dense markers — display-layer only.
+
+### 3. Interactions
+
+- **Investments (F):** price lookups for amount-mode and positions valuation;
+  contribution markers read investment operations.
+- **Portfolio Analytics (G):** exposure and performance consume prices.
+- **Scheduled Jobs (X-Jobs):** price sync can be invoked on-demand; a dedicated
+  price-sync cron is Planned (JOB-005).
+
+### 4. Edge Cases / Notes
+
+- **[Verified] Sync coverage is range-based** (marks the whole requested range
+  synced even if Yahoo returns fewer rows for holidays/weekends) — avoids
+  re-requesting non-trading days.
+- **[Verified] ISIN-first dedup** prevents duplicate assets across provider
+  tickers.
+- **[Verified] Currency conversion gap** (README bug): asset plots can show the
+  wrong currency symbol / ignore initial conversion — a known defect, Planned
+  (MKT-009), not current correct behavior.
+
+### 5. Test Coverage
+
+**[Verified] Strong.** The `_lib/financialProducts` sync/compare logic and the
+assets/search routes are property- and unit-tested. Best-covered area in the
+project.
+
+### 6. Decisions (applied; code is source of truth)
+
+- Documented catalog/mapping/sync/search/comparison/sparklines/markers as
+  implemented and tested. The currency-conversion plot bug stays a Planned
+  backlog item (not specified as correct current behavior). No OpenSpec change
+  created in this pass (the currency bug is a defect better handled as its own
+  future change once scoped). No business-rule guesses required.

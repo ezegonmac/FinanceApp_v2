@@ -27,6 +27,7 @@ const QUOTE_TYPE_MAP: Record<string, AssetType> = {
 };
 
 // GET /api/financial-products/search?q=<query>
+// MKT-003 Asset Search
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
