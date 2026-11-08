@@ -13,6 +13,7 @@ type ExpensesByKindResponse = {
 const toMonthLabel = (year: number, month: number) =>
   `${year}-${String(month).padStart(2, "0")}`;
 
+// MET-004 Expenses by Kind
 export async function GET() {
   try {
     const months = await prisma.month.findMany({

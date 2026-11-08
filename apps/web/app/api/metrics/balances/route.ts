@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 // GET /api/metrics/balances
+// MET-001 Account Balances
 export async function GET() {
   try {
     const accounts = await prisma.account.findMany({

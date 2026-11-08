@@ -12,6 +12,7 @@ type AccountBalanceSeriesResponse = {
 const toMonthLabel = (year: number, month: number) =>
   `${year}-${String(month).padStart(2, "0")}`;
 
+// MET-003 Account Balance Series
 export async function GET() {
   try {
     const months = await prisma.month.findMany({

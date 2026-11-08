@@ -157,13 +157,15 @@ Canonical requirements live at `openspec/specs/monthly-model/spec.md` and the
 
 ## Metrics & Reporting (`MET`)
 
+Canonical requirements live at `openspec/specs/metrics/spec.md`.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| MET-001 | Balances | Implemented (untested) | assessment inventory |
-| MET-002 | Monthly summary | Implemented (untested) | assessment inventory |
-| MET-003 | Account balance series | Implemented (untested) | assessment inventory |
-| MET-004 | Expenses by kind (+ budget) | Implemented (untested) | assessment inventory |
-| MET-005 | Year analytics | Planned | README 🟨 |
+| MET-001 | Account balances | Implemented (untested) | openspec specs |
+| MET-002 | Monthly summary | Implemented (untested) | openspec specs |
+| MET-003 | Account balance series | Implemented (untested) | openspec specs |
+| MET-004 | Expenses by kind (+ budget) | Implemented (untested) | openspec specs |
+| MET-005 | Year analytics | Planned | README 🟨 (not yet specified) |
 
 ## Todos (`TOD`)
 

@@ -1961,3 +1961,60 @@ paths.
   behavior, and left as backlog items (REC Planned). No OpenSpec change is
   created for them (they are future features, not agreed-target cleanups of
   existing behavior). No business-rule guesses required.
+
+
+---
+
+## Detailed Functional Analysis — Area H: Metrics & Reporting
+
+> **Status:** Evidence-based analysis traced from source. All four endpoints are
+> read-only GETs that aggregate from accounts and month snapshots. No automated
+> tests. Files: `app/api/metrics/{balances,monthly-summary,account-balance-series,expenses-by-kind}/route.ts`.
+
+### 1. Functional Overview
+
+Account- and month-centric reporting, derived entirely from `Account.balance`
+and `MonthSnapshot`. No writes, no validation, no persistence of its own.
+
+### 2. Endpoints (all [Verified])
+
+- **`GET /api/metrics/balances`** — active accounts with balances + total.
+- **`GET /api/metrics/monthly-summary`** — per-month income/expense/net from
+  snapshots, with a running total anchored to the current total balance (walked
+  backward), plus totals and averages.
+- **`GET /api/metrics/account-balance-series`** — per-account balance over time,
+  reconstructed backward from current balance using each month's snapshot net.
+- **`GET /api/metrics/expenses-by-kind`** — fixed/variable expense totals per
+  month (using `analytics_amount ?? amount`) plus the month budget.
+
+### 3. Interactions
+
+- **Accounts (A):** balances; filters `active: true`.
+- **Monthly Model (D):** reads `MonthSnapshot` and `MonthBudget`.
+- **Ledger (B):** `expenses-by-kind` uses the expense analytics value (LED-014).
+
+### 4. Edge Cases / Defects
+
+- **[Verified] Balance-over-time is reconstructed backward** from the current
+  balance via snapshot nets; accuracy depends on snapshot completeness. Both
+  series endpoints share this approach.
+- **[Verified] No OPTIONS handlers** on metrics routes (minor inconsistency vs
+  other areas).
+- **[Verified] No pagination** (bounded by number of months; acceptable).
+
+### 5. Planned
+
+- **[Verified] Year analytics** (yearly totals) — no route exists; genuinely
+  Planned (README 🟨).
+
+### 6. Test Coverage
+
+**[Verified] Zero automated tests.** The backward running-total reconstruction
+is the highest-value untested logic.
+
+### 7. Decisions (applied; code is source of truth)
+
+- Documented the four read endpoints as implemented. Year analytics stays
+  Planned (not specified). No OpenSpec change (no agreed-target cleanup of
+  existing behavior; the missing OPTIONS handlers are too minor to warrant a
+  change on their own). No business-rule guesses required.

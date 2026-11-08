@@ -19,6 +19,7 @@ export type MonthlySummaryResponse = {
 };
 
 // GET /api/metrics/monthly-summary
+// MET-002 Monthly Summary
 export async function GET() {
   try {
     // Get all months that have snapshots, ordered oldest first for running total calc
