@@ -85,16 +85,22 @@ that spec.
 
 ## Recurrent Items (`REC`)
 
+Canonical requirements live at `openspec/specs/recurrent-items/spec.md`. Covers
+all four types (income, expense, transaction, investment). Lifecycle edits
+(pause/resume, modify dates/frequency, status transitions) are genuinely
+**Planned** — no API path exists.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| REC-001 | Recurrent incomes | Implemented (untested) | assessment inventory, README |
-| REC-002 | Recurrent expenses | Implemented (untested) | assessment inventory, README |
-| REC-003 | Recurrent transactions | Implemented (untested) | assessment inventory, README |
-| REC-004 | Recurrent investments | Implemented (untested) | assessment inventory, README |
-| REC-005 | No-end-date recurrences | Implemented (untested) | README ✅ |
-| REC-006 | Delete recurrent with associated items | Unverified | README ✅ |
-| REC-007 | Pause / resume recurrent items | Partially implemented | README 🟨 |
-| REC-008 | Modify start/end dates and frequency | Planned | README 🟨 |
+| REC-001 | Create a recurrent item (all 4 types) | Implemented (untested) | openspec specs |
+| REC-002 | Backfill on creation (automated applies; non-automated → Todos) | Implemented (untested) | openspec specs |
+| REC-003 | Apply recurrent items via the daily job | Implemented (untested) | openspec specs |
+| REC-004 | Open-ended (no end date) recurrences | Implemented (untested) | openspec specs |
+| REC-005 | Delete a recurrent item (cascade + balance revert) | Implemented (untested) | openspec specs |
+| REC-006 | Run log (per-month APPLIED/FAILED) | Implemented (untested) | openspec specs |
+| REC-007 | Pause / resume recurrent items | Planned (no API path) | README 🟨 |
+| REC-008 | Modify start/end dates and frequency | Planned (no API path) | README 🟨 |
+| REC-009 | Status transitions after creation (incl. CANCELLED) | Planned (no API path) | assessment (Area C analysis) |
 
 ## Monthly Model & Snapshots (`MON`)
 

@@ -2,6 +2,8 @@ import { prisma } from "@repo/db";
 import type { ProcessCounts } from "../types";
 import { getErrorMessage, getNextYearMonth } from "../utils";
 
+// REC-003 Apply Recurrent Items via the Daily Job
+// REC-006 Run Log
 export async function applyRecurrentIncomesForMonth(
   year: number,
   month: number,

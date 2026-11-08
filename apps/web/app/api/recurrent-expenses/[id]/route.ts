@@ -10,6 +10,7 @@ interface RouteContext {
   }>;
 }
 
+// REC-005 Delete a Recurrent Item
 export async function DELETE(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;

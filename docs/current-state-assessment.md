@@ -1860,3 +1860,104 @@ aggregation correctness and finalization are the highest-value untested paths
   as **target** cleanups (small), proposed as an OpenSpec change. Monthly splits
   stays **Planned** (not specified as current behavior). No business-rule
   guesses were required.
+
+
+---
+
+## Detailed Functional Analysis — Area C: Recurrent Items
+
+> **Status:** Evidence-based analysis traced from source. Tags **[Verified]**,
+> **[Unverified]**, or open question. No automated tests for this area. The four
+> recurrent types (income, expense, transaction, investment) follow the same
+> structure; the recurrent-expense route + processor were read in full and the
+> others confirmed to share the pattern (same schema families, route shape, and
+> `_lib/jobs/processors/recurrent*.ts`).
+>
+> Files traced: `Recurrent{Income,Expense,Transaction,Investment}` + their
+> `*Run` models and status enums; `app/api/accounts/[id]/recurrent-*/route.ts`
+> (GET, POST); `app/api/recurrent-*/[id]/route.ts` (DELETE);
+> `_lib/jobs/processors/recurrent*.ts`.
+
+### 1. Functional Overview
+
+Recurrent items are templates that generate concrete ledger/investment entries
+over time. Each has an amount, description, `automated` flag, a status
+(`ACTIVE`/`PAUSED`/`CANCELLED`), optional `start_month`/`end_month`, and
+next-run tracking (`next_run_year`/`next_run_month`, `last_applied_month_id`).
+Each application is recorded in a per-month run-log (`*Run`, APPLIED/FAILED)
+linked to the generated item.
+
+### 2. Operations and Lifecycle
+
+- **[Verified] Create (`POST /api/accounts/[id]/recurrent-*`):** creates the
+  template (status defaults ACTIVE, automated defaults true), validates
+  `end_month >= start_month`, and **backfills**:
+  - **automated + start_month in the past:** applies the item for each due month
+    up to the current month (idempotent via run-log + `last_applied_month_id`),
+    mutating balances and recalculating snapshots.
+  - **non-automated:** creates **Todos** (origin RECURRENT, OPEN) for each due
+    month instead of applying (Area I).
+- **[Verified] Daily job (`recurrent*.ts` processors):** for ACTIVE, automated,
+  account-active templates whose window/next-run is due, creates the item as
+  COMPLETED, mutates balance, records the run APPLIED, and advances
+  `next_run_*` / `last_applied_month_id`. Idempotent: an existing APPLIED run or
+  matching `last_applied_month_id` is skipped; errors mark the run FAILED and
+  continue.
+- **[Verified] Delete (`DELETE /api/recurrent-*/[id]`):** reverts completed
+  child amounts, deletes child items and runs, deletes the template, recalculates
+  affected snapshots. (Confirmed for recurrent expense; income/transaction/
+  investment variants follow the same cascade pattern.)
+
+### 3. Lifecycle Gaps (confirmed Planned)
+
+- **[Verified] No PATCH/edit endpoint.** The `[id]` route exposes **only
+  DELETE** (OPTIONS advertises `DELETE`). Therefore:
+  - **Pause/resume** (ACTIVE↔PAUSED) is **not implemented** via API, even though
+    the status enum exists and POST accepts an initial status. The backlog's
+    "Pause and resume recurrent incomes/expenses 🟨" is **genuinely Planned**.
+  - **Modify start/end dates** and **modify frequency** are **not implemented**
+    — also genuinely Planned, matching the backlog 🟨.
+  - **CANCELLED** can only be set at creation; no transition path exists.
+- This contrasts with Accounts/Todos (which were falsely marked Planned) — here
+  the backlog's Planned markers are **accurate**.
+
+### 4. Interactions with Other Areas
+
+- **Ledger (B) / Investments (F):** recurrent application creates COMPLETED
+  items and mutates balances through the same mechanics.
+- **Monthly Model (D):** applications recalculate snapshots; items are
+  month-scoped.
+- **Scheduled Jobs (X-Jobs):** the processors run inside the daily job.
+- **Todos (I):** non-automated recurrents create Todos instead of applying.
+- **Accounts (A):** processors skip templates whose account is inactive.
+
+### 5. Edge Cases and Potential Defects
+
+- **[Verified] No-end-date support** works (`end_month` nullable; window checks
+  treat null as open) — matches backlog ✅.
+- **[Verified] Idempotency** is robust (run-log unique on
+  `(recurrent_id, month_id)` + `last_applied_month_id` guard).
+- **[Verified — gap] Status transitions** (pause/resume/cancel) and **edits**
+  have no API path (Section 3).
+- **[Verified] OPTIONS on `[id]` advertises only `DELETE`** (accurate — only
+  DELETE exists).
+- **[Unverified] Backfill window vs. non-automated Todo window** differ subtly
+  between the automated and non-automated branches at create time; exact
+  boundary behavior (e.g. end_month exactly current month) not exhaustively
+  traced.
+
+### 6. Test Coverage and Gaps
+
+**[Verified] Zero automated tests** for recurrent routes/processors (the only
+related tests are in investments/pending — not recurrent templates). The
+backfill-on-create and daily-job idempotency are the highest-value untested
+paths.
+
+### 7. Decisions (applied; code is source of truth)
+
+- Documented recurrent create / backfill / daily-apply / delete as implemented.
+- **Pause/resume, edit dates, edit frequency, and status transitions are
+  recorded as Planned** (genuinely not implemented) — NOT specified as current
+  behavior, and left as backlog items (REC Planned). No OpenSpec change is
+  created for them (they are future features, not agreed-target cleanups of
+  existing behavior). No business-rule guesses required.

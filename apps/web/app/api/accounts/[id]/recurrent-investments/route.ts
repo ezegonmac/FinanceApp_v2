@@ -88,6 +88,9 @@ export async function GET(request: Request, { params }: RouteContext) {
   }
 }
 
+// REC-001 Create a Recurrent Item
+// REC-002 Backfill on Creation
+// REC-004 Open-Ended Recurrences
 export async function POST(request: Request, { params }: RouteContext) {
   try {
     const { id } = await params;
