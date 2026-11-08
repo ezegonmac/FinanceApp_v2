@@ -55,6 +55,7 @@ function computeStartDate(timeframe: string, now: Date): string | null {
 }
 
 // GET /api/investments/performance/history
+// PFA-002 Portfolio Value History
 export async function GET(request: Request) {
   try {
     // 1. Validate query params — invalid timeframe defaults to "1Y"

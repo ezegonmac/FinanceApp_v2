@@ -16,6 +16,7 @@ import {
  * - Skips assets that already have snapshots for the current period.
  * - On per-asset failure, increments `failed` and continues processing.
  */
+// PFA-005 Monthly Exposure Synchronization
 export async function syncExposureData(
   jobRunId: number,
 ): Promise<ProcessCounts> {

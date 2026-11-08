@@ -20,6 +20,7 @@ const exposureQuerySchema = z.object({
 });
 
 // GET /api/investments/exposure
+// PFA-004 Portfolio Exposure
 export async function GET(request: Request) {
   try {
     // 1. Validate query params

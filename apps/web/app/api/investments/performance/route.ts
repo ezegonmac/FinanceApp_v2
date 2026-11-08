@@ -9,6 +9,7 @@ import { computeTWR, type CashFlowEvent } from "../../_lib/performance/twrCalcul
 export const dynamic = "force-dynamic";
 
 // GET /api/investments/performance
+// PFA-001 Portfolio Performance Summary
 export async function GET() {
   try {
     // 1. Fetch all COMPLETED investments with executed_at NOT NULL

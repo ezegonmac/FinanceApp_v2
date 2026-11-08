@@ -148,12 +148,21 @@ Canonical requirements live at `openspec/specs/investments/spec.md`.
 
 ## Portfolio Analytics (`PFA`)
 
+Canonical requirements live at `openspec/specs/portfolio-analytics/spec.md`.
+(Admin exposure re-sync is `ADM-004`, cross-referenced here.)
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| PFA-001 | Portfolio performance (P&L, TWR, value over time) | Implemented & tested | portfolio-performance.md |
-| PFA-002 | Portfolio exposure (sector/country) | Implemented & tested | portfolio-exposure.md |
-| PFA-003 | Exposure monthly sync | Implemented & tested | portfolio-exposure.md |
-| PFA-005 | Allocation drift | Planned | portfolio-drift.md 🟨 |
+| PFA-001 | Portfolio performance summary (P&L, TWR) | Implemented & tested | openspec specs |
+| PFA-002 | Portfolio value history | Implemented & tested | openspec specs |
+| PFA-003 | Per-asset performance | Implemented & tested | openspec specs |
+| PFA-004 | Portfolio exposure (sector/country + coverage) | Implemented & tested | openspec specs |
+| PFA-005 | Monthly exposure synchronization | Implemented & tested | openspec specs |
+| PFA-006 | Allocation drift | Planned (not implemented) | portfolio-drift.md 🟨 |
+
+> Earlier draft reserved PFA-004 for "allocation drift" then left it unassigned;
+> allocation drift is now **PFA-006**. PFA-004 is "Portfolio exposure" per the
+> OpenSpec spec. No ID is reused for a different item.
 
 > Admin exposure re-sync has the single canonical ID **ADM-004** (Administration
 > & Debug). It serves Portfolio Analytics but is classified as an admin

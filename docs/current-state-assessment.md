@@ -2450,3 +2450,76 @@ project.
   backlog item (not specified as correct current behavior). No OpenSpec change
   created in this pass (the currency bug is a defect better handled as its own
   future change once scoped). No business-rule guesses required.
+
+
+---
+
+## Detailed Functional Analysis — Area G: Portfolio Analytics
+
+> **Status:** Evidence-based analysis traced from source. Performance and
+> exposure calculators are tested (`_lib/performance/*.test.ts`,
+> `_lib/exposure/*.property.test.ts`, `investments/exposure/exposure.property.test.ts`,
+> `admin/exposure-resync/resync.property.test.ts`). Matches legacy
+> `specs/{portfolio-performance,portfolio-exposure}.md`. Files:
+> `app/api/investments/{performance,performance/history,performance/asset/[assetId],exposure}/route.ts`;
+> `_lib/{performance,exposure}/*`; `AssetExposureSnapshot`, `ExposureCategory(Mapping)`.
+
+### 1. Functional Overview
+
+Derives read-only, cross-account insight from investment positions and prices:
+portfolio performance (P&L, TWR, value over time) and exposure (sector/country
+look-through with coverage). Allocation drift is proposed but not built.
+
+### 2. Behavior (all [Verified])
+
+- **Performance summary (`GET /api/investments/performance`):** aggregates
+  COMPLETED investments into positions with cost basis, current value,
+  unrealized P&L (€ and %), weight, and daily change; computes portfolio totals
+  and time-weighted return (TWR via `twrCalculator`). Zeroed summary when no
+  active positions.
+- **Performance history (`.../performance/history?timeframe`):** portfolio value
+  over time with a cumulative invested baseline, by timeframe.
+- **Per-asset performance (`.../performance/asset/[assetId]`):** position value
+  over time, cost-basis line, operations, and per-asset summary.
+- **Exposure (`GET /api/investments/exposure?type=SECTOR|COUNTRY&period`):**
+  aggregates `AssetExposureSnapshot` weighted by each position's current value;
+  returns category percentages + monetary values + coverage percentage; includes
+  per-asset coverage flags. Equities get 100% own sector/country; funds/ETFs use
+  provider breakdowns; labels normalized via `ExposureCategory` mapping.
+- **Exposure sync:** monthly via the daily job (`exposureSync` processor), best-
+  effort per-asset on BUY (INV side-effect), and admin re-sync (ADM-004).
+
+### 3. Interactions
+
+- **Investments (F):** positions are the input.
+- **Market Data (E):** prices for valuation.
+- **Scheduled Jobs (X-Jobs):** monthly exposure sync.
+- **Admin (ADM):** exposure re-sync (ADM-004).
+
+### 4. Planned / Not Implemented
+
+- **[Verified] Allocation drift** (`portfolio-drift.md`) — **no implementation**
+  (full-source search for drift/target-allocation/rebalance found nothing).
+  Genuinely Planned.
+
+### 5. Edge Cases / Notes
+
+- **[Verified] Missing price** → position shown with price unavailable / excluded
+  from value totals (per performance calculator).
+- **[Verified] Provider exposure not summing to 100%** → stored raw, remainder
+  shown as "Other/Unclassified"; assets without exposure data reflected in the
+  coverage percentage.
+- **[Unverified] TWR / modified-Dietz exact sub-period handling** — tested at the
+  calculator level; not re-derived here.
+
+### 6. Test Coverage
+
+**[Verified] Good.** Performance and exposure calculators and the exposure route
++ admin re-sync are property/unit tested. Among the best-covered areas.
+
+### 7. Decisions (applied; code is source of truth)
+
+- Documented performance and exposure (incl. monthly sync) as implemented and
+  tested. Allocation drift stays Planned (not specified as current behavior; a
+  future OpenSpec change when approved). Contribution markers live in Market Data
+  (MKT-007). Admin exposure re-sync is ADM-004. No business-rule guesses required.

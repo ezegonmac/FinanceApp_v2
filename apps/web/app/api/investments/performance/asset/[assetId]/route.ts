@@ -55,6 +55,7 @@ function computeStartDate(timeframe: string, now: Date): string | null {
 }
 
 // GET /api/investments/performance/asset/[assetId]
+// PFA-003 Per-Asset Performance
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ assetId: string }> },
