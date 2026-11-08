@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+// AUT-002 Route Protection
+// AUT-003 Access Bypass List
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 

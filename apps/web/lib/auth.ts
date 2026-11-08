@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { env } from "@/lib/env";
 
+// AUT-001 Credential Login
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({

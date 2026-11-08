@@ -2115,3 +2115,59 @@ idempotency is the highest-value untested path.
   OpenSpec change that introduces the `milestones` capability (new spec at that
   point).
 - No business-rule guesses made; no code changed.
+
+
+---
+
+## Detailed Functional Analysis — Cross-cutting: Authentication & Access Control (`AUT`)
+
+> **Status:** Evidence-based analysis traced from source. No automated auth
+> tests. Files: `apps/web/middleware.ts`; `apps/web/lib/auth.ts`;
+> `app/api/auth/[...nextauth]/route.ts`; `app/login/`; `AUTH_*` env vars. Legacy
+> spec `specs/basic-authentification.md` matches the implementation.
+
+### 1. Functional Overview
+
+Single-user, credential-based authentication via Auth.js / NextAuth v5 with a
+JWT session strategy, gating all pages and APIs except an explicit bypass list.
+
+### 2. Behavior (all [Verified])
+
+- **Credentials provider** (`lib/auth.ts`): compares submitted email/password
+  against `AUTH_USER_EMAIL` / `AUTH_USER_PASSWORD` env vars (raw comparison);
+  returns a single owner identity on match, null otherwise. Session strategy
+  `jwt`; sign-in page `/login`; secret from `AUTH_SECRET`.
+- **Handler** (`api/auth/[...nextauth]`): exposes NextAuth GET/POST.
+- **Middleware** (`middleware.ts`): for unauthenticated requests, API routes
+  (`/api/*`) return **401 JSON**, page routes **redirect to `/login`**. Bypass
+  list: `/login`, `/api/auth`, `/api/internal/*`, `/_next`, and any path with a
+  `.` (static assets).
+- **Internal job bypass:** `/api/internal/*` is exempt from session auth; those
+  endpoints are protected separately by the Bearer `CRON_SECRET` (X-Jobs).
+
+### 3. Interactions
+
+- Applies uniformly to every area (access control, not a business domain).
+- **X-Jobs:** the internal job endpoint relies on the middleware bypass + its own
+  Bearer check.
+
+### 4. Edge Cases / Notes
+
+- **[Verified] Raw password comparison** (no hashing) — matches the legacy
+  spec's "compared raw for simplicity" option; acceptable for single-user, but a
+  noted hardening candidate (bcrypt) for any future multi-user move.
+- **[Verified] Env-var credentials** — missing/empty `AUTH_*` would make login
+  impossible; no explicit startup validation traced beyond `lib/env`.
+- **[Unverified] Session expiry / tampered-token** handling is delegated to
+  NextAuth defaults (not separately traced).
+
+### 5. Test Coverage
+
+**[Verified] Zero automated auth tests.** Middleware gating (401 vs redirect vs
+bypass) is the highest-value untested path.
+
+### 6. Decisions (applied; code is source of truth)
+
+- Documented auth as implemented. No OpenSpec change (behavior matches intent;
+  bcrypt hashing and multi-user are future enhancements, not agreed-target
+  cleanups). Recorded raw-comparison and env-validation as notes. No code changed.

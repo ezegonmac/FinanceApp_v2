@@ -190,11 +190,14 @@ capability. See legacy proposal `specs/financial-milestones.md`.
 
 ## Authentication & Access Control (`AUT`)
 
+Canonical requirements live at `openspec/specs/authentication/spec.md`.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| AUT-001 | Route protection (401 API / redirect pages) | Implemented (untested) | basic-authentification.md, middleware.ts |
-| AUT-002 | Credential login (env-var user) | Implemented (untested) | basic-authentification.md |
-| AUT-003 | Internal job Bearer bypass | Implemented (untested) | basic-authentification.md, README |
+| AUT-001 | Credential login (single env-var user, JWT) | Implemented (untested) | openspec specs |
+| AUT-002 | Route protection (401 API / redirect pages) | Implemented (untested) | openspec specs |
+| AUT-003 | Access bypass list (login, auth, internal, static) | Implemented (untested) | openspec specs |
+| AUT-004 | Internal job Bearer authorization | Implemented (untested) | openspec specs |
 
 ## Scheduled / Background Jobs (`JOB`)
 

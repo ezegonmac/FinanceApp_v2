@@ -3,6 +3,7 @@ import { applyPendingTransactionsForCurrentMadridMonth } from "@/app/api/_lib/jo
 
 export const dynamic = "force-dynamic";
 
+// AUT-004 Internal Job Authorization
 function isAuthorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
 
