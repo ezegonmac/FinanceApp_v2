@@ -180,9 +180,13 @@ Canonical requirements live at `openspec/specs/todos/spec.md`. Fully implemented
 
 ## Financial Milestones (`MIL`)
 
+Confirmed **not implemented** (no model/route/UI). No OpenSpec baseline spec;
+when approved it enters via an OpenSpec change introducing a `milestones`
+capability. See legacy proposal `specs/financial-milestones.md`.
+
 | ID | Item | Status | Source |
 |---|---|---|---|
-| MIL-001 | Milestone tracking (invested, net worth, portfolio, expense coverage) | Planned | financial-milestones.md 🟨 |
+| MIL-001 | Milestone tracking (invested, net worth, portfolio, expense coverage) | Planned (not implemented) | specs/financial-milestones.md 🟨 |
 
 ## Authentication & Access Control (`AUT`)
 

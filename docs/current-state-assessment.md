@@ -2085,3 +2085,33 @@ idempotency is the highest-value untested path.
 - Documented list + complete/skip/reopen as implemented. Corrected the backlog
   (Todos is Implemented, not Planned). No OpenSpec change (no agreed-target
   cleanup of existing behavior). No business-rule guesses required.
+
+
+---
+
+## Detailed Functional Analysis — Area J: Financial Milestones
+
+> **Status:** Evidence-based — confirmed **not implemented**. Full-source search
+> found no model, route, `_lib` module, or UI for milestones. The only artifact
+> is the legacy proposal `specs/financial-milestones.md`.
+
+### Finding
+
+- **[Verified] No implementation exists.** There is no `financial_milestones`
+  Prisma model, no `/api/.../milestones` route, no milestone calculation
+  service, and no milestone UI. The schema, route tree, and `_lib` were searched.
+- The legacy `specs/financial-milestones.md` describes the intended feature
+  (track invested amount, net worth, portfolio value, expense-coverage
+  milestones with progress and first-reached date).
+
+### Decision (applied; code is source of truth)
+
+- **No OpenSpec baseline spec is created** for Milestones, because a canonical
+  spec must describe implemented behavior and there is none. Creating one would
+  describe unbuilt functionality as current — contrary to the documentation
+  principles.
+- Milestones remains a **Planned / Candidate** backlog item (`MIL`), referencing
+  the legacy proposal. When it is approved and built, it will enter via an
+  OpenSpec change that introduces the `milestones` capability (new spec at that
+  point).
+- No business-rule guesses made; no code changed.
